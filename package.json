@@ -4,7 +4,7 @@
   "description": "Crypto Earning - Play games and earn cryptocurrency rewards",
   "scripts": {
     "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack serve --mode production"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
