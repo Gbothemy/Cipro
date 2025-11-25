@@ -1,0 +1,146 @@
+.achievements-section {
+  margin-top: 40px;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+@media (min-width: 769px) {
+  .achievements-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.achievement-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  text-align: center;
+}
+
+.achievement-card.locked {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+}
+
+.achievement-card.unlocked {
+  border-color: rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.achievement-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+}
+
+.achievement-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.achievement-card.unlocked .achievement-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.achievement-info h4 {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.achievement-info p {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.achievement-progress {
+  margin-top: 10px;
+}
+
+.achievement-progress-bar {
+  height: 6px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.achievement-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.achievement-progress-text {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+.unlocked-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@media (max-width: 768px) {
+  .achievements-section {
+    margin-top: 30px;
+  }
+  
+  .achievements-grid {
+    gap: 12px;
+  }
+  
+  .achievement-card {
+    padding: 16px;
+  }
+  
+  .achievement-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+  }
+  
+  .achievement-info h4 {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .achievement-info p {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  
+  .achievement-progress-bar {
+    height: 5px;
+  }
+  
+  .unlocked-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}

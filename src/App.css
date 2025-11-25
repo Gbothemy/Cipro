@@ -1,0 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 100%;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding-bottom: 80px;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}

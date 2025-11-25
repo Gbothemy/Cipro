@@ -1,0 +1,376 @@
+.airdrop-page {
+  padding-bottom: 20px;
+}
+
+.balance-section {
+  background: white;
+  border-radius: 24px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.balance-section h2 {
+  margin-bottom: 18px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.balance-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.balance-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.balance-item:hover {
+  transform: translateX(5px);
+  border-color: rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.currency-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.currency-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.currency-name {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.currency-amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.claim-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 40px 30px;
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.claim-section::before {
+  content: '🎁';
+  position: absolute;
+  font-size: 150px;
+  opacity: 0.1;
+  top: -30px;
+  right: -30px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.claim-section h3 {
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  z-index: 1;
+  position: relative;
+}
+
+.claim-description {
+  margin-bottom: 25px;
+  opacity: 0.95;
+  font-size: 15px;
+  z-index: 1;
+  position: relative;
+}
+
+.claim-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 30px;
+  padding: 16px 50px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.claim-btn:hover:not(:disabled) {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.claim-btn.claimed {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  animation: pulse 0.5s ease;
+}
+
+.claim-btn:disabled {
+  cursor: not-allowed;
+}
+
+.rewards-info {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.rewards-info h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+}
+
+.airdrop-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #FFF8E1;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.airdrop-icon {
+  font-size: 32px;
+}
+
+.airdrop-details h4 {
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.airdrop-details p {
+  color: #666;
+  font-size: 13px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+@media (min-width: 769px) {
+  .airdrop-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+  
+  .page-header {
+    grid-column: 1 / -1;
+  }
+  
+  .balance-section {
+    grid-column: 1 / -1;
+  }
+}
+
+.streak-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.streak-icon {
+  font-size: 24px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.streak-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.claim-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .airdrop-page {
+    padding-bottom: 16px;
+  }
+  
+  .page-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
+  .balance-section {
+    padding: 18px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+  }
+  
+  .balance-section h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  
+  .balance-grid {
+    gap: 10px;
+  }
+  
+  .balance-item {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  
+  .currency-icon {
+    font-size: 30px;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .currency-name {
+    font-size: 12px;
+  }
+  
+  .currency-amount {
+    font-size: 20px;
+  }
+  
+  .claim-section {
+    padding: 28px 20px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+  }
+  
+  .claim-section h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .claim-description {
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  
+  .streak-info {
+    padding: 8px 16px;
+    margin-bottom: 16px;
+  }
+  
+  .streak-icon {
+    font-size: 20px;
+  }
+  
+  .streak-text {
+    font-size: 14px;
+  }
+  
+  .claim-btn {
+    padding: 14px 35px;
+    font-size: 15px;
+  }
+  
+  .rewards-info {
+    padding: 18px;
+    border-radius: 20px;
+  }
+  
+  .rewards-info h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .airdrop-card {
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .airdrop-icon {
+    font-size: 28px;
+  }
+  
+  .airdrop-details h4 {
+    font-size: 14px;
+  }
+  
+  .airdrop-details p {
+    font-size: 12px;
+  }
+}

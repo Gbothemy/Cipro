@@ -1,0 +1,448 @@
+.referral-page {
+  padding-bottom: 20px;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 30px 25px;
+  color: white;
+  margin-bottom: 15px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-card::before {
+  content: '💰';
+  position: absolute;
+  font-size: 120px;
+  opacity: 0.1;
+  bottom: -20px;
+  right: -20px;
+}
+
+.balance-card h2 {
+  font-size: 18px;
+  margin-bottom: 18px;
+  opacity: 0.95;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 1;
+  position: relative;
+}
+
+.earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.earning-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.2);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.earning-label {
+  font-size: 12px;
+  margin-bottom: 5px;
+  opacity: 0.9;
+}
+
+.earning-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.commission-info {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #667eea;
+  font-weight: 600;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  font-size: 15px;
+}
+
+.invite-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.invite-btn:hover {
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.section-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+  padding-left: 15px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 24px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+}
+
+.referrals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.referral-card {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.referral-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.referral-avatar {
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+.referral-info {
+  flex: 1;
+}
+
+.referral-info h4 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.referral-earnings {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.referral-earnings span {
+  background: #FFF8E1;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+@media (min-width: 769px) {
+  .referrals-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+.referral-link-section {
+  margin-bottom: 20px;
+}
+
+.referral-link-section label {
+  display: block;
+  margin-bottom: 10px;
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.link-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.link-input-group input {
+  flex: 1;
+  padding: 14px 18px;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  background: white;
+  color: #333;
+}
+
+.link-input-group button {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.link-input-group button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.share-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.share-btn {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  font-size: 14px;
+}
+
+.share-btn.twitter {
+  background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%);
+}
+
+.share-btn.telegram {
+  background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+}
+
+.share-btn.whatsapp {
+  background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+}
+
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.referral-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.status-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.status-badge.inactive {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+}
+
+.joined-date {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .referral-page {
+    padding-bottom: 16px;
+  }
+  
+  .page-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
+  .balance-card {
+    padding: 24px 18px;
+    margin-bottom: 12px;
+    border-radius: 20px;
+  }
+  
+  .balance-card h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  
+  .earnings-grid {
+    gap: 10px;
+  }
+  
+  .earning-item {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .earning-label {
+    font-size: 11px;
+  }
+  
+  .earning-value {
+    font-size: 16px;
+  }
+  
+  .commission-info {
+    padding: 14px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    border-radius: 14px;
+  }
+  
+  .referral-link-section {
+    margin-bottom: 16px;
+  }
+  
+  .referral-link-section label {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  .link-input-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .link-input-group input {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  
+  .link-input-group button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .share-buttons {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .share-btn {
+    padding: 12px;
+    font-size: 13px;
+  }
+  
+  .section-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .referrals-list {
+    gap: 10px;
+  }
+  
+  .referral-card {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+  
+  .referral-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 26px;
+  }
+  
+  .referral-header h4 {
+    font-size: 15px;
+  }
+  
+  .status-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .joined-date {
+    font-size: 11px;
+  }
+  
+  .referral-earnings {
+    gap: 8px;
+  }
+  
+  .referral-earnings span {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
