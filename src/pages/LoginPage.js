@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { db } from '../db/supabase';
 import './LoginPage.css';
 
 function LoginPage({ onLogin }) {
@@ -56,37 +57,88 @@ function LoginPage({ onLogin }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
-    // Simulate authentication
-    const userData = {
-      username: formData.username,
-      email: formData.email || `${formData.username}@rewardgame.com`,
-      userId: `USR-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      avatar: ['👤', '👨', '👩', '🧑', '👦', '👧'][Math.floor(Math.random() * 6)],
-      isAuthenticated: true
-    };
+    try {
+      if (isLogin) {
+        // Login: Find user by username
+        const users = await db.getAllUsers();
+        const existingUser = users.find(u => u.username === formData.username);
+        
+        if (!existingUser) {
+          setErrors({ username: 'User not found. Please register first.' });
+          return;
+        }
 
-    // Save to localStorage
-    localStorage.setItem('authUser', JSON.stringify(userData));
-    
-    onLogin(userData, navigate);
+        const userData = {
+          username: existingUser.username,
+          email: existingUser.email,
+          userId: existingUser.userId,
+          avatar: existingUser.avatar,
+          isAuthenticated: true
+        };
+
+        localStorage.setItem('authUser', JSON.stringify(userData));
+        onLogin(userData, navigate);
+      } else {
+        // Register: Create new user
+        const users = await db.getAllUsers();
+        const existingUser = users.find(u => u.username === formData.username);
+        
+        if (existingUser) {
+          setErrors({ username: 'Username already taken' });
+          return;
+        }
+
+        const userData = {
+          username: formData.username,
+          email: formData.email || `${formData.username}@rewardgame.com`,
+          userId: `USR-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          avatar: ['👤', '👨', '👩', '🧑', '👦', '👧'][Math.floor(Math.random() * 6)],
+          isAuthenticated: true
+        };
+
+        localStorage.setItem('authUser', JSON.stringify(userData));
+        onLogin(userData, navigate);
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setErrors({ username: 'An error occurred. Please try again.' });
+    }
   };
 
-  const handleDemoLogin = () => {
-    const demoUser = {
-      username: 'DemoPlayer',
-      email: 'demo@rewardgame.com',
-      userId: 'USR-DEMO123',
-      avatar: '🎮',
-      isAuthenticated: true
-    };
-    
-    localStorage.setItem('authUser', JSON.stringify(demoUser));
-    onLogin(demoUser, navigate);
+  const handleDemoLogin = async () => {
+    try {
+      // Check if demo user exists
+      let demoUser = await db.getUser('USR-DEMO123');
+      
+      if (!demoUser) {
+        // Create demo user if doesn't exist
+        await db.createUser({
+          user_id: 'USR-DEMO123',
+          username: 'DemoPlayer',
+          email: 'demo@rewardgame.com',
+          avatar: '🎮',
+          is_admin: false
+        });
+      }
+
+      const userData = {
+        username: 'DemoPlayer',
+        email: 'demo@rewardgame.com',
+        userId: 'USR-DEMO123',
+        avatar: '🎮',
+        isAuthenticated: true
+      };
+      
+      localStorage.setItem('authUser', JSON.stringify(userData));
+      onLogin(userData, navigate);
+    } catch (error) {
+      console.error('Demo login error:', error);
+    }
   };
 
   return (

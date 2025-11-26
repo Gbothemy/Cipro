@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import AdminLoginPage from './pages/AdminLoginPage';
-import GamePage from './pages/GamePage';
-import AirdropPage from './pages/AirdropPage';
-import ReferralPage from './pages/ReferralPage';
-import BenefitPage from './pages/BenefitPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import ProfileEditPage from './pages/ProfileEditPage';
-import ConversionPage from './pages/ConversionPage';
-import AdminPage from './pages/AdminPage';
+import { db } from './db/supabase';
 import './App.css';
+
+// Lazy load pages
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
+const GamePage = lazy(() => import('./pages/GamePage'));
+const AirdropPage = lazy(() => import('./pages/AirdropPage'));
+const ReferralPage = lazy(() => import('./pages/ReferralPage'));
+const BenefitPage = lazy(() => import('./pages/BenefitPage'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+const ProfileEditPage = lazy(() => import('./pages/ProfileEditPage'));
+const ConversionPage = lazy(() => import('./pages/ConversionPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,18 +57,10 @@ function App() {
         setAuthUser(parsedAuthUser);
         setIsAuthenticated(true);
         
-        // Load user game data
-        const savedUser = localStorage.getItem(`rewardGameUser_${parsedAuthUser.userId}`);
-        if (savedUser) {
-          const parsedUser = JSON.parse(savedUser);
-          setUser({
-            ...parsedUser,
-            username: parsedAuthUser.username,
-            userId: parsedAuthUser.userId,
-            avatar: parsedAuthUser.avatar,
-            email: parsedAuthUser.email
-          });
-        }
+        // Load user data from Supabase
+        loadUserFromDatabase(parsedAuthUser.userId).catch(err => {
+          console.error('Failed to load user from database:', err);
+        });
       } catch (error) {
         console.error('Error restoring session:', error);
         localStorage.removeItem('authUser');
@@ -73,12 +68,38 @@ function App() {
     }
   }, []);
 
-  // Save user data to localStorage whenever it changes (per user)
-  useEffect(() => {
-    if (user.userId) {
-      localStorage.setItem(`rewardGameUser_${user.userId}`, JSON.stringify(user));
+  // Load user data from Supabase
+  const loadUserFromDatabase = async (userId) => {
+    try {
+      const userData = await db.getUser(userId);
+      if (userData) {
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error loading user from database:', error);
     }
-  }, [user]);
+  };
+
+  // Save user data to Supabase whenever it changes
+  useEffect(() => {
+    if (user.userId && isAuthenticated) {
+      const saveUserToDatabase = async () => {
+        try {
+          await db.updateUser(user.userId, {
+            points: user.points,
+            vipLevel: user.vipLevel,
+            exp: user.exp,
+            completedTasks: user.completedTasks,
+            dayStreak: user.dayStreak,
+            lastClaim: user.lastClaim
+          });
+        } catch (error) {
+          console.error('Error saving user to database:', error);
+        }
+      };
+      saveUserToDatabase();
+    }
+  }, [user, isAuthenticated]);
 
   const addNotification = (message, type = 'success') => {
     const id = Date.now();
@@ -92,55 +113,45 @@ function App() {
     setUser(prev => ({ ...prev, ...updates }));
   };
 
-  const handleLogin = (userData, navigate) => {
+  const handleLogin = async (userData, navigate) => {
     setAuthUser(userData);
     setIsAuthenticated(true);
     
     // Check if user is admin
     const isAdmin = userData.userId?.startsWith('ADMIN-') || userData.email?.endsWith('@admin.com');
     
-    // Load saved game data if exists, otherwise start fresh
-    const savedUser = localStorage.getItem(`rewardGameUser_${userData.userId}`);
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser({
-        ...parsedUser,
-        username: userData.username,
-        userId: userData.userId,
-        avatar: userData.avatar,
-        email: userData.email,
-        isAdmin: isAdmin
-      });
-      addNotification(`Welcome back, ${userData.username}!`, 'success');
-    } else {
-      // New user - start from zero
-      setUser({
-        username: userData.username,
-        userId: userData.userId,
-        avatar: userData.avatar,
-        email: userData.email || '',
-        isAdmin: isAdmin,
-        balance: { ton: 0, cati: 0, usdt: 0 },
-        points: 0,
-        vipLevel: 1,
-        exp: 0,
-        maxExp: 1000,
-        giftPoints: 0,
-        completedTasks: 0,
-        dayStreak: 0,
-        lastClaim: null,
-        totalEarnings: { ton: 0, cati: 0, usdt: 0 }
-      });
-      addNotification(`Welcome to Reward Game, ${userData.username}!`, 'success');
-    }
-    
-    // Redirect admins to admin panel, regular users to game page
-    if (navigate) {
-      if (isAdmin) {
-        navigate('/admin');
+    try {
+      // Check if user exists in database
+      let dbUser = await db.getUser(userData.userId);
+      
+      if (dbUser) {
+        // Existing user - load their data
+        setUser(dbUser);
+        addNotification(`Welcome back, ${userData.username}!`, 'success');
       } else {
-        navigate('/game');
+        // New user - create in database
+        const newUser = await db.createUser({
+          user_id: userData.userId,
+          username: userData.username,
+          email: userData.email || '',
+          avatar: userData.avatar,
+          is_admin: isAdmin
+        });
+        setUser(newUser);
+        addNotification(`Welcome to Reward Game, ${userData.username}!`, 'success');
       }
+      
+      // Redirect admins to admin panel, regular users to game page
+      if (navigate) {
+        if (isAdmin) {
+          navigate('/admin');
+        } else {
+          navigate('/game');
+        }
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      addNotification('Error loading user data', 'error');
     }
   };
 
@@ -153,29 +164,31 @@ function App() {
 
   return (
     <Router>
-      {!isAuthenticated ? (
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-          <Route path="/admin/login" element={<AdminLoginPage onLogin={handleLogin} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      ) : (
-        <Layout user={user} notifications={notifications} onLogout={handleLogout}>
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '1.5rem' }}>Loading...</div>}>
+        {!isAuthenticated ? (
           <Routes>
-            <Route path="/" element={<GamePage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/game" element={<GamePage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/airdrop" element={<AirdropPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/referral" element={<ReferralPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/benefit" element={<BenefitPage user={user} updateUser={updateUser} addNotification={addNotification} onLogout={handleLogout} />} />
-            <Route path="/leaderboard" element={<LeaderboardPage user={user} />} />
-            <Route path="/profile/edit" element={<ProfileEditPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/conversion" element={<ConversionPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
-            <Route path="/admin" element={<AdminPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            <Route path="/admin/login" element={<AdminLoginPage onLogin={handleLogin} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Layout>
-      )}
+        ) : (
+          <Layout user={user} notifications={notifications} onLogout={handleLogout}>
+            <Routes>
+              <Route path="/" element={<GamePage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/game" element={<GamePage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/airdrop" element={<AirdropPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/referral" element={<ReferralPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/benefit" element={<BenefitPage user={user} updateUser={updateUser} addNotification={addNotification} onLogout={handleLogout} />} />
+              <Route path="/leaderboard" element={<LeaderboardPage user={user} />} />
+              <Route path="/profile/edit" element={<ProfileEditPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/conversion" element={<ConversionPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/admin" element={<AdminPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Layout>
+        )}
+      </Suspense>
     </Router>
   );
 }

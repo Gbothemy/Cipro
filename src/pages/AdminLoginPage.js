@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { db } from '../db/supabase';
 import './AdminLoginPage.css';
 
 function AdminLoginPage({ onLogin }) {
@@ -44,33 +45,60 @@ function AdminLoginPage({ onLogin }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
     setIsLoading(true);
 
-    // Simulate authentication delay
-    setTimeout(() => {
-      // Create admin user data
-      const adminData = {
-        username: formData.username,
-        email: `${formData.username.toLowerCase()}@admin.com`,
-        userId: `ADMIN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        avatar: '🛡️',
-        isAuthenticated: true,
-        isAdmin: true
-      };
+    try {
+      // Check if admin exists
+      const users = await db.getAllUsers();
+      const adminEmail = `${formData.username.toLowerCase()}@admin.com`;
+      let existingAdmin = users.find(u => u.email === adminEmail && u.isAdmin);
+      
+      let adminData;
+      
+      if (existingAdmin) {
+        // Existing admin
+        adminData = {
+          username: existingAdmin.username,
+          email: existingAdmin.email,
+          userId: existingAdmin.userId,
+          avatar: existingAdmin.avatar,
+          isAuthenticated: true,
+          isAdmin: true
+        };
+      } else {
+        // Create new admin
+        const userId = `ADMIN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        await db.createUser({
+          user_id: userId,
+          username: formData.username,
+          email: adminEmail,
+          avatar: '🛡️',
+          is_admin: true
+        });
 
-      // Save to localStorage
+        adminData = {
+          username: formData.username,
+          email: adminEmail,
+          userId: userId,
+          avatar: '🛡️',
+          isAuthenticated: true,
+          isAdmin: true
+        };
+      }
+
       localStorage.setItem('authUser', JSON.stringify(adminData));
-      
-      // Call parent login handler
       onLogin(adminData, navigate);
-      
+    } catch (error) {
+      console.error('Admin login error:', error);
+      setErrors({ username: 'Authentication failed. Please try again.' });
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   const handleBackToHome = () => {
