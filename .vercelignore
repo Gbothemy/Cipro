@@ -1,9 +1,3 @@
 node_modules
 .git
-.env
-*.md
 test-database-connection.html
-src
-public
-.babelrc
-webpack.config.js
