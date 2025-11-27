@@ -52,6 +52,26 @@ function AdminPage({ user, addNotification }) {
     try {
       // Fetch all users from database
       const allUsers = await db.getAllUsers();
+      
+      if (!allUsers || !Array.isArray(allUsers)) {
+        console.error('Invalid users data:', allUsers);
+        setUsers([]);
+        setStats({
+          totalUsers: 0,
+          totalPoints: 0,
+          totalTasks: 0,
+          avgLevel: 0,
+          activeToday: 0,
+          totalSOL: '0.0000',
+          totalETH: '0.0000',
+          totalUSDT: '0.00',
+          totalUSDC: '0.00',
+          topPlayer: null,
+          lastUpdate: new Date().toLocaleTimeString()
+        });
+        return;
+      }
+      
       setUsers(allUsers);
 
       // Calculate comprehensive stats
@@ -68,8 +88,12 @@ function AdminPage({ user, addNotification }) {
       // Get active users today from database
       const today = new Date().toISOString().split('T')[0];
       const activeToday = allUsers.filter(u => {
-        const lastLogin = new Date(u.last_login || u.created_at);
-        return lastLogin.toISOString().split('T')[0] === today;
+        try {
+          const lastLogin = new Date(u.last_login || u.created_at);
+          return lastLogin.toISOString().split('T')[0] === today;
+        } catch (e) {
+          return false;
+        }
       }).length;
 
       setStats({
@@ -82,12 +106,15 @@ function AdminPage({ user, addNotification }) {
         totalETH: totalETH.toFixed(4),
         totalUSDT: totalUSDT.toFixed(2),
         totalUSDC: totalUSDC.toFixed(2),
-        topPlayer: allUsers.sort((a, b) => b.points - a.points)[0],
+        topPlayer: allUsers.length > 0 ? allUsers.sort((a, b) => (b.points || 0) - (a.points || 0))[0] : null,
         lastUpdate: new Date().toLocaleTimeString()
       });
     } catch (error) {
       console.error('Error loading data:', error);
-      addNotification('Error loading data', 'error');
+      if (addNotification) {
+        addNotification('Error loading data: ' + error.message, 'error');
+      }
+      setUsers([]);
     }
   };
 
