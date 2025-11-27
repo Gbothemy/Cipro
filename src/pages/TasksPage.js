@@ -62,6 +62,13 @@ function TasksPage({ user, updateUser, addNotification }) {
     }
 
     try {
+      // First, ensure task progress exists in database
+      const existingTask = userTasks.find(ut => ut.task_id === task.id);
+      if (!existingTask) {
+        // Create task progress record first
+        await db.updateTaskProgress(user.userId, task.id, task.required_count);
+      }
+      
       // Claim task in database
       await db.claimTask(user.userId, task.id);
       
