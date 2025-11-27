@@ -4,7 +4,7 @@ import Achievements from '../components/Achievements';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
-import NativeAd from '../components/NativeAd';
+import GoogleAd, { AdSlots } from '../components/GoogleAd';
 import './GamePage.css';
 
 function GamePage({ user, updateUser, addNotification }) {
@@ -15,9 +15,7 @@ function GamePage({ user, updateUser, addNotification }) {
   const miningModes = [
     { id: 'puzzle', name: 'Puzzle Challenge', icon: '🧩', reward: 50, duration: 2000, cooldown: 30000, expReward: 10, hasGame: true, gameType: 'puzzle' },
     { id: 'spin', name: 'Spin Wheel', icon: '🎰', reward: 100, duration: 3000, cooldown: 60000, expReward: 20, hasGame: true, gameType: 'spin' },
-    { id: 'memory', name: 'Memory Match', icon: '🧠', reward: 120, duration: 2500, cooldown: 45000, expReward: 25, hasGame: true, gameType: 'memory' },
-    { id: 'video', name: 'Video Mining', icon: '📹', reward: 30, duration: 1500, cooldown: 20000, expReward: 5, hasGame: false },
-    { id: 'sticker', name: 'Sticker Packs', icon: '🎨', reward: 75, duration: 4000, cooldown: 90000, expReward: 15, hasGame: false }
+    { id: 'memory', name: 'Memory Match', icon: '🧠', reward: 120, duration: 2500, cooldown: 45000, expReward: 25, hasGame: true, gameType: 'memory' }
   ];
 
   useEffect(() => {
@@ -219,8 +217,8 @@ function GamePage({ user, updateUser, addNotification }) {
         }) : <div style={{padding: '40px', textAlign: 'center', color: '#999'}}>Loading mining modes...</div>}
       </div>
 
-      {/* Native Ad between content */}
-      <NativeAd style="card" />
+      {/* Google AdSense - In-Article */}
+      <GoogleAd slot={AdSlots.IN_ARTICLE} format="fluid" />
 
       <Achievements user={user} />
 

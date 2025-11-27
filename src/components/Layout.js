@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import soundManager from '../utils/soundManager';
 import themeManager from '../utils/themeManager';
-import AdBanner from './AdBanner';
+import GoogleAd, { AdSlots } from './GoogleAd';
 import './Layout.css';
 
 function Layout({ children, user, notifications = [], onLogout, isAdmin = false }) {
@@ -193,6 +193,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                     {/* Help & Support Section */}
                     <div className="menu-section-title">❓ Help & Support</div>
                     <Link to="/faq" onClick={() => setMenuOpen(false)}>FAQ</Link>
+                    
                   </>
                 )}
               </nav>
@@ -201,9 +202,14 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         )}
 
         <main className="main-content">
-          <AdBanner size="banner" position="top" dismissible={true} />
+          {/* Google AdSense - Top Banner */}
+          <GoogleAd slot={AdSlots.HEADER_BANNER} format="horizontal" />
+          
           {children}
-          <AdBanner size="banner" position="bottom" dismissible={false} />
+          
+          {/* Google AdSense - Footer Banner */}
+          <GoogleAd slot={AdSlots.FOOTER} format="horizontal" />
+          
           <footer className="footer desktop-only">
             <p>&copy; 2024 Cipro. All rights reserved.</p>
             <div className="footer-links">

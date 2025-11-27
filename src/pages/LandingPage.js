@@ -95,9 +95,6 @@ function LandingPage() {
             <span className="logo-text">Cipro</span>
           </div>
           <div className="nav-buttons">
-            <button onClick={() => navigate('/admin/login')} className="nav-btn admin-btn" title="Admin Portal">
-              🛡️
-            </button>
             <button onClick={() => navigate('/login')} className="nav-btn login-btn">
               Login
             </button>

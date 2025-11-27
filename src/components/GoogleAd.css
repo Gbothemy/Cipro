@@ -1,0 +1,46 @@
+.google-ad-container {
+  margin: 20px 0;
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.google-ad-placeholder {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  border: 2px dashed #ccc;
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ad-placeholder-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #666;
+}
+
+.ad-placeholder-content span:first-child {
+  font-size: 2rem;
+}
+
+.ad-placeholder-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .google-ad-container,
+  .google-ad-placeholder {
+    margin: 15px 0;
+    min-height: 50px;
+  }
+}

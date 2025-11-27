@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
-import NativeAd from '../components/NativeAd';
 import './LeaderboardPage.css';
 
 function LeaderboardPage({ user }) {
@@ -125,9 +124,6 @@ function LeaderboardPage({ user }) {
           </div>
         </div>
       </div>
-
-      {/* Native Ad */}
-      <NativeAd style="inline" />
 
       <div className="leaderboard-tabs">
         <button 
