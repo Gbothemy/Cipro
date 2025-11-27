@@ -40,8 +40,10 @@ function LeaderboardPage({ user }) {
           rank: index + 1,
           username: u.username,
           avatar: u.avatar,
-          earnings: u.balances?.ton || u.balance?.ton || 0,
-          currency: 'TON'
+          earnings: u.total_earnings || 0,
+          ton: u.balances?.ton || 0,
+          cati: u.balances?.cati || 0,
+          usdt: u.balances?.usdt || 0
         }));
 
         // Format streak leaderboard
@@ -159,7 +161,11 @@ function LeaderboardPage({ user }) {
                 <p>{player.points.toLocaleString()} points • VIP {player.vipLevel}</p>
               )}
               {activeTab === 'earnings' && (
-                <p>{player.earnings.toFixed(2)} {player.currency}</p>
+                <p>
+                  💎 {player.ton?.toFixed(4) || 0} TON • 
+                  🐱 {player.cati?.toFixed(2) || 0} CATI • 
+                  💵 {player.usdt?.toFixed(2) || 0} USDT
+                </p>
               )}
               {activeTab === 'streak' && (
                 <p>{player.streak} days • {player.points.toLocaleString()} pts</p>

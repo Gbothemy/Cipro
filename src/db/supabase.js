@@ -191,7 +191,11 @@ export const db = {
             currency: requestData.currency,
             amount: requestData.amount,
             wallet_address: requestData.wallet_address,
-            status: "pending",
+            network: requestData.network || null,
+            memo: requestData.memo || null,
+            network_fee: requestData.network_fee || 0,
+            net_amount: requestData.net_amount || requestData.amount,
+            status: requestData.status || "pending",
           },
         ])
         .select()
@@ -225,7 +229,7 @@ export const db = {
     }
   },
 
-  async updateWithdrawalStatus(id, status, processed_by) {
+  async updateWithdrawalStatus(id, status, processed_by, txHash = null) {
     try {
       const { data, error } = await supabase
         .from("withdrawal_requests")
@@ -233,12 +237,42 @@ export const db = {
           status,
           processed_date: new Date().toISOString(),
           processed_by,
+          transaction_hash: txHash,
         })
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
+
+      // Get user_id from the withdrawal request
+      const { data: request } = await supabase
+        .from("withdrawal_requests")
+        .select("user_id, username, amount, currency")
+        .eq("id", id)
+        .single();
+
+      if (request) {
+        // Create notification for user
+        const notificationData = {
+          type: status === 'approved' ? 'withdrawal' : 'info',
+          title: status === 'approved' ? 'Withdrawal Approved ✅' : 'Withdrawal Rejected ❌',
+          message: status === 'approved' 
+            ? `Your withdrawal of ${request.amount} ${request.currency.toUpperCase()} has been approved and is being processed.`
+            : `Your withdrawal request of ${request.amount} ${request.currency.toUpperCase()} has been rejected. Please contact support for details.`,
+          icon: status === 'approved' ? '✅' : '❌'
+        };
+
+        await this.createNotification(request.user_id, notificationData);
+
+        // Log activity
+        await this.logActivity(request.user_id, {
+          type: 'withdrawal_' + status,
+          description: `Withdrawal ${status}: ${request.amount} ${request.currency.toUpperCase()}`,
+          pointsChange: 0
+        });
+      }
+
       return data;
     } catch (error) {
       console.error("Error updating withdrawal status:", error);
@@ -329,22 +363,45 @@ export const db = {
         if (error) throw error;
         return data || [];
       } else if (type === "earnings") {
+        // Get users with their balances
         const { data, error } = await supabase
           .from("users")
-          .select(
-            `
+          .select(`
             user_id,
             username,
             avatar,
-            balances (ton)
-          `
-          )
-          .eq("is_admin", false)
-          .order("balances.ton", { ascending: false })
-          .limit(limit);
+            balances (ton, cati, usdt)
+          `)
+          .eq("is_admin", false);
 
         if (error) throw error;
-        return data || [];
+
+        // Calculate total earnings in TON equivalent
+        const usersWithEarnings = (data || []).map(user => {
+          const ton = user.balances?.[0]?.ton || user.balances?.ton || 0;
+          const cati = user.balances?.[0]?.cati || user.balances?.cati || 0;
+          const usdt = user.balances?.[0]?.usdt || user.balances?.usdt || 0;
+          
+          // Calculate total earnings (you can adjust conversion rates)
+          const totalEarnings = ton + (cati * 0.1) + (usdt * 0.05);
+          
+          return {
+            ...user,
+            total_earnings: totalEarnings,
+            balances: {
+              ton,
+              cati,
+              usdt
+            }
+          };
+        });
+
+        // Sort by total earnings and limit
+        const sorted = usersWithEarnings
+          .sort((a, b) => b.total_earnings - a.total_earnings)
+          .slice(0, limit);
+
+        return sorted;
       } else if (type === "streak") {
         const { data, error } = await supabase
           .from("users")

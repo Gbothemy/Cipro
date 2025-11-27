@@ -82,10 +82,6 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
               <span className="nav-icon">💰</span>
               <span className="nav-text">Referral</span>
             </Link>
-            <Link to="/benefit" className={location.pathname === '/benefit' ? 'active' : ''}>
-              <span className="nav-icon">👤</span>
-              <span className="nav-text">Benefit</span>
-            </Link>
             <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
               <span className="nav-icon">🏆</span>
               <span className="nav-text">Leaderboard</span>
@@ -152,7 +148,6 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                     {/* Account Section */}
                     <div className="menu-section-title">👤 Account</div>
                     <Link to="/profile" onClick={() => setMenuOpen(false)}>👤 My Profile</Link>
-                    <Link to="/benefit" onClick={() => setMenuOpen(false)}>🎁 Benefits & Packs</Link>
                     <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-logout-btn">
                       🚪 Logout
                     </button>
@@ -171,7 +166,6 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                     <Link to="/tasks" onClick={() => setMenuOpen(false)}>📋 Tasks & Missions</Link>
                     <Link to="/airdrop" onClick={() => setMenuOpen(false)}>Airdrop</Link>
                     <Link to="/referral" onClick={() => setMenuOpen(false)}>Referral</Link>
-                    <Link to="/benefit" onClick={() => setMenuOpen(false)}>Benefits</Link>
                     
                     <div className="nav-divider"></div>
                     
@@ -237,7 +231,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <span className="nav-icon">🔔</span>
             <span className="nav-label">ALERTS</span>
           </Link>
-          <Link to="/profile" className={location.pathname === '/profile' || location.pathname === '/benefit' ? 'active' : ''}>
+          <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>
             <span className="nav-icon">👤</span>
             <span className="nav-label">ACCOUNT</span>
           </Link>
