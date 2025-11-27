@@ -7,14 +7,16 @@ import './Layout.css';
 
 function Layout({ children, user, notifications = [], onLogout, isAdmin = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [isDarkMode, setIsDarkMode] = useState(themeManager.isDark());
   const location = useLocation();
 
   const toggleSound = () => {
     const newState = soundManager.toggle();
     setSoundEnabled(newState);
-    soundManager.play('click');
+    if (newState) {
+      soundManager.click();
+    }
   };
 
   const toggleTheme = () => {
