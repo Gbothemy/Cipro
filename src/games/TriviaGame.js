@@ -60,6 +60,7 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
       .slice(0, settings.questions);
     setQuestions(selectedQuestions);
     soundManager.gameStart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
   useEffect(() => {
@@ -79,7 +80,8 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestion, gameOver, showResult, questions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestion, gameOver, showResult, questions.length]);
 
   const handleTimeout = () => {
     setShowResult(true);
