@@ -43,9 +43,10 @@ export const db = {
       const { error: balanceError } = await supabase.from("balances").insert([
         {
           user_id,
-          ton: 0,
-          cati: 0,
+          sol: 0,
+          eth: 0,
           usdt: 0,
+          usdc: 0,
         },
       ]);
 
@@ -65,7 +66,7 @@ export const db = {
         .select(
           `
           *,
-          balances (ton, cati, usdt)
+          balances (sol, eth, usdt, usdc)
         `
         )
         .eq("user_id", user_id)
@@ -117,7 +118,7 @@ export const db = {
         .select(
           `
           *,
-          balances (ton, cati, usdt)
+          balances (sol, eth, usdt, usdc)
         `
         )
         .eq("is_admin", false)
@@ -370,28 +371,31 @@ export const db = {
             user_id,
             username,
             avatar,
-            balances (ton, cati, usdt)
+            balances (sol, eth, usdt, usdc)
           `)
           .eq("is_admin", false);
 
         if (error) throw error;
 
-        // Calculate total earnings in TON equivalent
+        // Calculate total earnings in USDT equivalent
         const usersWithEarnings = (data || []).map(user => {
-          const ton = user.balances?.[0]?.ton || user.balances?.ton || 0;
-          const cati = user.balances?.[0]?.cati || user.balances?.cati || 0;
+          const sol = user.balances?.[0]?.sol || user.balances?.sol || 0;
+          const eth = user.balances?.[0]?.eth || user.balances?.eth || 0;
           const usdt = user.balances?.[0]?.usdt || user.balances?.usdt || 0;
+          const usdc = user.balances?.[0]?.usdc || user.balances?.usdc || 0;
           
-          // Calculate total earnings (you can adjust conversion rates)
-          const totalEarnings = ton + (cati * 0.1) + (usdt * 0.05);
+          // Calculate total earnings in USDT (using approximate conversion rates)
+          // SOL ~$100, ETH ~$2000, USDT $1, USDC $1
+          const totalEarnings = (sol * 100) + (eth * 2000) + usdt + usdc;
           
           return {
             ...user,
             total_earnings: totalEarnings,
             balances: {
-              ton,
-              cati,
-              usdt
+              sol,
+              eth,
+              usdt,
+              usdc
             }
           };
         });
@@ -845,14 +849,16 @@ export const db = {
       dayStreak: dbUser.day_streak || 0,
       lastClaim: dbUser.last_claim,
       balance: {
-        ton: dbUser.balances?.[0]?.ton || dbUser.balances?.ton || 0,
-        cati: dbUser.balances?.[0]?.cati || dbUser.balances?.cati || 0,
+        sol: dbUser.balances?.[0]?.sol || dbUser.balances?.sol || 0,
+        eth: dbUser.balances?.[0]?.eth || dbUser.balances?.eth || 0,
         usdt: dbUser.balances?.[0]?.usdt || dbUser.balances?.usdt || 0,
+        usdc: dbUser.balances?.[0]?.usdc || dbUser.balances?.usdc || 0,
       },
       totalEarnings: {
-        ton: dbUser.balances?.[0]?.ton || dbUser.balances?.ton || 0,
-        cati: dbUser.balances?.[0]?.cati || dbUser.balances?.cati || 0,
+        sol: dbUser.balances?.[0]?.sol || dbUser.balances?.sol || 0,
+        eth: dbUser.balances?.[0]?.eth || dbUser.balances?.eth || 0,
         usdt: dbUser.balances?.[0]?.usdt || dbUser.balances?.usdt || 0,
+        usdc: dbUser.balances?.[0]?.usdc || dbUser.balances?.usdc || 0,
       },
     };
   },

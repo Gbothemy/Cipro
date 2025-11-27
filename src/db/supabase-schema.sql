@@ -38,9 +38,10 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS balances (
   id BIGSERIAL PRIMARY KEY,
   user_id TEXT UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  ton DECIMAL(18, 8) DEFAULT 0,
-  cati DECIMAL(18, 8) DEFAULT 0,
+  sol DECIMAL(18, 8) DEFAULT 0,
+  eth DECIMAL(18, 8) DEFAULT 0,
   usdt DECIMAL(18, 8) DEFAULT 0,
+  usdc DECIMAL(18, 8) DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -203,9 +204,10 @@ CREATE TABLE IF NOT EXISTS daily_rewards (
   user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   claim_date DATE NOT NULL,
   points_earned INTEGER DEFAULT 0,
-  ton_earned DECIMAL(18, 8) DEFAULT 0,
-  cati_earned DECIMAL(18, 8) DEFAULT 0,
+  sol_earned DECIMAL(18, 8) DEFAULT 0,
+  eth_earned DECIMAL(18, 8) DEFAULT 0,
   usdt_earned DECIMAL(18, 8) DEFAULT 0,
+  usdc_earned DECIMAL(18, 8) DEFAULT 0,
   streak_day INTEGER DEFAULT 1,
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(user_id, claim_date)
@@ -391,7 +393,7 @@ INSERT INTO tasks (task_name, description, task_type, icon, required_count, rewa
 ('30-Day Streak', 'Login for 30 consecutive days', 'monthly', '🔥', 30, 3000),
 ('Reach VIP Level 10', 'Level up to VIP 10', 'monthly', '⭐', 10, 5000),
 ('Play 100 Games', 'Complete 100 games this month', 'monthly', '🎮', 100, 4000),
-('Earn 10 TON', 'Accumulate 10 TON', 'monthly', '💰', 10, 10000)
+('Earn 100 USDT', 'Accumulate 100 USDT', 'monthly', '💰', 100, 10000)
 ON CONFLICT DO NOTHING;
 
 -- Achievements
@@ -426,9 +428,10 @@ INSERT INTO site_settings (setting_key, setting_value, setting_type, category, d
 ('site_description', 'Play games and earn crypto rewards', 'text', 'general', 'Website description'),
 ('maintenance_mode', 'false', 'boolean', 'general', 'Enable maintenance mode'),
 ('registration_enabled', 'true', 'boolean', 'general', 'Allow new user registration'),
-('min_withdrawal_ton', '0.1', 'number', 'conversion', 'Minimum TON withdrawal amount'),
-('min_withdrawal_cati', '10', 'number', 'conversion', 'Minimum CATI withdrawal amount'),
-('min_withdrawal_usdt', '5', 'number', 'conversion', 'Minimum USDT withdrawal amount'),
+('min_withdrawal_sol', '0.01', 'number', 'conversion', 'Minimum SOL withdrawal amount'),
+('min_withdrawal_eth', '0.001', 'number', 'conversion', 'Minimum ETH withdrawal amount'),
+('min_withdrawal_usdt', '10', 'number', 'conversion', 'Minimum USDT withdrawal amount (Main)'),
+('min_withdrawal_usdc', '10', 'number', 'conversion', 'Minimum USDC withdrawal amount'),
 ('default_conversion_rate', '10000', 'number', 'conversion', 'Default points to crypto rate'),
 ('daily_game_limit', '10', 'number', 'games', 'Daily game play limit'),
 ('referral_bonus', '500', 'number', 'rewards', 'Referral bonus points'),

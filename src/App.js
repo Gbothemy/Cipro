@@ -34,9 +34,10 @@ function App() {
     email: '',
     isAdmin: false,
     balance: {
-      ton: 0,
-      cati: 0,
-      usdt: 0
+      sol: 0,
+      eth: 0,
+      usdt: 0,
+      usdc: 0
     },
     points: 0,
     vipLevel: 1,
@@ -47,9 +48,10 @@ function App() {
     dayStreak: 0,
     lastClaim: null,
     totalEarnings: {
-      ton: 0,
-      cati: 0,
-      usdt: 0
+      sol: 0,
+      eth: 0,
+      usdt: 0,
+      usdc: 0
     }
   });
 
