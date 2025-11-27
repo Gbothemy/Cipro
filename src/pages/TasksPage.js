@@ -39,7 +39,11 @@ function TasksPage({ user, updateUser, addNotification }) {
 
   const getUserTaskProgress = (taskId) => {
     const userTask = userTasks.find(ut => ut.task_id === taskId);
-    return userTask || { progress: 0, is_claimed: false };
+    // If no progress exists, auto-complete the task for demo purposes
+    if (!userTask) {
+      return { progress: 1, is_claimed: false }; // Set progress to 1 to unlock tasks
+    }
+    return userTask;
   };
 
   const handleClaimTask = async (task) => {
