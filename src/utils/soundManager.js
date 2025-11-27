@@ -11,7 +11,9 @@ class SoundManager {
 
   init() {
     try {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (typeof window !== 'undefined') {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
     } catch (e) {
       console.warn('Web Audio API not supported');
       this.enabled = false;
@@ -23,6 +25,11 @@ class SoundManager {
     if (!this.enabled || !this.audioContext) return;
 
     try {
+      // Resume audio context if suspended (required by browsers)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
@@ -39,6 +46,7 @@ class SoundManager {
       oscillator.stop(this.audioContext.currentTime + duration);
     } catch (e) {
       console.warn('Error playing sound:', e);
+      this.enabled = false;
     }
   }
 
