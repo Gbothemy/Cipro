@@ -43,17 +43,19 @@ function AirdropPage({ user, updateUser, addNotification }) {
     setClaimed(true);
     
     const rewards = {
-      ton: parseFloat((Math.random() * 5 + 1).toFixed(2)),
-      cati: Math.floor(Math.random() * 100 + 50),
+      sol: parseFloat((Math.random() * 0.05 + 0.01).toFixed(4)),
+      eth: parseFloat((Math.random() * 0.002 + 0.001).toFixed(4)),
       usdt: parseFloat((Math.random() * 10 + 5).toFixed(2)),
+      usdc: parseFloat((Math.random() * 10 + 5).toFixed(2)),
       points: Math.floor(Math.random() * 500 + 200)
     };
 
     try {
       // Update balances in database
-      await db.updateBalance(user.userId, 'ton', user.balance.ton + rewards.ton);
-      await db.updateBalance(user.userId, 'cati', user.balance.cati + rewards.cati);
+      await db.updateBalance(user.userId, 'sol', user.balance.sol + rewards.sol);
+      await db.updateBalance(user.userId, 'eth', user.balance.eth + rewards.eth);
       await db.updateBalance(user.userId, 'usdt', user.balance.usdt + rewards.usdt);
+      await db.updateBalance(user.userId, 'usdc', user.balance.usdc + rewards.usdc);
       
       // Update user data in database
       await db.updateUser(user.userId, {
@@ -68,16 +70,17 @@ function AirdropPage({ user, updateUser, addNotification }) {
       // Update local state
       updateUser({
         balance: {
-          ton: user.balance.ton + rewards.ton,
-          cati: user.balance.cati + rewards.cati,
-          usdt: user.balance.usdt + rewards.usdt
+          sol: user.balance.sol + rewards.sol,
+          eth: user.balance.eth + rewards.eth,
+          usdt: user.balance.usdt + rewards.usdt,
+          usdc: user.balance.usdc + rewards.usdc
         },
         points: user.points + rewards.points,
         lastClaim: new Date().toISOString(),
         dayStreak: user.dayStreak + 1
       });
 
-      addNotification(`🎁 Claimed: ${rewards.ton} TON, ${rewards.cati} CATI, ${rewards.usdt} USDT, ${rewards.points} Points!`, 'success');
+      addNotification(`🎁 Claimed: ${rewards.sol} SOL, ${rewards.eth} ETH, ${rewards.usdt} USDT, ${rewards.usdc} USDC, ${rewards.points} Points!`, 'success');
       setClaimed(false);
       setCanClaim(false);
     } catch (error) {
@@ -98,17 +101,17 @@ function AirdropPage({ user, updateUser, addNotification }) {
         <h2>Your Balance</h2>
         <div className="balance-grid">
           <div className="balance-item">
-            <div className="currency-icon">💎</div>
+            <div className="currency-icon">◎</div>
             <div className="currency-info">
-              <span className="currency-name">TON</span>
-              <span className="currency-amount">{user.balance.ton}</span>
+              <span className="currency-name">SOL</span>
+              <span className="currency-amount">{user.balance.sol.toFixed(4)}</span>
             </div>
           </div>
           <div className="balance-item">
-            <div className="currency-icon">🐱</div>
+            <div className="currency-icon">Ξ</div>
             <div className="currency-info">
-              <span className="currency-name">CATI</span>
-              <span className="currency-amount">{user.balance.cati}</span>
+              <span className="currency-name">ETH</span>
+              <span className="currency-amount">{user.balance.eth.toFixed(4)}</span>
             </div>
           </div>
           <div className="balance-item">

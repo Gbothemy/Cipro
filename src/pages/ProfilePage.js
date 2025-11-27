@@ -32,9 +32,10 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
     { label: 'VIP Level', value: user.vipLevel, icon: '⭐', color: '#f59e0b' },
     { label: 'Games Played', value: user.completedTasks, icon: '🎮', color: '#10b981' },
     { label: 'Day Streak', value: user.dayStreak, icon: '🔥', color: '#ef4444' },
-    { label: 'TON Balance', value: user.balance?.ton?.toFixed(2) || '0.00', icon: '💰', color: '#8b5cf6' },
-    { label: 'CATI Balance', value: user.balance?.cati?.toFixed(2) || '0.00', icon: '🐱', color: '#ec4899' },
-    { label: 'USDT Balance', value: user.balance?.usdt?.toFixed(2) || '0.00', icon: '💵', color: '#06b6d4' },
+    { label: 'SOL Balance', value: user.balance?.sol?.toFixed(4) || '0.0000', icon: '◎', color: '#14F195' },
+    { label: 'ETH Balance', value: user.balance?.eth?.toFixed(4) || '0.0000', icon: 'Ξ', color: '#627EEA' },
+    { label: 'USDT Balance', value: user.balance?.usdt?.toFixed(2) || '0.00', icon: '💵', color: '#26a17b' },
+    { label: 'USDC Balance', value: user.balance?.usdc?.toFixed(2) || '0.00', icon: '💵', color: '#2775CA' },
     { label: 'Gift Points', value: user.giftPoints || 0, icon: '🎁', color: '#f97316' }
   ];
 
@@ -181,17 +182,17 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
               <h3>📊 Earnings Overview</h3>
               <div className="earnings-cards">
                 <div className="earning-card">
-                  <div className="earning-icon">💰</div>
+                  <div className="earning-icon">◎</div>
                   <div className="earning-info">
-                    <div className="earning-value">{user.balance?.ton?.toFixed(4) || '0.0000'} TON</div>
-                    <div className="earning-label">Total TON Earned</div>
+                    <div className="earning-value">{user.balance?.sol?.toFixed(4) || '0.0000'} SOL</div>
+                    <div className="earning-label">Total SOL Earned</div>
                   </div>
                 </div>
                 <div className="earning-card">
-                  <div className="earning-icon">🐱</div>
+                  <div className="earning-icon">Ξ</div>
                   <div className="earning-info">
-                    <div className="earning-value">{user.balance?.cati?.toFixed(4) || '0.0000'} CATI</div>
-                    <div className="earning-label">Total CATI Earned</div>
+                    <div className="earning-value">{user.balance?.eth?.toFixed(4) || '0.0000'} ETH</div>
+                    <div className="earning-label">Total ETH Earned</div>
                   </div>
                 </div>
                 <div className="earning-card">

@@ -75,16 +75,18 @@ function BenefitPage({ user, updateUser, addNotification, onLogout }) {
       });
 
       // Update balances in database
-      await db.updateBalance(user.userId, 'ton', user.balance.ton + pack.rewards.ton);
-      await db.updateBalance(user.userId, 'cati', user.balance.cati + pack.rewards.cati);
+      await db.updateBalance(user.userId, 'sol', user.balance.sol + pack.rewards.sol);
+      await db.updateBalance(user.userId, 'eth', user.balance.eth + pack.rewards.eth);
       await db.updateBalance(user.userId, 'usdt', user.balance.usdt + pack.rewards.usdt);
+      await db.updateBalance(user.userId, 'usdc', user.balance.usdc + pack.rewards.usdc);
 
       // Update local state
       const newPoints = user.points - pack.points;
       const newBalance = {
-        ton: user.balance.ton + pack.rewards.ton,
-        cati: user.balance.cati + pack.rewards.cati,
-        usdt: user.balance.usdt + pack.rewards.usdt
+        sol: user.balance.sol + pack.rewards.sol,
+        eth: user.balance.eth + pack.rewards.eth,
+        usdt: user.balance.usdt + pack.rewards.usdt,
+        usdc: user.balance.usdc + pack.rewards.usdc
       };
       const newGiftPoints = user.giftPoints + pack.rewards.giftPoints;
 
@@ -173,9 +175,10 @@ function BenefitPage({ user, updateUser, addNotification, onLogout }) {
                 <h4>{pack.name}</h4>
                 <p className="pack-description">{pack.description}</p>
                 <div className="pack-rewards-list">
-                  <span>💎 {pack.rewards.ton} TON</span>
-                  <span>🐱 {pack.rewards.cati} CATI</span>
+                  <span>◎ {pack.rewards.sol} SOL</span>
+                  <span>Ξ {pack.rewards.eth} ETH</span>
                   <span>💵 {pack.rewards.usdt} USDT</span>
+                  <span>💵 {pack.rewards.usdc} USDC</span>
                   <span>🎁 {pack.rewards.giftPoints} GP</span>
                 </div>
                 <p className="pack-cost">{pack.points.toLocaleString()} points required</p>

@@ -42,10 +42,11 @@ function ReferralPage({ user, updateUser, addNotification }) {
   };
 
   const totalEarnings = referrals.reduce((acc, ref) => ({
-    ton: acc.ton + ref.ton,
-    cati: acc.cati + ref.cati,
-    usdt: acc.usdt + ref.usdt
-  }), { ton: 0, cati: 0, usdt: 0 });
+    sol: acc.sol + ref.sol,
+    eth: acc.eth + ref.eth,
+    usdt: acc.usdt + ref.usdt,
+    usdc: acc.usdc + ref.usdc
+  }), { sol: 0, eth: 0, usdt: 0, usdc: 0 });
 
   return (
     <div className="referral-page">
@@ -58,16 +59,20 @@ function ReferralPage({ user, updateUser, addNotification }) {
         <h2>Referral Earnings</h2>
         <div className="earnings-grid">
           <div className="earning-item">
-            <span className="earning-label">TON</span>
-            <span className="earning-value">{totalEarnings.ton.toFixed(2)}</span>
+            <span className="earning-label">SOL</span>
+            <span className="earning-value">{totalEarnings.sol.toFixed(4)}</span>
           </div>
           <div className="earning-item">
-            <span className="earning-label">CATI</span>
-            <span className="earning-value">{totalEarnings.cati}</span>
+            <span className="earning-label">ETH</span>
+            <span className="earning-value">{totalEarnings.eth.toFixed(4)}</span>
           </div>
           <div className="earning-item">
             <span className="earning-label">USDT</span>
             <span className="earning-value">{totalEarnings.usdt.toFixed(2)}</span>
+          </div>
+          <div className="earning-item">
+            <span className="earning-label">USDC</span>
+            <span className="earning-value">{totalEarnings.usdc.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -110,9 +115,10 @@ function ReferralPage({ user, updateUser, addNotification }) {
               </div>
               <p className="joined-date">Joined: {new Date(ref.joined).toLocaleDateString()}</p>
               <div className="referral-earnings">
-                <span>💎 {ref.ton}</span>
-                <span>🐱 {ref.cati}</span>
+                <span>◎ {ref.sol}</span>
+                <span>Ξ {ref.eth}</span>
                 <span>💵 {ref.usdt}</span>
+                <span>💵 {ref.usdc}</span>
               </div>
             </div>
           </div>

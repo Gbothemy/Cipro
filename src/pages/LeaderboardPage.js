@@ -41,9 +41,10 @@ function LeaderboardPage({ user }) {
           username: u.username,
           avatar: u.avatar,
           earnings: u.total_earnings || 0,
-          ton: u.balances?.ton || 0,
-          cati: u.balances?.cati || 0,
-          usdt: u.balances?.usdt || 0
+          sol: u.balances?.sol || 0,
+          eth: u.balances?.eth || 0,
+          usdt: u.balances?.usdt || 0,
+          usdc: u.balances?.usdc || 0
         }));
 
         // Format streak leaderboard
@@ -64,7 +65,7 @@ function LeaderboardPage({ user }) {
         // Calculate current user rank
         const pointsRank = allUsers.findIndex(u => u.userId === user.userId) + 1;
         const earningsRank = [...allUsers]
-          .sort((a, b) => (b.balance?.ton || 0) - (a.balance?.ton || 0))
+          .sort((a, b) => (b.balance?.usdt || 0) - (a.balance?.usdt || 0))
           .findIndex(u => u.userId === user.userId) + 1;
         const streakRank = [...allUsers]
           .sort((a, b) => (b.dayStreak || 0) - (a.dayStreak || 0))

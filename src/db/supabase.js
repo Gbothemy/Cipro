@@ -752,9 +752,10 @@ export const db = {
             user_id,
             claim_date: today,
             points_earned: rewardData.points,
-            ton_earned: rewardData.ton || 0,
-            cati_earned: rewardData.cati || 0,
+            sol_earned: rewardData.sol || 0,
+            eth_earned: rewardData.eth || 0,
             usdt_earned: rewardData.usdt || 0,
+            usdc_earned: rewardData.usdc || 0,
             streak_day: rewardData.streakDay,
           },
         ])
