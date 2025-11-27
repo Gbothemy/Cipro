@@ -1,49 +1,16 @@
-import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../db/supabase';
 import './LandingPage.css';
 
 function LandingPage() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState([
-    { value: '0', label: 'Active Players' },
-    { value: '$0', label: 'Rewards Paid' },
-    { value: '0', label: 'Tasks Completed' },
+  
+  // Hardcoded stats - not retrieved from database
+  const stats = [
+    { value: '1+', label: 'Active Players' },
+    { value: '$0+', label: 'Rewards Paid' },
+    { value: '2+', label: 'Tasks Completed' },
     { value: '4.9/5', label: 'User Rating' }
-  ]);
-
-  useEffect(() => {
-    loadRealStats();
-  }, []);
-
-  const loadRealStats = async () => {
-    try {
-      // Get all users
-      const users = await db.getAllUsers();
-      const activeUsers = users.length;
-
-      // Calculate total rewards paid (sum of all user balances in USD)
-      const totalRewards = users.reduce((sum, user) => {
-        const solValue = (user.balance?.sol || 0) * 100; // SOL ~$100
-        const ethValue = (user.balance?.eth || 0) * 2000; // ETH ~$2000
-        const usdtValue = (user.balance?.usdt || 0); // USDT $1
-        const usdcValue = (user.balance?.usdc || 0); // USDC $1
-        return sum + solValue + ethValue + usdtValue + usdcValue;
-      }, 0);
-
-      // Calculate total tasks completed
-      const totalTasks = users.reduce((sum, user) => sum + (user.completedTasks || 0), 0);
-
-      setStats([
-        { value: `${activeUsers.toLocaleString()}+`, label: 'Active Players' },
-        { value: `$${Math.floor(totalRewards).toLocaleString()}+`, label: 'Rewards Paid' },
-        { value: `${totalTasks.toLocaleString()}+`, label: 'Tasks Completed' },
-        { value: '4.9/5', label: 'User Rating' }
-      ]);
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  };
+  ];
 
   const features = [
     {
@@ -90,7 +57,7 @@ function LandingPage() {
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="nav-container">
-          <div className="nav-logo">
+          <div className="nav-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <span className="logo-icon">💎</span>
             <span className="logo-text">Cipro</span>
           </div>

@@ -19,13 +19,20 @@ function GoogleAd({
     }
   }, []);
 
-  // Only show ads in production
+  // Show demo ads in development, real ads in production
   if (process.env.NODE_ENV !== 'production') {
     return (
       <div className={`google-ad-placeholder ${className}`} style={style}>
         <div className="ad-placeholder-content">
-          <span>📢 Google Ad</span>
-          <span className="ad-placeholder-text">Ads will appear here in production</span>
+          <div className="ad-demo-banner">
+            <span className="ad-demo-icon">🚀</span>
+            <div className="ad-demo-text">
+              <strong>Boost Your Crypto Earnings!</strong>
+              <p>Join the #1 crypto trading platform</p>
+            </div>
+            <button className="ad-demo-cta">Learn More</button>
+          </div>
+          <span className="ad-placeholder-label">Demo Ad - Real ads in production</span>
         </div>
       </div>
     );
