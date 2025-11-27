@@ -110,6 +110,27 @@ function GamePage({ user, updateUser, addNotification }) {
         await db.recordGamePlay(user.userId, mode.gameType);
       }
 
+      // Update task progress for "Play 3 Games" and "Play 20 Games" tasks
+      try {
+        // Get all tasks
+        const allTasks = await db.getTasks();
+        const playGamesTasks = allTasks.filter(t => 
+          t.task_name.includes('Play') && t.task_name.includes('Games')
+        );
+        
+        // Update progress for each play games task
+        for (const task of playGamesTasks) {
+          const userTask = await db.getUserTasks(user.userId);
+          const existingProgress = userTask.find(ut => ut.task_id === task.id);
+          const currentProgress = existingProgress?.progress || 0;
+          
+          // Increment progress by 1
+          await db.updateTaskProgress(user.userId, task.id, currentProgress + 1);
+        }
+      } catch (taskError) {
+        console.error('Error updating task progress:', taskError);
+      }
+
       // Update local state
       updateUser({
         points: newPoints,

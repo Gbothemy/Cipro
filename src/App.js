@@ -131,6 +131,17 @@ function App() {
         // Existing user - load their data
         setUser(dbUser);
         addNotification(`Welcome back, ${userData.username}!`, 'success');
+        
+        // Update "Daily Login" task progress
+        try {
+          const allTasks = await db.getTasks('daily');
+          const loginTask = allTasks.find(t => t.task_name === 'Daily Login');
+          if (loginTask) {
+            await db.updateTaskProgress(userData.userId, loginTask.id, 1);
+          }
+        } catch (taskError) {
+          console.error('Error updating login task:', taskError);
+        }
       } else {
         // New user - create in database
         const newUser = await db.createUser({
