@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import soundManager from '../utils/soundManager';
 import './PuzzleGame.css';
 
 function PuzzleGame({ onComplete, onClose }) {
@@ -56,16 +57,26 @@ function PuzzleGame({ onComplete, onClose }) {
     setPuzzle(randomPuzzle);
     setGameStarted(true);
     setTimeLeft(30);
+    soundManager.gameStart();
   };
 
   const handleAnswer = (answer) => {
+    soundManager.click();
     setUserAnswer(answer);
     const isCorrect = answer === puzzle.answer;
+    if (isCorrect) {
+      soundManager.correct();
+    } else {
+      soundManager.wrong();
+    }
     handleGameEnd(isCorrect);
   };
 
   const handleGameEnd = (won) => {
     setGameStarted(false);
+    if (won) {
+      soundManager.success();
+    }
     setTimeout(() => {
       onComplete(won, won ? 50 : 10);
     }, 1000);

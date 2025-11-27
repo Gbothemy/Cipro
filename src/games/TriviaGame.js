@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import soundManager from '../utils/soundManager';
 import './TriviaGame.css';
 
 const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
@@ -58,6 +59,7 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
       .sort(() => Math.random() - 0.5)
       .slice(0, settings.questions);
     setQuestions(selectedQuestions);
+    soundManager.gameStart();
   }, [difficulty]);
 
   useEffect(() => {
@@ -68,6 +70,9 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
         if (prev <= 1) {
           handleTimeout();
           return settings.timePerQuestion;
+        }
+        if (prev <= 5) {
+          soundManager.tick();
         }
         return prev - 1;
       });
@@ -86,11 +91,15 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
   const handleAnswer = (index) => {
     if (selectedAnswer !== null) return;
 
+    soundManager.click();
     setSelectedAnswer(index);
     const isCorrect = index === questions[currentQuestion].correct;
     
     if (isCorrect) {
       setScore(score + settings.pointsPerCorrect);
+      soundManager.correct();
+    } else {
+      soundManager.wrong();
     }
 
     setShowResult(true);
@@ -114,6 +123,8 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
     setGameOver(true);
     const totalPossible = settings.questions * settings.pointsPerCorrect;
     const isPerfect = score + settings.pointsPerCorrect >= totalPossible;
+    
+    soundManager.success();
     
     // Call onComplete with won status and score
     if (onComplete) {

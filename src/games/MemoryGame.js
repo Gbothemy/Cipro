@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import soundManager from '../utils/soundManager';
 import './MemoryGame.css';
 
 function MemoryGame({ onComplete, onClose }) {
@@ -23,15 +24,18 @@ function MemoryGame({ onComplete, onClose }) {
     setMoves(0);
     setGameStarted(true);
     setGameComplete(false);
+    soundManager.gameStart();
   };
 
   useEffect(() => {
     if (flipped.length === 2) {
       const [first, second] = flipped;
       if (cards[first].emoji === cards[second].emoji) {
+        soundManager.match();
         setMatched([...matched, first, second]);
         setFlipped([]);
       } else {
+        soundManager.wrong();
         setTimeout(() => setFlipped([]), 1000);
       }
       setMoves(moves + 1);
@@ -41,6 +45,7 @@ function MemoryGame({ onComplete, onClose }) {
   useEffect(() => {
     if (matched.length === cards.length && cards.length > 0) {
       setGameComplete(true);
+      soundManager.success();
       const points = Math.max(200 - (moves * 5), 50);
       setTimeout(() => {
         onComplete(true, points);
@@ -52,6 +57,7 @@ function MemoryGame({ onComplete, onClose }) {
     if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) {
       return;
     }
+    soundManager.flip();
     setFlipped([...flipped, index]);
   };
 

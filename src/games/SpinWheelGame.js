@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import soundManager from '../utils/soundManager';
 import './SpinWheelGame.css';
 
 function SpinWheelGame({ onComplete, onClose }) {
@@ -22,6 +23,7 @@ function SpinWheelGame({ onComplete, onClose }) {
   const spinWheel = () => {
     if (spinning) return;
 
+    soundManager.spin();
     setSpinning(true);
     const randomIndex = Math.floor(Math.random() * prizes.length);
     const prize = prizes[randomIndex];
@@ -36,8 +38,10 @@ function SpinWheelGame({ onComplete, onClose }) {
 
     setTimeout(() => {
       setSpinning(false);
+      soundManager.coin();
       setResult(prize);
       setTimeout(() => {
+        soundManager.success();
         onComplete(true, prize.points);
       }, 2000);
     }, 4000);
