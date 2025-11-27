@@ -4,6 +4,7 @@ import Achievements from '../components/Achievements';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
+import TriviaGame from '../games/TriviaGame';
 import GoogleAd, { AdSlots } from '../components/GoogleAd';
 import './GamePage.css';
 
@@ -15,7 +16,8 @@ function GamePage({ user, updateUser, addNotification }) {
   const miningModes = [
     { id: 'puzzle', name: 'Puzzle Challenge', icon: '🧩', reward: 50, duration: 2000, cooldown: 30000, expReward: 10, hasGame: true, gameType: 'puzzle' },
     { id: 'spin', name: 'Spin Wheel', icon: '🎰', reward: 100, duration: 3000, cooldown: 60000, expReward: 20, hasGame: true, gameType: 'spin' },
-    { id: 'memory', name: 'Memory Match', icon: '🧠', reward: 120, duration: 2500, cooldown: 45000, expReward: 25, hasGame: true, gameType: 'memory' }
+    { id: 'memory', name: 'Memory Match', icon: '🧠', reward: 120, duration: 2500, cooldown: 45000, expReward: 25, hasGame: true, gameType: 'memory' },
+    { id: 'trivia', name: 'Trivia Quiz', icon: '❓', reward: 80, duration: 2000, cooldown: 40000, expReward: 15, hasGame: true, gameType: 'trivia' }
   ];
 
   useEffect(() => {
@@ -260,6 +262,13 @@ function GamePage({ user, updateUser, addNotification }) {
 
       {activeGame === 'memory' && (
         <MemoryGame 
+          onComplete={handleGameComplete}
+          onClose={() => setActiveGame(null)}
+        />
+      )}
+
+      {activeGame === 'trivia' && (
+        <TriviaGame 
           onComplete={handleGameComplete}
           onClose={() => setActiveGame(null)}
         />
