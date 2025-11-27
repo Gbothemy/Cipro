@@ -3,14 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": null,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/admin/login",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

@@ -67,7 +67,10 @@ function AdminPage({ user, addNotification }) {
 
       // Get active users today from database
       const today = new Date().toISOString().split('T')[0];
-      const activeToday = 0; // TODO: Implement active users tracking
+      const activeToday = allUsers.filter(u => {
+        const lastLogin = new Date(u.last_login || u.created_at);
+        return lastLogin.toISOString().split('T')[0] === today;
+      }).length;
 
       setStats({
         totalUsers: allUsers.length,
@@ -75,8 +78,10 @@ function AdminPage({ user, addNotification }) {
         totalTasks,
         avgLevel,
         activeToday,
-        totalTON: totalTON.toFixed(2),
-        totalCATI: totalCATI.toFixed(2),
+        totalSOL: totalSOL.toFixed(4),
+        totalETH: totalETH.toFixed(4),
+        totalUSDT: totalUSDT.toFixed(2),
+        totalUSDC: totalUSDC.toFixed(2),
         topPlayer: allUsers.sort((a, b) => b.points - a.points)[0],
         lastUpdate: new Date().toLocaleTimeString()
       });
@@ -406,10 +411,31 @@ function AdminPage({ user, addNotification }) {
               </div>
             </div>
             <div className="admin-stat-card">
-              <div className="stat-icon">💰</div>
+              <div className="stat-icon">◎</div>
               <div className="stat-info">
-                <div className="stat-value">{stats.totalTON} TON</div>
-                <div className="stat-label">Total Balance</div>
+                <div className="stat-value">{stats.totalSOL} SOL</div>
+                <div className="stat-label">Total SOL</div>
+              </div>
+            </div>
+            <div className="admin-stat-card">
+              <div className="stat-icon">Ξ</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.totalETH} ETH</div>
+                <div className="stat-label">Total ETH</div>
+              </div>
+            </div>
+            <div className="admin-stat-card">
+              <div className="stat-icon">💵</div>
+              <div className="stat-info">
+                <div className="stat-value">${stats.totalUSDT} USDT</div>
+                <div className="stat-label">Total USDT</div>
+              </div>
+            </div>
+            <div className="admin-stat-card">
+              <div className="stat-icon">💵</div>
+              <div className="stat-info">
+                <div className="stat-value">${stats.totalUSDC} USDC</div>
+                <div className="stat-label">Total USDC</div>
               </div>
             </div>
           </div>
@@ -451,8 +477,9 @@ function AdminPage({ user, addNotification }) {
                     <th>User ID</th>
                     <th>Points</th>
                     <th>Level</th>
-                    <th>TON</th>
-                    <th>CATI</th>
+                    <th>SOL</th>
+                    <th>ETH</th>
+                    <th>USDT</th>
                     <th>Tasks</th>
                     <th>Actions</th>
                   </tr>
@@ -467,6 +494,7 @@ function AdminPage({ user, addNotification }) {
                       <td>Level {u.vipLevel || 1}</td>
                       <td>{(u.balance?.sol || 0).toFixed(4)}</td>
                       <td>{(u.balance?.eth || 0).toFixed(4)}</td>
+                      <td>{(u.balance?.usdt || 0).toFixed(2)}</td>
                       <td>{u.completedTasks || 0}</td>
                       <td className="actions-cell">
                         <button onClick={() => handleEditUser(u)} className="edit-btn" title="Edit">✏️</button>
