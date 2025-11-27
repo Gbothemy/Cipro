@@ -21,7 +21,7 @@ function ReferralPage({ user, updateUser, addNotification }) {
   };
 
   const handleShare = (platform) => {
-    const text = `Join me on Reward Game and earn crypto! Use my referral link: ${referralLink}`;
+    const text = `Join me on Cipro and earn crypto! Use my referral link: ${referralLink}`;
     let url = '';
 
     switch(platform) {

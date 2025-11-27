@@ -127,7 +127,7 @@ function App() {
           is_admin: isAdmin
         });
         setUser(newUser);
-        addNotification(`Welcome to Reward Game, ${userData.username}!`, 'success');
+        addNotification(`Welcome to Cipro, ${userData.username}!`, 'success');
       }
       
       // Redirect admins to admin panel, regular users to game page

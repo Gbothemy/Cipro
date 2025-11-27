@@ -39,7 +39,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         <div className="header-content">
           <div className="header-left">
             <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-            <h1 className="header-title">🎮 Reward Game Dashboard</h1>
+            <h1 className="header-title">💎 Cipro</h1>
           </div>
           <div className="header-right">
             <button onClick={toggleTheme} className="theme-toggle" title={isDarkMode ? 'Light Mode' : 'Dark Mode'}>
@@ -202,7 +202,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         <main className="main-content">
           {children}
           <footer className="footer desktop-only">
-            <p>&copy; 2024 Reward Game Dashboard. All rights reserved.</p>
+            <p>&copy; 2024 Cipro. All rights reserved.</p>
             <div className="footer-links">
               <a href="#">Privacy Policy</a>
               <a href="#">Terms of Service</a>

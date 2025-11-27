@@ -1,7 +1,7 @@
 {
-  "name": "crypto-earning",
+  "name": "cipro",
   "version": "1.0.0",
-  "description": "Crypto Earning - Play games and earn cryptocurrency rewards",
+  "description": "Cipro - Play games and earn cryptocurrency rewards",
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",

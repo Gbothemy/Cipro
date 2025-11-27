@@ -57,8 +57,8 @@ function LandingPage() {
       <nav className="landing-nav">
         <div className="nav-container">
           <div className="nav-logo">
-            <span className="logo-icon">💰</span>
-            <span className="logo-text">Crypto Earning</span>
+            <span className="logo-icon">💎</span>
+            <span className="logo-text">Cipro</span>
           </div>
           <div className="nav-buttons">
             <button onClick={() => navigate('/admin/login')} className="nav-btn admin-btn" title="Admin Portal">
@@ -137,7 +137,7 @@ function LandingPage() {
       <section className="features-section">
         <div className="features-container">
           <div className="section-header">
-            <h2 className="section-title">Why Choose Reward Game?</h2>
+            <h2 className="section-title">Why Choose Cipro?</h2>
             <p className="section-subtitle">
               Everything you need to start earning crypto rewards today
             </p>
@@ -201,10 +201,10 @@ function LandingPage() {
           <div className="footer-content">
             <div className="footer-brand">
               <div className="footer-logo">
-                <span className="logo-icon">🎮</span>
-                <span className="logo-text">Reward Game</span>
+                <span className="logo-icon">💎</span>
+                <span className="logo-text">Cipro</span>
               </div>
-              <p>Earn crypto rewards while playing games</p>
+              <p>Play games and earn cryptocurrency rewards</p>
             </div>
             <div className="footer-links">
               <div className="footer-column">
@@ -228,7 +228,7 @@ function LandingPage() {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 Reward Game Dashboard. All rights reserved.</p>
+            <p>&copy; 2024 Cipro. All rights reserved.</p>
           </div>
         </div>
       </footer>

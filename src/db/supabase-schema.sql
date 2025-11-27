@@ -1,5 +1,5 @@
 -- ============================================
--- COMPLETE DATABASE SCHEMA - CRYPTO EARNING GAME
+-- COMPLETE DATABASE SCHEMA - CIPRO
 -- ============================================
 -- Version: 2.0
 -- Last Updated: 2024
@@ -422,7 +422,7 @@ ON CONFLICT DO NOTHING;
 
 -- Site Settings
 INSERT INTO site_settings (setting_key, setting_value, setting_type, category, description) VALUES
-('site_name', 'Crypto Earning Game', 'text', 'general', 'Website name'),
+('site_name', 'Cipro', 'text', 'general', 'Website name'),
 ('site_description', 'Play games and earn crypto rewards', 'text', 'general', 'Website description'),
 ('maintenance_mode', 'false', 'boolean', 'general', 'Enable maintenance mode'),
 ('registration_enabled', 'true', 'boolean', 'general', 'Allow new user registration'),

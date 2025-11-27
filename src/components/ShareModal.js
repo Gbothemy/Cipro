@@ -15,7 +15,7 @@ function ShareModal({ user, onClose, type = 'achievement' }) {
     },
     referral: {
       title: '🎁 Join Me!',
-      message: `Join me on this amazing reward game! Use my referral code: ${user.referralCode}`,
+      message: `Join me on Cipro and earn crypto! Use my referral code: ${user.referralCode}`,
       hashtags: '#RewardGame #Referral #JoinNow'
     }
   };

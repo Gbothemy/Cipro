@@ -1,6 +1,41 @@
-# 💰 Crypto Earning
+# 💎 Cipro
 
 Play games and earn cryptocurrency rewards!
+
+## About Cipro
+
+Cipro is a gamified cryptocurrency earning platform where users can play various games and earn real crypto rewards (TON, CATI, USDT).
+
+## Features
+
+- 🎮 Multiple game types with difficulty levels
+- 💰 Earn TON, CATI, and USDT
+- 🏆 Achievement system
+- 📋 Daily, weekly, and monthly tasks
+- ⭐ VIP tier system with exclusive benefits
+- 💸 Professional withdrawal system
+- 📊 Leaderboards and rankings
+- 👥 Referral program
+- 🔔 Real-time notifications
+
+## Tech Stack
+
+- React.js
+- Supabase (Database)
+- Webpack
+- CSS3
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Run development server: `npm start`
+5. Build for production: `npm run build`
+
+## License
+
+© 2024 Cipro. All rights reserved.
 
 ## 🎯 Features
 

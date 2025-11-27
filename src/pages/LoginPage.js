@@ -199,8 +199,8 @@ function LoginPage({ onLogin }) {
       <div className="login-container">
         <div className="login-header">
           <div className="login-logo">🎮</div>
-          <h1>Reward Game Dashboard</h1>
-          <p>Earn crypto rewards by playing games</p>
+          <h1>Cipro Dashboard</h1>
+          <p>Play games and earn cryptocurrency rewards</p>
         </div>
 
         <div className="login-tabs">
