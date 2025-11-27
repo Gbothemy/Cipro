@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './TriviaGame.css';
 
-const TriviaGame = ({ onGameEnd, difficulty = 'easy' }) => {
+const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -114,7 +114,13 @@ const TriviaGame = ({ onGameEnd, difficulty = 'easy' }) => {
     setGameOver(true);
     const totalPossible = settings.questions * settings.pointsPerCorrect;
     const isPerfect = score + settings.pointsPerCorrect >= totalPossible;
-    onGameEnd(score, isPerfect);
+    
+    // Call onComplete with won status and score
+    if (onComplete) {
+      setTimeout(() => {
+        onComplete(true, score);
+      }, 2000);
+    }
   };
 
   if (questions.length === 0) {
@@ -150,8 +156,10 @@ const TriviaGame = ({ onGameEnd, difficulty = 'easy' }) => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="trivia-game">
-      <div className="trivia-header">
+    <div className="game-modal" onClick={onClose}>
+      <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
+        <button className="close-btn" onClick={onClose}>✕</button>
+        <div className="trivia-header">
         <div className="trivia-progress">
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${progress}%` }}></div>
@@ -192,6 +200,7 @@ const TriviaGame = ({ onGameEnd, difficulty = 'easy' }) => {
             </button>
           );
         })}
+      </div>
       </div>
     </div>
   );

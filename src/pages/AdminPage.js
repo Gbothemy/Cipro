@@ -95,14 +95,18 @@ function AdminPage({ user, addNotification }) {
     // Load admin notifications from database (withdrawal requests)
     try {
       const pendingRequests = await db.getWithdrawalRequests('pending');
-      const notifs = pendingRequests.map(req => ({
-        id: req.id,
-        icon: '💰',
-        title: 'New Withdrawal Request',
-        message: `${req.username} requested ${req.amount} ${req.currency}`,
-        date: new Date(req.request_date).toLocaleString()
-      }));
-      setNotifications(notifs);
+      if (pendingRequests && Array.isArray(pendingRequests)) {
+        const notifs = pendingRequests.map(req => ({
+          id: req.id,
+          icon: '💰',
+          title: 'New Withdrawal Request',
+          message: `${req.username} requested ${req.amount} ${req.currency}`,
+          date: new Date(req.request_date).toLocaleString()
+        }));
+        setNotifications(notifs);
+      } else {
+        setNotifications([]);
+      }
     } catch (error) {
       console.error('Error loading notifications:', error);
       setNotifications([]);
@@ -112,7 +116,7 @@ function AdminPage({ user, addNotification }) {
   const loadWithdrawalRequests = async () => {
     try {
       const requests = await db.getWithdrawalRequests();
-      setWithdrawalRequests(requests);
+      setWithdrawalRequests(requests || []);
     } catch (error) {
       console.error('Error loading withdrawal requests:', error);
       setWithdrawalRequests([]);
@@ -127,7 +131,7 @@ function AdminPage({ user, addNotification }) {
       const streakData = await db.getLeaderboard('streak', 10);
 
       // Format points leaderboard
-      const pointsLeaderboard = pointsData.map((u, index) => ({
+      const pointsLeaderboard = (pointsData || []).map((u, index) => ({
         rank: index + 1,
         username: u.username,
         avatar: u.avatar,
@@ -136,7 +140,7 @@ function AdminPage({ user, addNotification }) {
       }));
 
       // Format earnings leaderboard
-      const earningsLeaderboard = earningsData.map((u, index) => ({
+      const earningsLeaderboard = (earningsData || []).map((u, index) => ({
         rank: index + 1,
         username: u.username,
         avatar: u.avatar,
@@ -145,7 +149,7 @@ function AdminPage({ user, addNotification }) {
       }));
 
       // Format streak leaderboard
-      const streakLeaderboard = streakData.map((u, index) => ({
+      const streakLeaderboard = (streakData || []).map((u, index) => ({
         rank: index + 1,
         username: u.username,
         avatar: u.avatar,
