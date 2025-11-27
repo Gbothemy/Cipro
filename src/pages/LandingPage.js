@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 
@@ -6,9 +7,9 @@ function LandingPage() {
   
   // Hardcoded stats - not retrieved from database
   const stats = [
-    { value: '1+', label: 'Active Players' },
-    { value: '$0+', label: 'Rewards Paid' },
-    { value: '2+', label: 'Tasks Completed' },
+    { value: '1ook+', label: 'Active Players' },
+    { value: '$10k+', label: 'Rewards Paid' },
+    { value: '500k+', label: 'Tasks Completed' },
     { value: '4.9/5', label: 'User Rating' }
   ];
 
