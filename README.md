@@ -19,6 +19,17 @@ Cipro is a gamified cryptocurrency earning platform where users can play various
 - 🔔 Real-time notifications
 - 🌐 Multiple blockchain networks supported
 
+## Conversion Rates (Based on Real Crypto Prices)
+
+**Base Rate:** 10,000 points = $1 USD
+
+- **SOL:** 1,000,000 points = 1 SOL (~$100)
+- **ETH:** 20,000,000 points = 1 ETH (~$2,000)
+- **USDT:** 10,000 points = 1 USDT ($1)
+- **USDC:** 10,000 points = 1 USDC ($1)
+
+*VIP members get better rates (up to 20% discount)*
+
 ## Tech Stack
 
 - React.js

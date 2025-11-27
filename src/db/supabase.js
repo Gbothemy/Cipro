@@ -830,6 +830,244 @@ export const db = {
     }
   },
 
+  // ==================== COMPANY REVENUE OPERATIONS ====================
+
+  async recordRevenue(revenueData) {
+    try {
+      const { data, error } = await supabase
+        .from("revenue_transactions")
+        .insert([
+          {
+            user_id: revenueData.user_id,
+            transaction_type: revenueData.type,
+            revenue_source: revenueData.source,
+            amount: revenueData.amount,
+            fee_percentage: revenueData.feePercentage,
+            original_amount: revenueData.originalAmount,
+            description: revenueData.description,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update company wallet
+      await this.updateCompanyWallet(revenueData.source, revenueData.amount);
+
+      return data;
+    } catch (error) {
+      console.error("Error recording revenue:", error);
+      throw error;
+    }
+  },
+
+  async updateCompanyWallet(currency, amount) {
+    try {
+      // Get current wallet
+      const { data: wallet } = await supabase
+        .from("company_wallet")
+        .select("*")
+        .limit(1)
+        .single();
+
+      if (!wallet) {
+        // Create wallet if doesn't exist
+        await supabase.from("company_wallet").insert([
+          {
+            sol_balance: currency === "sol" ? amount : 0,
+            eth_balance: currency === "eth" ? amount : 0,
+            usdt_balance: currency === "usdt" ? amount : 0,
+            usdc_balance: currency === "usdc" ? amount : 0,
+            total_points_collected: currency === "points" ? amount : 0,
+          },
+        ]);
+      } else {
+        // Update existing wallet
+        const updates = {};
+        if (currency === "sol") updates.sol_balance = wallet.sol_balance + amount;
+        if (currency === "eth") updates.eth_balance = wallet.eth_balance + amount;
+        if (currency === "usdt") updates.usdt_balance = wallet.usdt_balance + amount;
+        if (currency === "usdc") updates.usdc_balance = wallet.usdc_balance + amount;
+        if (currency === "points") updates.total_points_collected = wallet.total_points_collected + amount;
+
+        await supabase
+          .from("company_wallet")
+          .update(updates)
+          .eq("id", wallet.id);
+      }
+    } catch (error) {
+      console.error("Error updating company wallet:", error);
+    }
+  },
+
+  async getCompanyWallet() {
+    try {
+      const { data, error } = await supabase
+        .from("company_wallet")
+        .select("*")
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error getting company wallet:", error);
+      return null;
+    }
+  },
+
+  async getRevenueStats(startDate = null, endDate = null) {
+    try {
+      let query = supabase
+        .from("revenue_transactions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (startDate) {
+        query = query.gte("created_at", startDate);
+      }
+      if (endDate) {
+        query = query.lte("created_at", endDate);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error getting revenue stats:", error);
+      return [];
+    }
+  },
+
+  async recordTrafficRevenue(trafficData) {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+
+      const { data: existing } = await supabase
+        .from("traffic_revenue")
+        .select("*")
+        .eq("date", today)
+        .single();
+
+      if (existing) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from("traffic_revenue")
+          .update({
+            page_views: existing.page_views + (trafficData.pageViews || 0),
+            unique_visitors: existing.unique_visitors + (trafficData.uniqueVisitors || 0),
+            ad_impressions: existing.ad_impressions + (trafficData.adImpressions || 0),
+            ad_clicks: existing.ad_clicks + (trafficData.adClicks || 0),
+            estimated_revenue: existing.estimated_revenue + (trafficData.revenue || 0),
+          })
+          .eq("id", existing.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new record
+        const { data, error } = await supabase
+          .from("traffic_revenue")
+          .insert([
+            {
+              date: today,
+              page_views: trafficData.pageViews || 0,
+              unique_visitors: trafficData.uniqueVisitors || 0,
+              ad_impressions: trafficData.adImpressions || 0,
+              ad_clicks: trafficData.adClicks || 0,
+              estimated_revenue: trafficData.revenue || 0,
+            },
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error("Error recording traffic revenue:", error);
+      throw error;
+    }
+  },
+
+  async getTrafficRevenue(startDate = null, endDate = null) {
+    try {
+      let query = supabase
+        .from("traffic_revenue")
+        .select("*")
+        .order("date", { ascending: false });
+
+      if (startDate) {
+        query = query.gte("date", startDate.split('T')[0]);
+      }
+      if (endDate) {
+        query = query.lte("date", endDate.split('T')[0]);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error getting traffic revenue:", error);
+      return [];
+    }
+  },
+
+  async recordUserSession(sessionData) {
+    try {
+      const { data, error } = await supabase
+        .from("user_sessions")
+        .insert([
+          {
+            user_id: sessionData.userId,
+            session_id: sessionData.sessionId,
+            ip_address: sessionData.ipAddress,
+            user_agent: sessionData.userAgent,
+            page_views: 1,
+            duration_seconds: 0,
+            ad_impressions: 0,
+            ad_clicks: 0,
+            revenue_generated: 0,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error recording user session:", error);
+      throw error;
+    }
+  },
+
+  async updateUserSession(sessionId, sessionData) {
+    try {
+      const { data, error } = await supabase
+        .from("user_sessions")
+        .update({
+          page_views: sessionData.pageViews,
+          duration_seconds: sessionData.duration,
+          ad_impressions: sessionData.adImpressions,
+          ad_clicks: sessionData.adClicks,
+          revenue_generated: sessionData.revenueGenerated,
+          last_activity: new Date().toISOString(),
+        })
+        .eq("session_id", sessionId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error updating user session:", error);
+      throw error;
+    }
+  },
+
   // ==================== HELPER FUNCTIONS ====================
 
   formatUser(dbUser) {

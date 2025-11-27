@@ -1,7 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import { db } from './db/supabase';
+import trafficTracker from './utils/trafficTracker';
 import './App.css';
 
 // Lazy load pages
@@ -23,6 +24,18 @@ const VIPTiersPage = lazy(() => import('./pages/VIPTiersPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const TasksPage = lazy(() => import('./pages/TasksPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+
+// Component to track route changes
+function RouteTracker() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Track page view on route change
+    trafficTracker.onPageChange();
+  }, [location]);
+  
+  return null;
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -155,6 +168,7 @@ function App() {
 
   return (
     <Router>
+      <RouteTracker />
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '1.5rem' }}>Loading...</div>}>
         {!isAuthenticated ? (
           <Routes>

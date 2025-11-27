@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { db } from '../db/supabase';
+import RevenueDashboard from './RevenueDashboard';
 import './AdminPage.css';
 
 function AdminPage({ user, addNotification }) {
@@ -56,8 +57,10 @@ function AdminPage({ user, addNotification }) {
       // Calculate comprehensive stats
       const totalPoints = allUsers.reduce((sum, u) => sum + (u.points || 0), 0);
       const totalTasks = allUsers.reduce((sum, u) => sum + (u.completedTasks || 0), 0);
-      const totalTON = allUsers.reduce((sum, u) => sum + (u.balance?.ton || 0), 0);
-      const totalCATI = allUsers.reduce((sum, u) => sum + (u.balance?.cati || 0), 0);
+      const totalSOL = allUsers.reduce((sum, u) => sum + (u.balance?.sol || 0), 0);
+      const totalETH = allUsers.reduce((sum, u) => sum + (u.balance?.eth || 0), 0);
+      const totalUSDT = allUsers.reduce((sum, u) => sum + (u.balance?.usdt || 0), 0);
+      const totalUSDC = allUsers.reduce((sum, u) => sum + (u.balance?.usdc || 0), 0);
       const avgLevel = allUsers.length > 0 
         ? (allUsers.reduce((sum, u) => sum + (u.vipLevel || 1), 0) / allUsers.length).toFixed(1)
         : 0;
@@ -132,8 +135,8 @@ function AdminPage({ user, addNotification }) {
         rank: index + 1,
         username: u.username,
         avatar: u.avatar,
-        earnings: u.balances?.ton || 0,
-        currency: 'TON'
+        earnings: u.balances?.usdt || 0,
+        currency: 'USDT'
       }));
 
       // Format streak leaderboard
@@ -201,9 +204,10 @@ function AdminPage({ user, addNotification }) {
       points: userData.points || 0,
       vipLevel: userData.vipLevel || 1,
       completedTasks: userData.completedTasks || 0,
-      ton: userData.balance?.ton || 0,
-      cati: userData.balance?.cati || 0,
-      usdt: userData.balance?.usdt || 0
+      sol: userData.balance?.sol || 0,
+      eth: userData.balance?.eth || 0,
+      usdt: userData.balance?.usdt || 0,
+      usdc: userData.balance?.usdc || 0
     });
     setEditMode(true);
   };
@@ -223,9 +227,10 @@ function AdminPage({ user, addNotification }) {
       });
 
       // Update balances
-      await db.updateBalance(selectedUser.userId, 'ton', parseFloat(editForm.ton) || 0);
-      await db.updateBalance(selectedUser.userId, 'cati', parseFloat(editForm.cati) || 0);
+      await db.updateBalance(selectedUser.userId, 'sol', parseFloat(editForm.sol) || 0);
+      await db.updateBalance(selectedUser.userId, 'eth', parseFloat(editForm.eth) || 0);
       await db.updateBalance(selectedUser.userId, 'usdt', parseFloat(editForm.usdt) || 0);
+      await db.updateBalance(selectedUser.userId, 'usdc', parseFloat(editForm.usdc) || 0);
       
       addNotification('User updated successfully', 'success');
       setEditMode(false);
@@ -339,6 +344,9 @@ function AdminPage({ user, addNotification }) {
         <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
           📊 Overview
         </button>
+        <button className={activeTab === 'revenue' ? 'active' : ''} onClick={() => setActiveTab('revenue')}>
+          💰 Revenue Dashboard
+        </button>
         <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
           👥 Users ({users.length})
         </button>
@@ -346,7 +354,7 @@ function AdminPage({ user, addNotification }) {
           🏆 Leaderboard
         </button>
         <button className={activeTab === 'withdrawals' ? 'active' : ''} onClick={() => setActiveTab('withdrawals')}>
-          💰 Withdrawals ({withdrawalRequests.filter(r => r.status === 'pending').length})
+          💸 Withdrawals ({withdrawalRequests.filter(r => r.status === 'pending').length})
         </button>
         <button className={activeTab === 'notifications' ? 'active' : ''} onClick={() => setActiveTab('notifications')}>
           🔔 Notifications ({notifications.length})
@@ -423,6 +431,10 @@ function AdminPage({ user, addNotification }) {
         </div>
       )}
 
+      {activeTab === 'revenue' && (
+        <RevenueDashboard user={user} addNotification={addNotification} />
+      )}
+
       {activeTab === 'users' && (
         <div className="admin-content">
           {users.length === 0 ? (
@@ -453,8 +465,8 @@ function AdminPage({ user, addNotification }) {
                       <td className="user-id">{u.userId}</td>
                       <td>{(u.points || 0).toLocaleString()}</td>
                       <td>Level {u.vipLevel || 1}</td>
-                      <td>{(u.balance?.ton || 0).toFixed(2)}</td>
-                      <td>{(u.balance?.cati || 0).toFixed(0)}</td>
+                      <td>{(u.balance?.sol || 0).toFixed(4)}</td>
+                      <td>{(u.balance?.eth || 0).toFixed(4)}</td>
                       <td>{u.completedTasks || 0}</td>
                       <td className="actions-cell">
                         <button onClick={() => handleEditUser(u)} className="edit-btn" title="Edit">✏️</button>
@@ -741,9 +753,10 @@ function AdminPage({ user, addNotification }) {
               <label>Points: <input type="number" value={editForm.points} onChange={(e) => setEditForm({...editForm, points: e.target.value})} /></label>
               <label>VIP Level: <input type="number" min="1" max="99" value={editForm.vipLevel} onChange={(e) => setEditForm({...editForm, vipLevel: e.target.value})} /></label>
               <label>Completed Tasks: <input type="number" min="0" value={editForm.completedTasks} onChange={(e) => setEditForm({...editForm, completedTasks: e.target.value})} /></label>
-              <label>TON Balance: <input type="number" step="0.01" value={editForm.ton} onChange={(e) => setEditForm({...editForm, ton: e.target.value})} /></label>
-              <label>CATI Balance: <input type="number" value={editForm.cati} onChange={(e) => setEditForm({...editForm, cati: e.target.value})} /></label>
+              <label>SOL Balance: <input type="number" step="0.0001" value={editForm.sol} onChange={(e) => setEditForm({...editForm, sol: e.target.value})} /></label>
+              <label>ETH Balance: <input type="number" step="0.0001" value={editForm.eth} onChange={(e) => setEditForm({...editForm, eth: e.target.value})} /></label>
               <label>USDT Balance: <input type="number" step="0.01" value={editForm.usdt} onChange={(e) => setEditForm({...editForm, usdt: e.target.value})} /></label>
+              <label>USDC Balance: <input type="number" step="0.01" value={editForm.usdc} onChange={(e) => setEditForm({...editForm, usdc: e.target.value})} /></label>
               <div className="modal-actions">
                 <button onClick={handleSaveUser} className="save-btn">💾 Save</button>
                 <button onClick={() => { setEditMode(false); setSelectedUser(null); }} className="cancel-btn">❌ Cancel</button>

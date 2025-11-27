@@ -186,6 +186,7 @@ CREATE TABLE IF NOT EXISTS withdrawal_requests (
   network TEXT,
   memo TEXT,
   network_fee DECIMAL(18, 8) DEFAULT 0,
+  company_fee DECIMAL(18, 8) DEFAULT 0,
   net_amount DECIMAL(18, 8),
   status TEXT DEFAULT 'pending',
   transaction_hash TEXT,
@@ -275,6 +276,65 @@ CREATE TABLE IF NOT EXISTS admin_actions (
 );
 
 -- ============================================
+-- COMPANY REVENUE SYSTEM
+-- ============================================
+
+-- Company wallet to track all revenue
+CREATE TABLE IF NOT EXISTS company_wallet (
+  id BIGSERIAL PRIMARY KEY,
+  sol_balance DECIMAL(18, 8) DEFAULT 0,
+  eth_balance DECIMAL(18, 8) DEFAULT 0,
+  usdt_balance DECIMAL(18, 8) DEFAULT 0,
+  usdc_balance DECIMAL(18, 8) DEFAULT 0,
+  total_points_collected INTEGER DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Revenue transactions log
+CREATE TABLE IF NOT EXISTS revenue_transactions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  transaction_type TEXT NOT NULL, -- conversion_fee, withdrawal_fee, ad_revenue
+  revenue_source TEXT NOT NULL, -- points, sol, eth, usdt, usdc, ads
+  amount DECIMAL(18, 8) NOT NULL,
+  fee_percentage DECIMAL(5, 2) NOT NULL,
+  original_amount DECIMAL(18, 8) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Traffic and ad revenue tracking
+CREATE TABLE IF NOT EXISTS traffic_revenue (
+  id BIGSERIAL PRIMARY KEY,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  page_views INTEGER DEFAULT 0,
+  unique_visitors INTEGER DEFAULT 0,
+  ad_impressions INTEGER DEFAULT 0,
+  ad_clicks INTEGER DEFAULT 0,
+  estimated_revenue DECIMAL(10, 2) DEFAULT 0,
+  revenue_per_1000_views DECIMAL(10, 2) DEFAULT 2.00, -- CPM rate
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(date)
+);
+
+-- User sessions for traffic tracking
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
+  session_id TEXT UNIQUE NOT NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  page_views INTEGER DEFAULT 0,
+  duration_seconds INTEGER DEFAULT 0,
+  ad_impressions INTEGER DEFAULT 0,
+  ad_clicks INTEGER DEFAULT 0,
+  revenue_generated DECIMAL(10, 2) DEFAULT 0,
+  started_at TIMESTAMP DEFAULT NOW(),
+  last_activity TIMESTAMP DEFAULT NOW()
+);
+
+-- ============================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================
 
@@ -322,6 +382,15 @@ CREATE INDEX IF NOT EXISTS idx_site_settings_category ON site_settings(category)
 CREATE INDEX IF NOT EXISTS idx_admin_actions_admin ON admin_actions(admin_id);
 CREATE INDEX IF NOT EXISTS idx_admin_actions_created ON admin_actions(created_at DESC);
 
+CREATE INDEX IF NOT EXISTS idx_revenue_transactions_user ON revenue_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_revenue_transactions_type ON revenue_transactions(transaction_type);
+CREATE INDEX IF NOT EXISTS idx_revenue_transactions_created ON revenue_transactions(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_traffic_revenue_date ON traffic_revenue(date DESC);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_started ON user_sessions(started_at DESC);
+
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
@@ -343,6 +412,10 @@ ALTER TABLE conversion_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_actions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE game_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE company_wallet ENABLE ROW LEVEL SECURITY;
+ALTER TABLE revenue_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE traffic_revenue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_sessions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (Allow all for now - customize based on your needs)
 CREATE POLICY "Allow all operations" ON users FOR ALL USING (true);
@@ -362,6 +435,10 @@ CREATE POLICY "Allow all operations" ON conversion_history FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON site_settings FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON admin_actions FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON game_types FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON company_wallet FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON revenue_transactions FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON traffic_revenue FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON user_sessions FOR ALL USING (true);
 
 -- ============================================
 -- SEED DATA
@@ -432,13 +509,28 @@ INSERT INTO site_settings (setting_key, setting_value, setting_type, category, d
 ('min_withdrawal_eth', '0.001', 'number', 'conversion', 'Minimum ETH withdrawal amount'),
 ('min_withdrawal_usdt', '10', 'number', 'conversion', 'Minimum USDT withdrawal amount (Main)'),
 ('min_withdrawal_usdc', '10', 'number', 'conversion', 'Minimum USDC withdrawal amount'),
-('default_conversion_rate', '10000', 'number', 'conversion', 'Default points to crypto rate'),
+('conversion_rate_sol', '1000000', 'number', 'conversion', 'Points per 1 SOL (SOL ≈ $100)'),
+('conversion_rate_eth', '20000000', 'number', 'conversion', 'Points per 1 ETH (ETH ≈ $2000)'),
+('conversion_rate_usdt', '10000', 'number', 'conversion', 'Points per 1 USDT ($1)'),
+('conversion_rate_usdc', '10000', 'number', 'conversion', 'Points per 1 USDC ($1)'),
+('default_conversion_rate', '10000', 'number', 'conversion', 'Default points to crypto rate (for stablecoins)'),
 ('daily_game_limit', '10', 'number', 'games', 'Daily game play limit'),
 ('referral_bonus', '500', 'number', 'rewards', 'Referral bonus points'),
 ('daily_login_bonus', '50', 'number', 'rewards', 'Daily login bonus points'),
 ('perfect_score_bonus', '50', 'number', 'games', 'Bonus points for perfect score'),
-('event_bonus_multiplier', '2.0', 'number', 'events', 'Event bonus multiplier')
+('event_bonus_multiplier', '2.0', 'number', 'events', 'Event bonus multiplier'),
+('conversion_fee_percentage', '10', 'number', 'revenue', 'Fee on point conversions (%)'),
+('withdrawal_fee_percentage', '5', 'number', 'revenue', 'Fee on crypto withdrawals (%)'),
+('ad_revenue_per_1000_views', '2.00', 'number', 'revenue', 'Revenue per 1000 page views (CPM)'),
+('company_wallet_address_sol', '', 'text', 'revenue', 'Company Solana wallet address'),
+('company_wallet_address_eth', '', 'text', 'revenue', 'Company Ethereum wallet address'),
+('company_wallet_address_usdt_trc20', '', 'text', 'revenue', 'Company USDT TRC20 wallet address')
 ON CONFLICT (setting_key) DO NOTHING;
+
+-- Initialize company wallet
+INSERT INTO company_wallet (sol_balance, eth_balance, usdt_balance, usdc_balance, total_points_collected)
+VALUES (0, 0, 0, 0, 0)
+ON CONFLICT DO NOTHING;
 
 -- ============================================
 -- COMPLETION MESSAGE

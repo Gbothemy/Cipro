@@ -51,11 +51,26 @@ function ConversionPage({ user, updateUser, addNotification }) {
     }
   };
 
+  // Conversion rates based on real crypto prices
+  // Base: 10,000 points = $1 USD (1 USDT or 1 USDC)
+  // SOL ≈ $100 → 1,000,000 points = 1 SOL
+  // ETH ≈ $2,000 → 20,000,000 points = 1 ETH
+  // USDT = $1 → 10,000 points = 1 USDT
+  // USDC = $1 → 10,000 points = 1 USDC
+  
+  const BASE_CONVERSION_RATES = {
+    sol: 1000000,    // 1 SOL = $100 = 1,000,000 points
+    eth: 20000000,   // 1 ETH = $2,000 = 20,000,000 points
+    usdt: 10000,     // 1 USDT = $1 = 10,000 points
+    usdc: 10000      // 1 USDC = $1 = 10,000 points
+  };
+
+  // Apply VIP tier discount if available
   const CONVERSION_RATES = {
-    sol: vipTier?.conversion_rate || 10000,
-    eth: vipTier?.conversion_rate || 10000,
-    usdt: vipTier?.conversion_rate || 10000,
-    usdc: vipTier?.conversion_rate || 10000
+    sol: vipTier?.conversion_rate ? Math.floor(BASE_CONVERSION_RATES.sol * (vipTier.conversion_rate / 10000)) : BASE_CONVERSION_RATES.sol,
+    eth: vipTier?.conversion_rate ? Math.floor(BASE_CONVERSION_RATES.eth * (vipTier.conversion_rate / 10000)) : BASE_CONVERSION_RATES.eth,
+    usdt: vipTier?.conversion_rate || BASE_CONVERSION_RATES.usdt,
+    usdc: vipTier?.conversion_rate || BASE_CONVERSION_RATES.usdc
   };
 
   const MIN_WITHDRAW = {
@@ -107,6 +122,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
     
     const cryptoAmount = points / CONVERSION_RATES[selectedCurrency];
     
+    // Calculate 10% company fee
+    const companyFeePoints = Math.floor(points * 0.10);
+    const userReceivesPoints = points - companyFeePoints;
+    const userReceivesCrypto = userReceivesPoints / CONVERSION_RATES[selectedCurrency];
+    const companyReceivesCrypto = companyFeePoints / CONVERSION_RATES[selectedCurrency];
+    
     try {
       setLoading(true);
 
@@ -120,15 +141,26 @@ function ConversionPage({ user, updateUser, addNotification }) {
         lastClaim: user.lastClaim
       });
       
-      // Update crypto balance in database
-      const newBalance = user.balance[selectedCurrency] + cryptoAmount;
+      // Update crypto balance in database (user gets 90%)
+      const newBalance = user.balance[selectedCurrency] + userReceivesCrypto;
       await db.updateBalance(user.userId, selectedCurrency, newBalance);
+
+      // Record company revenue (10% fee)
+      await db.recordRevenue({
+        user_id: user.userId,
+        type: 'conversion_fee',
+        source: selectedCurrency,
+        amount: companyReceivesCrypto,
+        feePercentage: 10,
+        originalAmount: cryptoAmount,
+        description: `10% conversion fee from ${points.toLocaleString()} points to ${selectedCurrency.toUpperCase()}`
+      });
 
       // Record conversion in history
       await db.recordConversion(user.userId, {
         points: points,
         currency: selectedCurrency.toUpperCase(),
-        amount: cryptoAmount,
+        amount: userReceivesCrypto,
         rate: CONVERSION_RATES[selectedCurrency]
       });
 
@@ -148,7 +180,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
         }
       });
       
-      addNotification(`Successfully converted ${points.toLocaleString()} points to ${cryptoAmount.toFixed(4)} ${selectedCurrency.toUpperCase()}!`, 'success');
+      addNotification(`Successfully converted ${points.toLocaleString()} points to ${userReceivesCrypto.toFixed(6)} ${selectedCurrency.toUpperCase()} (10% platform fee applied)`, 'success');
       setConvertAmount('');
       
       // Reload transaction history
@@ -200,10 +232,14 @@ function ConversionPage({ user, updateUser, addNotification }) {
     try {
       setLoading(true);
 
+      // Calculate fees
+      const networkFee = NETWORK_FEES[withdrawNetwork] || 0;
+      const companyFee = amount * 0.05; // 5% company fee
+      const totalFees = networkFee + companyFee;
+      const netAmount = amount - totalFees;
+
       // Create withdrawal request in database
       const requestId = `WD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      const networkFee = NETWORK_FEES[withdrawNetwork] || 0;
-      const netAmount = amount - networkFee;
 
       await db.createWithdrawalRequest({
         id: requestId,
@@ -215,8 +251,20 @@ function ConversionPage({ user, updateUser, addNotification }) {
         network: withdrawNetwork,
         memo: withdrawMemo || null,
         network_fee: networkFee,
+        company_fee: companyFee,
         net_amount: netAmount,
         status: 'pending'
+      });
+
+      // Record company revenue (5% withdrawal fee)
+      await db.recordRevenue({
+        user_id: user.userId,
+        type: 'withdrawal_fee',
+        source: selectedCurrency,
+        amount: companyFee,
+        feePercentage: 5,
+        originalAmount: amount,
+        description: `5% withdrawal fee from ${amount} ${selectedCurrency.toUpperCase()} withdrawal`
       });
       
       // Update crypto balance in database
@@ -555,9 +603,13 @@ function ConversionPage({ user, updateUser, addNotification }) {
                   <span>Network Fee:</span>
                   <span>-{NETWORK_FEES[withdrawNetwork] || 0} {selectedCurrency.toUpperCase()}</span>
                 </div>
+                <div className="summary-row">
+                  <span>Platform Fee (5%):</span>
+                  <span>-{(parseFloat(withdrawAmount) * 0.05).toFixed(6)} {selectedCurrency.toUpperCase()}</span>
+                </div>
                 <div className="summary-row total">
                   <span>You will receive:</span>
-                  <span>{(parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0)).toFixed(6)} {selectedCurrency.toUpperCase()}</span>
+                  <span>{(parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0) - (parseFloat(withdrawAmount) * 0.05)).toFixed(6)} {selectedCurrency.toUpperCase()}</span>
                 </div>
               </div>
             )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import soundManager from '../utils/soundManager';
 import themeManager from '../utils/themeManager';
+import AdBanner from './AdBanner';
 import './Layout.css';
 
 function Layout({ children, user, notifications = [], onLogout, isAdmin = false }) {
@@ -200,7 +201,9 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         )}
 
         <main className="main-content">
+          <AdBanner size="banner" position="top" />
           {children}
+          <AdBanner size="banner" position="bottom" />
           <footer className="footer desktop-only">
             <p>&copy; 2024 Cipro. All rights reserved.</p>
             <div className="footer-links">
