@@ -177,14 +177,14 @@ function DailyMining({ user, updateUser, addNotification }) {
 
   return (
     <div className="daily-mining-section">
-      <h3 className="section-title">⛏️ Daily Mining</h3>
-      <p className="section-subtitle">Mine every 8 hours to earn bonus Cipro!</p>
+      <h3 className="section-title">⛏️ 8-Hour Mining</h3>
+      <p className="section-subtitle">Mine every 8 hours to earn bonus Cipro rewards!</p>
 
       <div className={`daily-mining-card ${mining ? 'mining-active' : ''} ${!isAvailable ? 'on-cooldown' : ''}`}>
         <div className="mining-header">
           <div className="mining-icon-large">⛏️</div>
           <div className="mining-info">
-            <h4>Daily Mining Session</h4>
+            <h4>8-Hour Mining Session</h4>
             <p className="mining-description">
               {isAvailable ? 'Ready to mine!' : `Next mining in ${formatTime(timeUntilNext)}`}
             </p>
