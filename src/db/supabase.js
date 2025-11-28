@@ -1101,4 +1101,132 @@ export const db = {
       },
     };
   },
+
+  // ==================== REFERRAL OPERATIONS ====================
+
+  async getUserReferrals(user_id) {
+    try {
+      // Get all users referred by this user
+      const { data, error } = await supabase
+        .from("users")
+        .select(`
+          user_id,
+          username,
+          avatar,
+          created_at,
+          last_login,
+          points,
+          balances (sol, eth, usdt, usdc)
+        `)
+        .eq("referred_by", user_id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return (data || []).map(user => ({
+        id: user.user_id,
+        userId: user.user_id,
+        name: user.username,
+        avatar: user.avatar,
+        joined: user.created_at,
+        lastActive: user.last_login,
+        active: user.last_login ? new Date(user.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false,
+        points: user.points || 0,
+        sol: user.balances?.[0]?.sol || 0,
+        eth: user.balances?.[0]?.eth || 0,
+        usdt: user.balances?.[0]?.usdt || 0,
+        usdc: user.balances?.[0]?.usdc || 0,
+      }));
+    } catch (error) {
+      console.error("Error getting user referrals:", error);
+      return [];
+    }
+  },
+
+  async getReferrer(user_id) {
+    try {
+      // Get the user's data to find who referred them
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("referred_by")
+        .eq("user_id", user_id)
+        .single();
+
+      if (userError) throw userError;
+      if (!userData?.referred_by) return null;
+
+      // Get the referrer's details
+      const { data: referrer, error: referrerError } = await supabase
+        .from("users")
+        .select(`
+          user_id,
+          username,
+          avatar,
+          created_at,
+          vip_level
+        `)
+        .eq("user_id", userData.referred_by)
+        .single();
+
+      if (referrerError) throw referrerError;
+
+      return {
+        userId: referrer.user_id,
+        username: referrer.username,
+        avatar: referrer.avatar,
+        joinedDate: referrer.created_at,
+        vipLevel: referrer.vip_level || 1,
+      };
+    } catch (error) {
+      console.error("Error getting referrer:", error);
+      return null;
+    }
+  },
+
+  async getReferralStats(user_id) {
+    try {
+      // Get total referrals count
+      const { data: referrals, error: countError } = await supabase
+        .from("users")
+        .select("user_id, balances (sol, eth, usdt, usdc)")
+        .eq("referred_by", user_id);
+
+      if (countError) throw countError;
+
+      const totalReferrals = referrals?.length || 0;
+
+      // Calculate total earnings from referrals (10% commission)
+      const totalEarnings = (referrals || []).reduce((acc, ref) => {
+        const balance = ref.balances?.[0] || {};
+        return {
+          sol: acc.sol + (balance.sol || 0) * 0.1,
+          eth: acc.eth + (balance.eth || 0) * 0.1,
+          usdt: acc.usdt + (balance.usdt || 0) * 0.1,
+          usdc: acc.usdc + (balance.usdc || 0) * 0.1,
+        };
+      }, { sol: 0, eth: 0, usdt: 0, usdc: 0 });
+
+      // Get active referrals (logged in within last 7 days)
+      const { data: activeRefs, error: activeError } = await supabase
+        .from("users")
+        .select("user_id")
+        .eq("referred_by", user_id)
+        .gte("last_login", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+      if (activeError) throw activeError;
+
+      return {
+        totalReferrals,
+        activeReferrals: activeRefs?.length || 0,
+        totalEarnings,
+      };
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      return {
+        totalReferrals: 0,
+        activeReferrals: 0,
+        totalEarnings: { sol: 0, eth: 0, usdt: 0, usdc: 0 },
+      };
+    }
+  },
 };

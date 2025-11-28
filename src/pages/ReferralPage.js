@@ -1,17 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '../db/supabase';
+import SkeletonLoader from '../components/SkeletonLoader';
 import './ReferralPage.css';
 
 function ReferralPage({ user, updateUser, addNotification }) {
-  const [referrals] = useState([
-    { id: 1, name: 'Alice', avatar: '👩', ton: 12.5, cati: 340, usdt: 8.2, joined: '2024-01-15', active: true },
-    { id: 2, name: 'Bob', avatar: '👨', ton: 8.3, cati: 220, usdt: 5.5, joined: '2024-01-20', active: true },
-    { id: 3, name: 'Charlie', avatar: '🧑', ton: 15.7, cati: 450, usdt: 12.0, joined: '2024-01-10', active: true },
-    { id: 4, name: 'Diana', avatar: '👧', ton: 6.2, cati: 180, usdt: 4.1, joined: '2024-01-25', active: false }
-  ]);
+  const [referrals, setReferrals] = useState([]);
+  const [referrer, setReferrer] = useState(null);
+  const [stats, setStats] = useState({
+    totalReferrals: 0,
+    activeReferrals: 0,
+    totalEarnings: { sol: 0, eth: 0, usdt: 0, usdc: 0 }
+  });
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   const referralLink = `https://cipro1.vercel.app/login?ref=${user.userId}`;
 
-  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    loadReferralData();
+  }, [user.userId]);
+
+  const loadReferralData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load all referral data in parallel
+      const [referralsData, referrerData, statsData] = await Promise.all([
+        db.getUserReferrals(user.userId),
+        db.getReferrer(user.userId),
+        db.getReferralStats(user.userId)
+      ]);
+
+      setReferrals(referralsData);
+      setReferrer(referrerData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error loading referral data:', error);
+      addNotification('Failed to load referral data', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInvite = async () => {
     try {
@@ -45,12 +74,19 @@ function ReferralPage({ user, updateUser, addNotification }) {
     window.open(url, '_blank');
   };
 
-  const totalEarnings = referrals.reduce((acc, ref) => ({
-    sol: acc.sol + ref.sol,
-    eth: acc.eth + ref.eth,
-    usdt: acc.usdt + ref.usdt,
-    usdc: acc.usdc + ref.usdc
-  }), { sol: 0, eth: 0, usdt: 0, usdc: 0 });
+  const totalEarnings = stats.totalEarnings;
+
+  if (loading) {
+    return (
+      <div className="referral-page">
+        <div className="page-header">
+          <h1 className="page-title">Referral Program</h1>
+          <p className="page-subtitle">Invite friends and earn 10% commission</p>
+        </div>
+        <SkeletonLoader type="card" count={3} />
+      </div>
+    );
+  }
 
   return (
     <div className="referral-page">
@@ -58,6 +94,23 @@ function ReferralPage({ user, updateUser, addNotification }) {
         <h1 className="page-title">Referral Program</h1>
         <p className="page-subtitle">Invite friends and earn 10% commission</p>
       </div>
+
+      {/* Show who referred this user */}
+      {referrer && (
+        <div className="referrer-card">
+          <div className="referrer-header">
+            <span className="referrer-label">👤 Referred by</span>
+          </div>
+          <div className="referrer-info">
+            <div className="referrer-avatar">{referrer.avatar}</div>
+            <div className="referrer-details">
+              <h4>{referrer.username}</h4>
+              <p className="referrer-date">Joined: {new Date(referrer.joinedDate).toLocaleDateString()}</p>
+              <span className="vip-badge">VIP Level {referrer.vipLevel}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="balance-card">
         <h2>Referral Earnings</h2>
@@ -108,29 +161,49 @@ function ReferralPage({ user, updateUser, addNotification }) {
         </button>
       </div>
 
+      <div className="referral-stats">
+        <div className="stat-item">
+          <span className="stat-value">{stats.totalReferrals}</span>
+          <span className="stat-label">Total Referrals</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-value">{stats.activeReferrals}</span>
+          <span className="stat-label">Active Referrals</span>
+        </div>
+      </div>
+
       <h3 className="section-title">Your Referrals ({referrals.length})</h3>
-      <div className="referrals-list">
-        {referrals.map(ref => (
-          <div key={ref.id} className="referral-card">
-            <div className="referral-avatar">{ref.avatar}</div>
-            <div className="referral-info">
-              <div className="referral-header">
-                <h4>{ref.name}</h4>
-                <span className={`status-badge ${ref.active ? 'active' : 'inactive'}`}>
-                  {ref.active ? '🟢 Active' : '⚪ Inactive'}
-                </span>
-              </div>
-              <p className="joined-date">Joined: {new Date(ref.joined).toLocaleDateString()}</p>
-              <div className="referral-earnings">
-                <span>◎ {ref.sol}</span>
-                <span>Ξ {ref.eth}</span>
-                <span>💵 {ref.usdt}</span>
-                <span>💵 {ref.usdc}</span>
+      
+      {referrals.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">👥</div>
+          <h4>No referrals yet</h4>
+          <p>Share your referral link to start earning commissions!</p>
+        </div>
+      ) : (
+        <div className="referrals-list">
+          {referrals.map(ref => (
+            <div key={ref.id} className="referral-card">
+              <div className="referral-avatar">{ref.avatar}</div>
+              <div className="referral-info">
+                <div className="referral-header">
+                  <h4>{ref.name}</h4>
+                  <span className={`status-badge ${ref.active ? 'active' : 'inactive'}`}>
+                    {ref.active ? '🟢 Active' : '⚪ Inactive'}
+                  </span>
+                </div>
+                <p className="joined-date">Joined: {new Date(ref.joined).toLocaleDateString()}</p>
+                <div className="referral-earnings">
+                  <span>◎ {ref.sol.toFixed(4)}</span>
+                  <span>Ξ {ref.eth.toFixed(4)}</span>
+                  <span>💵 {ref.usdt.toFixed(2)}</span>
+                  <span>💵 {ref.usdc.toFixed(2)}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

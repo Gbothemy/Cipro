@@ -93,6 +93,124 @@
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
+/* Referrer Card */
+.referrer-card {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.referrer-header {
+  margin-bottom: 12px;
+}
+
+.referrer-label {
+  font-size: 12px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.referrer-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.referrer-avatar {
+  font-size: 48px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.referrer-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.referrer-date {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.vip-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Referral Stats */
+.referral-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 14px;
+  color: #718096;
+  font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #2d3748;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
+}
+
 .section-title {
   margin-bottom: 15px;
   color: #333;
@@ -462,4 +580,62 @@
     font-size: 11px;
     padding: 3px 8px;
   }
+}
+/*
+ Dark Mode Support */
+body.dark-mode .referral-page {
+  color: #e2e8f0;
+}
+
+body.dark-mode .section-title {
+  color: #e2e8f0;
+}
+
+body.dark-mode .stat-item {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .stat-label {
+  color: #a0aec0;
+}
+
+body.dark-mode .empty-state {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .empty-state h4 {
+  color: #e2e8f0;
+}
+
+body.dark-mode .empty-state p {
+  color: #a0aec0;
+}
+
+body.dark-mode .referral-card {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .referral-header h4 {
+  color: #e2e8f0;
+}
+
+body.dark-mode .joined-date {
+  color: #a0aec0;
+}
+
+body.dark-mode .referral-link-section label {
+  color: #e2e8f0;
+}
+
+body.dark-mode .link-input-group input {
+  background: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .referral-hint {
+  color: #a0aec0;
 }
