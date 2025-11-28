@@ -1,29 +1,17 @@
-// Game Attempt Manager - Handles daily limits based on VIP tiers
+// Game Attempt Manager - Handles daily limits based on VIP levels
 
 import { supabase } from '../db/supabase';
+import { getDailyGameLimit, getVIPConfig } from './vipConfig';
 
-// VIP Tier attempt limits
-export const VIP_ATTEMPT_LIMITS = {
-  bronze: 5,    // Level 1-5
-  silver: 10,   // Level 6-15
-  gold: 20,     // Level 16-30
-  platinum: 50, // Level 31-50
-  diamond: 100  // Level 51+
-};
-
-// Get VIP tier from level
-export const getVIPTier = (vipLevel) => {
-  if (vipLevel >= 51) return 'diamond';
-  if (vipLevel >= 31) return 'platinum';
-  if (vipLevel >= 16) return 'gold';
-  if (vipLevel >= 6) return 'silver';
-  return 'bronze';
-};
-
-// Get daily attempt limit for user
+// Get daily attempt limit for user (uses VIP config)
 export const getDailyAttemptLimit = (vipLevel) => {
-  const tier = getVIPTier(vipLevel);
-  return VIP_ATTEMPT_LIMITS[tier];
+  return getDailyGameLimit(vipLevel);
+};
+
+// Get VIP tier name for display
+export const getVIPTierName = (vipLevel) => {
+  const config = getVIPConfig(vipLevel);
+  return config.name;
 };
 
 // Check if user can play (has attempts remaining)

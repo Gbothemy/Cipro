@@ -170,7 +170,7 @@ function GamePage({ user, updateUser, addNotification }) {
     <div className="game-page">
       <div className="page-header">
         <h1 className="page-title">Game Mining</h1>
-        <p className="page-subtitle">Play games to earn points and rewards</p>
+        <p className="page-subtitle">Play games to earn Cipro and rewards</p>
       </div>
 
       <div className="stats-grid">
@@ -178,7 +178,7 @@ function GamePage({ user, updateUser, addNotification }) {
           <div className="stat-icon">💎</div>
           <div className="stat-info">
             <div className="stat-value">{user.points.toLocaleString()}</div>
-            <div className="stat-label">Total Points</div>
+            <div className="stat-label">Total Cipro</div>
           </div>
         </div>
         <div className="stat-card">
@@ -216,7 +216,7 @@ function GamePage({ user, updateUser, addNotification }) {
               <div className="mining-icon">{mode.icon}</div>
               <h4>{mode.name}</h4>
               <div className="mining-rewards">
-                <p className="reward">+{mode.reward} pts</p>
+                <p className="reward">+{mode.reward} CIPRO</p>
                 <p className="exp-reward">+{mode.expReward} exp</p>
               </div>
               <button 

@@ -54,7 +54,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="user-info">
               <div className="user-details">
                 <span className="user-name">{user.username}</span>
-                <span className="user-points">{user.points.toLocaleString()} pts</span>
+                <span className="user-points">{user.points.toLocaleString()} CIPRO</span>
               </div>
               <div className="user-avatar">{user.avatar}</div>
             </div>
