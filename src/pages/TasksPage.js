@@ -82,7 +82,7 @@ function TasksPage({ user, updateUser, addNotification }) {
       await db.createNotification(user.userId, {
         type: 'task',
         title: 'Task Completed!',
-        message: `You earned ${task.reward_points} points from "${task.task_name}"`,
+        message: `You earned ${task.reward_points} Cipro from "${task.task_name}"`,
         icon: '✅'
       });
 
@@ -94,7 +94,7 @@ function TasksPage({ user, updateUser, addNotification }) {
       // Reload tasks
       await loadTasks();
       
-      addNotification(`🎉 Claimed ${task.reward_points} points!`, 'success');
+      addNotification(`🎉 Claimed ${task.reward_points} Cipro!`, 'success');
     } catch (error) {
       console.error('Error claiming task:', error);
       addNotification('Failed to claim task', 'error');
@@ -174,7 +174,7 @@ function TasksPage({ user, updateUser, addNotification }) {
           <div className="overview-icon">💎</div>
           <div className="overview-info">
             <div className="overview-value">{getTotalPointsEarned()}</div>
-            <div className="overview-label">Points Earned</div>
+            <div className="overview-label">Cipro Earned</div>
           </div>
         </div>
         <div className="overview-card">
@@ -194,7 +194,7 @@ function TasksPage({ user, updateUser, addNotification }) {
           <h2>🌅 Daily Tasks</h2>
           <span className="section-info">
             {getCompletedCount(tasks.daily)}/{tasks.daily.length} • 
-            {getTotalRewards(tasks.daily)} pts total
+            {getTotalRewards(tasks.daily)} CIPRO total
           </span>
         </div>
         <div className="tasks-grid">

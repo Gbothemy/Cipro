@@ -17,7 +17,7 @@ function DailyMining({ user, updateUser, addNotification }) {
   const COOLDOWN_HOURS = 8;
   const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000; // 8 hours in milliseconds
   const MINING_DURATION = 5000; // 5 seconds mining animation
-  const BASE_REWARD = 200; // Base points reward
+  const BASE_REWARD = 200; // Base Cipro reward
   const VIP_MULTIPLIER = {
     1: 1,
     2: 1.2,
@@ -107,7 +107,7 @@ function DailyMining({ user, updateUser, addNotification }) {
 
   const completeMining = async () => {
     const reward = calculateReward();
-    const expReward = Math.floor(reward / 4); // 25% of points as EXP
+    const expReward = Math.floor(reward / 4); // 25% of Cipro as EXP
     const newPoints = user.points + reward;
     const newExp = user.exp + expReward;
     const newTotalMined = totalMined + reward;
@@ -148,7 +148,7 @@ function DailyMining({ user, updateUser, addNotification }) {
       setMiningProgress(100);
       setShowConfetti(true);
       haptics.success();
-      addNotification(`⛏️ Mining complete! Earned ${reward} points!`, 'success');
+      addNotification(`⛏️ Mining complete! Earned ${reward} Cipro!`, 'success');
 
       setTimeout(() => {
         setShowConfetti(false);
@@ -183,7 +183,7 @@ function DailyMining({ user, updateUser, addNotification }) {
   return (
     <div className="daily-mining-section">
       <h3 className="section-title">⛏️ Daily Mining</h3>
-      <p className="section-subtitle">Mine every 8 hours to earn bonus points!</p>
+      <p className="section-subtitle">Mine every 8 hours to earn bonus Cipro!</p>
 
       <div className={`daily-mining-card ${mining ? 'mining-active' : ''} ${!isAvailable ? 'on-cooldown' : ''}`}>
         <div className="mining-header">
@@ -200,7 +200,7 @@ function DailyMining({ user, updateUser, addNotification }) {
           <div className="mining-stat">
             <span className="stat-label">Reward</span>
             <span className="stat-value">
-              <AnimatedCounter value={reward} suffix=" pts" />
+              <AnimatedCounter value={reward} suffix=" CIPRO" />
             </span>
           </div>
           <div className="mining-stat">

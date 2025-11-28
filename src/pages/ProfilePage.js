@@ -28,7 +28,7 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
   const tier = getTierName(user.vipLevel);
 
   const stats = [
-    { label: 'Total Points', value: user.points.toLocaleString(), icon: '💎', color: '#667eea' },
+    { label: 'Total Cipro', value: user.points.toLocaleString(), icon: '💎', color: '#667eea' },
     { label: 'VIP Level', value: user.vipLevel, icon: '⭐', color: '#f59e0b' },
     { label: 'Games Played', value: user.completedTasks, icon: '🎮', color: '#10b981' },
     { label: 'Day Streak', value: user.dayStreak, icon: '🔥', color: '#ef4444' },
@@ -36,23 +36,23 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
     { label: 'ETH Balance', value: user.balance?.eth?.toFixed(4) || '0.0000', icon: 'Ξ', color: '#627EEA' },
     { label: 'USDT Balance', value: user.balance?.usdt?.toFixed(2) || '0.00', icon: '💵', color: '#26a17b' },
     { label: 'USDC Balance', value: user.balance?.usdc?.toFixed(2) || '0.00', icon: '💵', color: '#2775CA' },
-    { label: 'Gift Points', value: user.giftPoints || 0, icon: '🎁', color: '#f97316' }
+    { label: 'Gift Cipro', value: user.giftPoints || 0, icon: '🎁', color: '#f97316' }
   ];
 
   const achievements = [
     { id: 1, name: 'First Login', icon: '👋', unlocked: true },
     { id: 2, name: 'Week Warrior', icon: '🔥', unlocked: user.dayStreak >= 7 },
-    { id: 3, name: 'Point Collector', icon: '💎', unlocked: user.points >= 1000 },
+    { id: 3, name: 'Cipro Collector', icon: '💎', unlocked: user.points >= 1000 },
     { id: 4, name: 'Game Master', icon: '🎮', unlocked: user.completedTasks >= 10 },
     { id: 5, name: 'VIP Elite', icon: '⭐', unlocked: user.vipLevel >= 5 },
     { id: 6, name: 'Social Butterfly', icon: '👥', unlocked: false }
   ];
 
   const recentActivity = [
-    { id: 1, action: 'Played Puzzle Game', points: '+50 pts', time: '2 hours ago', icon: '🧩' },
-    { id: 2, action: 'Claimed Daily Reward', points: '+100 pts', time: '5 hours ago', icon: '🎁' },
-    { id: 3, action: 'Level Up to VIP ' + user.vipLevel, points: '+200 pts', time: '1 day ago', icon: '⭐' },
-    { id: 4, action: 'Completed Task', points: '+150 pts', time: '2 days ago', icon: '✅' }
+    { id: 1, action: 'Played Puzzle Game', points: '+50 CIPRO', time: '2 hours ago', icon: '🧩' },
+    { id: 2, action: 'Claimed Daily Reward', points: '+100 CIPRO', time: '5 hours ago', icon: '🎁' },
+    { id: 3, action: 'Level Up to VIP ' + user.vipLevel, points: '+200 CIPRO', time: '1 day ago', icon: '⭐' },
+    { id: 4, action: 'Completed Task', points: '+150 CIPRO', time: '2 days ago', icon: '✅' }
   ];
 
   return (
@@ -160,7 +160,7 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
                 </button>
                 <button className="action-card" onClick={() => navigate('/conversion')}>
                   <span className="action-icon">🔄</span>
-                  <span className="action-label">Convert Points</span>
+                  <span className="action-label">Convert Cipro</span>
                 </button>
                 <button className="action-card" onClick={() => navigate('/referral')}>
                   <span className="action-icon">👥</span>
@@ -221,7 +221,7 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
                   <span className="gaming-stat-value">Puzzle Challenge</span>
                 </div>
                 <div className="gaming-stat">
-                  <span className="gaming-stat-label">Average Points/Game</span>
+                  <span className="gaming-stat-label">Average Cipro/Game</span>
                   <span className="gaming-stat-value">{user.completedTasks > 0 ? Math.floor(user.points / user.completedTasks) : 0}</span>
                 </div>
               </div>
