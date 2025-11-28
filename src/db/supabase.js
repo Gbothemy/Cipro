@@ -13,7 +13,7 @@ export const db = {
 
   async createUser(userData) {
     try {
-      const { user_id, username, email, avatar, is_admin } = userData;
+      const { user_id, username, email, avatar, is_admin, referred_by } = userData;
 
       // Insert into users table
       const { data: user, error: userError } = await supabase
@@ -25,6 +25,7 @@ export const db = {
             email: email || "",
             avatar,
             is_admin: is_admin || false,
+            referred_by: referred_by || null,
             points: 0,
             vip_level: 1,
             exp: 0,
