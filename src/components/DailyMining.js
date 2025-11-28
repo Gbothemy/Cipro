@@ -30,27 +30,20 @@ function DailyMining({ user, updateUser, addNotification }) {
     loadMiningData();
     const interval = setInterval(updateCooldown, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user.userId]);
 
-  const loadMiningData = () => {
-    const savedData = localStorage.getItem(`dailyMining_${user.userId}`);
-    if (savedData) {
-      try {
-        const data = JSON.parse(savedData);
-        setLastMineTime(data.lastMineTime);
-        setTotalMined(data.totalMined || 0);
-      } catch (e) {
-        console.error('Error loading mining data:', e);
+  const loadMiningData = async () => {
+    try {
+      // Load from database instead of localStorage
+      const userData = await db.getUser(user.userId);
+      if (userData) {
+        const lastMine = userData.last_mine_time ? new Date(userData.last_mine_time).getTime() : null;
+        setLastMineTime(lastMine);
+        setTotalMined(userData.total_mined || 0);
       }
+    } catch (e) {
+      console.error('Error loading mining data:', e);
     }
-  };
-
-  const saveMiningData = (mineTime, total) => {
-    const data = {
-      lastMineTime: mineTime,
-      totalMined: total
-    };
-    localStorage.setItem(`dailyMining_${user.userId}`, JSON.stringify(data));
   };
 
   const updateCooldown = () => {
@@ -122,11 +115,14 @@ function DailyMining({ user, updateUser, addNotification }) {
     }
 
     try {
-      // Update user in database
+      // Update user in database with mining data
+      const now = new Date().toISOString();
       await db.updateUser(user.userId, {
         points: newPoints,
         vipLevel: newLevel,
-        exp: finalExp
+        exp: finalExp,
+        last_mine_time: now,
+        total_mined: newTotalMined
       });
 
       // Update local state
@@ -137,11 +133,10 @@ function DailyMining({ user, updateUser, addNotification }) {
         exp: finalExp
       });
 
-      // Save mining data
-      const now = Date.now();
-      setLastMineTime(now);
+      // Update local mining state
+      const nowMs = Date.now();
+      setLastMineTime(nowMs);
       setTotalMined(newTotalMined);
-      saveMiningData(now, newTotalMined);
 
       // Show success
       setMining(false);
