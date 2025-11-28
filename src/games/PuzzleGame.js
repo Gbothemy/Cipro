@@ -103,7 +103,7 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
   }
 
   if (!gameStarted && !puzzle.type) {
-    const timeUntilReset = getTimeUntilReset();
+    const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
     // If no user or no attempt info, allow playing without limits
     if (!user?.id || !attemptInfo) {

@@ -41,21 +41,27 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
     const vipLevel = userData?.vip_level || 1;
     const dailyLimit = getDailyAttemptLimit(vipLevel);
 
-    // Get today's attempts
-    const today = new Date().toISOString().split('T')[0];
+    // Get attempts from last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     
     const { data: attempts, error: attemptsError } = await supabase
       .from('game_attempts')
       .select('*')
       .eq('user_id', userId)
       .eq('game_type', gameType)
-      .gte('created_at', `${today}T00:00:00`)
-      .lte('created_at', `${today}T23:59:59`);
+      .gte('created_at', twentyFourHoursAgo)
+      .order('created_at', { ascending: true });
 
     if (attemptsError) throw attemptsError;
 
     const attemptsUsed = attempts?.length || 0;
     const attemptsRemaining = dailyLimit - attemptsUsed;
+
+    // Get the oldest attempt time for reset calculation
+    const oldestAttempt = attempts && attempts.length > 0 ? attempts[0].created_at : null;
+    const resetTime = oldestAttempt 
+      ? new Date(new Date(oldestAttempt).getTime() + 24 * 60 * 60 * 1000).toISOString()
+      : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     return {
       canPlay: attemptsRemaining > 0,
@@ -63,7 +69,8 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
       attemptsRemaining,
       dailyLimit,
       vipTier: getVIPTier(vipLevel),
-      resetTime: getResetTime()
+      resetTime,
+      oldestAttemptTime: oldestAttempt
     };
   } catch (error) {
     console.error('Error checking game attempts:', error);
@@ -74,7 +81,7 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
       attemptsRemaining: 5,
       dailyLimit: 5,
       vipTier: 'bronze',
-      resetTime: getResetTime()
+      resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     };
   }
 };
@@ -141,20 +148,30 @@ export const getGameStats = async (userId, gameType = 'puzzle') => {
   }
 };
 
-// Get reset time (midnight UTC)
-export const getResetTime = () => {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  tomorrow.setUTCHours(0, 0, 0, 0);
-  return tomorrow.toISOString();
+// Get reset time (24 hours from oldest attempt)
+export const getResetTime = (oldestAttemptTime = null) => {
+  if (oldestAttemptTime) {
+    const resetTime = new Date(new Date(oldestAttemptTime).getTime() + 24 * 60 * 60 * 1000);
+    return resetTime.toISOString();
+  }
+  // If no attempts yet, return 24 hours from now
+  return new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 };
 
 // Get time until reset
-export const getTimeUntilReset = () => {
+export const getTimeUntilReset = (resetTime = null) => {
   const now = new Date();
-  const resetTime = new Date(getResetTime());
-  const diff = resetTime - now;
+  const reset = resetTime ? new Date(resetTime) : new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const diff = reset - now;
+  
+  // If diff is negative, attempts have already reset
+  if (diff <= 0) {
+    return {
+      hours: 0,
+      minutes: 0,
+      formatted: 'Now'
+    };
+  }
   
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -166,25 +183,24 @@ export const getTimeUntilReset = () => {
   };
 };
 
-// Get today's attempts for display
+// Get attempts from last 24 hours for display
 export const getTodayAttempts = async (userId, gameType = 'puzzle') => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     
     const { data, error } = await supabase
       .from('game_attempts')
       .select('*')
       .eq('user_id', userId)
       .eq('game_type', gameType)
-      .gte('created_at', `${today}T00:00:00`)
-      .lte('created_at', `${today}T23:59:59`)
+      .gte('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     return data || [];
   } catch (error) {
-    console.error('Error getting today attempts:', error);
+    console.error('Error getting recent attempts:', error);
     return [];
   }
 };
