@@ -208,9 +208,40 @@ function AdminPage({ user, addNotification }) {
     try {
       const status = action === 'approved' ? 'approved' : 'rejected';
       
+      // If rejecting, refund the user
+      if (status === 'rejected') {
+        // Find the withdrawal request
+        const request = withdrawalRequests.find(r => r.id === requestId);
+        
+        if (request) {
+          // Get user's current balance
+          const userData = await db.getUser(request.user_id);
+          const currentBalance = userData?.balance?.[request.currency] || 0;
+          const newBalance = currentBalance + parseFloat(request.amount);
+          
+          // Refund the crypto back to user's balance
+          await db.updateBalance(request.user_id, request.currency, newBalance);
+          
+          // Create notification for user
+          await db.createNotification(request.user_id, {
+            type: 'withdrawal',
+            title: 'Withdrawal Rejected',
+            message: `Your withdrawal of ${request.amount} ${request.currency.toUpperCase()} has been rejected and refunded to your account.`,
+            icon: '❌'
+          });
+          
+          // Log activity
+          await db.logActivity(request.user_id, {
+            type: 'withdrawal_rejected',
+            description: `Withdrawal rejected and refunded: ${request.amount} ${request.currency.toUpperCase()}`,
+            pointsChange: 0
+          });
+        }
+      }
+      
       await db.updateWithdrawalStatus(requestId, status, user.username);
       
-      addNotification(`Withdrawal ${status}: ${requestId}`, 'success');
+      addNotification(`Withdrawal ${status}: ${requestId}${status === 'rejected' ? ' (User refunded)' : ''}`, 'success');
       
       loadWithdrawalRequests();
       loadNotifications();
