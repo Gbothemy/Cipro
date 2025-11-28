@@ -250,6 +250,23 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
+.link-input-group button.copied {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.referral-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #718096;
+  text-align: center;
+}
+
 .share-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -9,12 +9,16 @@ function ReferralPage({ user, updateUser, addNotification }) {
     { id: 4, name: 'Diana', avatar: '👧', ton: 6.2, cati: 180, usdt: 4.1, joined: '2024-01-25', active: false }
   ]);
 
-  const referralLink = `https://rewardgame.com/ref/${user.userId}`;
+  const referralLink = `https://cipro1.vercel.app/login?ref=${user.userId}`;
+
+  const [copied, setCopied] = useState(false);
 
   const handleInvite = async () => {
     try {
       await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
       addNotification('Referral link copied to clipboard!', 'success');
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       addNotification('Failed to copy link', 'error');
     }
@@ -85,8 +89,11 @@ function ReferralPage({ user, updateUser, addNotification }) {
         <label>Your Referral Link</label>
         <div className="link-input-group">
           <input type="text" value={referralLink} readOnly />
-          <button onClick={handleInvite}>📋 Copy</button>
+          <button onClick={handleInvite} className={copied ? 'copied' : ''}>
+            {copied ? '✓ Copied!' : '📋 Copy'}
+          </button>
         </div>
+        <p className="referral-hint">Share this link with friends to earn 10% commission on their earnings!</p>
       </div>
 
       <div className="share-buttons">

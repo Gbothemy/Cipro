@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db } from '../db/supabase';
 import './LoginPage.css';
 
 function LoginPage({ onLogin }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
+  const [referralCode, setReferralCode] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -13,6 +15,15 @@ function LoginPage({ onLogin }) {
     confirmPassword: '',
     fullName: ''
   });
+
+  // Get referral code from URL
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setIsLogin(false); // Switch to signup mode
+    }
+  }, [searchParams]);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -140,7 +151,8 @@ function LoginPage({ onLogin }) {
           username: formData.username,
           email: formData.email,
           avatar: avatar,
-          is_admin: false
+          is_admin: false,
+          referred_by: referralCode || null
         });
 
         const userData = {
@@ -228,6 +240,12 @@ function LoginPage({ onLogin }) {
           {successMessage && (
             <div className="success-banner">
               ✅ {successMessage}
+            </div>
+          )}
+
+          {referralCode && !isLogin && (
+            <div className="referral-banner">
+              🎉 You're signing up with a referral code! You and your friend will both earn rewards!
             </div>
           )}
 
