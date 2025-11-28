@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
+import { getRandomQuestions, getTotalQuestionCount } from '../data/questionBank';
+import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
 import './TriviaGame.css';
 
-const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
+const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -10,6 +12,9 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
   const [showResult, setShowResult] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [attemptInfo, setAttemptInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const difficultySettings = {
     easy: { questions: 5, timePerQuestion: 30, pointsPerCorrect: 20 },
@@ -19,52 +24,35 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
 
   const settings = difficultySettings[difficulty];
 
-  const triviaQuestions = {
-    easy: [
-      { question: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: 1 },
-      { question: 'What color is the sky?', options: ['Red', 'Blue', 'Green', 'Yellow'], correct: 1 },
-      { question: 'How many days in a week?', options: ['5', '6', '7', '8'], correct: 2 },
-      { question: 'What is the capital of France?', options: ['London', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
-      { question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], correct: 1 },
-      { question: 'What is 10 - 5?', options: ['3', '4', '5', '6'], correct: 2 },
-      { question: 'Which animal says "meow"?', options: ['Dog', 'Cat', 'Cow', 'Bird'], correct: 1 },
-      { question: 'What comes after Monday?', options: ['Sunday', 'Tuesday', 'Wednesday', 'Thursday'], correct: 1 }
-    ],
-    medium: [
-      { question: 'What is the largest planet?', options: ['Earth', 'Mars', 'Jupiter', 'Saturn'], correct: 2 },
-      { question: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Da Vinci', 'Picasso', 'Monet'], correct: 1 },
-      { question: 'What is H2O?', options: ['Oxygen', 'Water', 'Hydrogen', 'Carbon'], correct: 1 },
-      { question: 'How many continents are there?', options: ['5', '6', '7', '8'], correct: 2 },
-      { question: 'What year did WWII end?', options: ['1943', '1944', '1945', '1946'], correct: 2 },
-      { question: 'What is the speed of light?', options: ['300,000 km/s', '150,000 km/s', '450,000 km/s', '600,000 km/s'], correct: 0 },
-      { question: 'Who wrote Romeo and Juliet?', options: ['Dickens', 'Shakespeare', 'Austen', 'Hemingway'], correct: 1 },
-      { question: 'What is the smallest prime number?', options: ['0', '1', '2', '3'], correct: 2 }
-    ],
-    hard: [
-      { question: 'What is the Planck constant?', options: ['6.626×10⁻³⁴', '3.14×10⁻³⁴', '9.81×10⁻³⁴', '1.602×10⁻³⁴'], correct: 0 },
-      { question: 'Who discovered penicillin?', options: ['Einstein', 'Fleming', 'Curie', 'Newton'], correct: 1 },
-      { question: 'What is the capital of Kazakhstan?', options: ['Almaty', 'Astana', 'Bishkek', 'Tashkent'], correct: 1 },
-      { question: 'In what year was Bitcoin created?', options: ['2007', '2008', '2009', '2010'], correct: 2 },
-      { question: 'What is the atomic number of Gold?', options: ['47', '79', '82', '92'], correct: 1 },
-      { question: 'Who wrote "1984"?', options: ['Huxley', 'Orwell', 'Bradbury', 'Asimov'], correct: 1 },
-      { question: 'What is the longest river in the world?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], correct: 1 },
-      { question: 'What is the square root of 144?', options: ['10', '11', '12', '13'], correct: 2 },
-      { question: 'Who painted "The Starry Night"?', options: ['Monet', 'Van Gogh', 'Picasso', 'Dali'], correct: 1 },
-      { question: 'What is the chemical symbol for Silver?', options: ['Si', 'Ag', 'Au', 'Al'], correct: 1 }
-    ]
+  useEffect(() => {
+    checkAttempts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const checkAttempts = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    const info = await canPlayGame(user.id, 'trivia');
+    setAttemptInfo(info);
+    setLoading(false);
   };
 
-  useEffect(() => {
-    // Use timestamp + random to ensure different questions each time
-    const seed = Date.now() + Math.random();
-    const selectedQuestions = [...triviaQuestions[difficulty]]
-      .sort(() => Math.random() - 0.5)
-      .sort(() => (seed % 2) - 0.5) // Double shuffle for more randomness
-      .slice(0, settings.questions);
+  const startGame = () => {
+    // If user is logged in and has attempt info, check if can play
+    if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
+    
+    // Load questions from the comprehensive question bank
+    const selectedQuestions = getRandomQuestions(settings.questions, difficulty);
     setQuestions(selectedQuestions);
+    setGameStarted(true);
     soundManager.gameStart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [difficulty]);
+    
+    // Log total available questions
+    console.log(`Total questions in bank: ${getTotalQuestionCount().toLocaleString()}`);
+  };
 
   useEffect(() => {
     if (questions.length === 0 || gameOver || showResult) return;
@@ -124,12 +112,21 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
     }
   };
 
-  const endGame = () => {
+  const endGame = async () => {
     setGameOver(true);
     const totalPossible = settings.questions * settings.pointsPerCorrect;
     const isPerfect = score + settings.pointsPerCorrect >= totalPossible;
     
     soundManager.success();
+
+    // Record attempt
+    if (user?.id) {
+      await recordGameAttempt(user.id, 'trivia', {
+        won: true,
+        score,
+        difficulty
+      });
+    }
     
     // Call onComplete with won status and score
     if (onComplete) {
@@ -138,6 +135,89 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
       }, 2000);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="game-modal">
+        <div className="trivia-game">
+          <div className="trivia-loading">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameStarted) {
+    const timeUntilReset = getTimeUntilReset();
+    
+    // If no user or no attempt info, allow playing without limits
+    if (!user?.id || !attemptInfo) {
+      return (
+        <div className="game-modal" onClick={onClose}>
+          <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={onClose}>✕</button>
+            <div className="game-intro">
+              <h2>🎯 Trivia Challenge</h2>
+              <p>Answer questions to earn points!</p>
+              <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
+              <p className="question-count">
+                <small>🎯 {getTotalQuestionCount().toLocaleString()}+ questions available</small>
+              </p>
+              <button onClick={startGame} className="start-game-btn">Start Game</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="game-modal" onClick={onClose}>
+        <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
+          <button className="close-btn" onClick={onClose}>✕</button>
+          <div className="game-intro">
+            {attemptInfo.canPlay ? (
+              <>
+                <h2>🎯 Trivia Challenge</h2>
+                <p>Answer questions to earn points!</p>
+                <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
+                <div className="attempts-info">
+                  <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
+                  <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
+                  <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
+                  <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
+                </div>
+                <p className="question-count">
+                  <small>🎯 {getTotalQuestionCount().toLocaleString()}+ questions available</small>
+                </p>
+                <button onClick={startGame} className="start-game-btn">Start Game</button>
+              </>
+            ) : (
+              <>
+                <div className="no-attempts">
+                  <h3>❌ No Attempts Remaining</h3>
+                  <p>You've used all {attemptInfo.dailyLimit} attempts today.</p>
+                  <p className="vip-tier">Current Tier: {attemptInfo.vipTier.toUpperCase()}</p>
+                  <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
+                  {attemptInfo.vipTier !== 'diamond' && (
+                    <div className="upgrade-prompt">
+                      <h4>🌟 Want More Attempts?</h4>
+                      <p>Upgrade your VIP tier!</p>
+                      <ul className="vip-benefits">
+                        <li>🥈 Silver: 10 attempts/day</li>
+                        <li>🥇 Gold: 20 attempts/day</li>
+                        <li>💎 Platinum: 50 attempts/day</li>
+                        <li>💠 Diamond: 100 attempts/day</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button onClick={onClose} className="close-game-btn">Close</button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (questions.length === 0) {
     return <div className="trivia-loading">Loading questions...</div>;

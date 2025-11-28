@@ -114,3 +114,99 @@ body.dark-mode .memory-game .game-container {
     font-size: 36px;
   }
 }
+
+
+/* Attempt tracking styles */
+.game-intro {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.attempts-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin: 20px 0;
+}
+
+.attempts-info p {
+  color: white;
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.vip-tier {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 15px;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+.reset-time {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.no-attempts {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 15px;
+  padding: 30px;
+  margin: 20px 0;
+}
+
+.no-attempts h3 {
+  color: #856404;
+  margin-bottom: 15px;
+}
+
+.no-attempts p {
+  color: #856404;
+  margin: 10px 0;
+}
+
+.upgrade-prompt {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.upgrade-prompt h4 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.vip-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.vip-benefits li {
+  padding: 8px 0;
+  font-size: 16px;
+}
+
+.close-game-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.3s;
+  font-weight: 700;
+}
+
+.close-game-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4);
+}
