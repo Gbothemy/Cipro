@@ -56,7 +56,7 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
       attemptsUsed,
       attemptsRemaining,
       dailyLimit,
-      vipTier: getVIPTier(vipLevel),
+      vipTier: getVIPTierName(vipLevel),
       resetTime,
       oldestAttemptTime: oldestAttempt
     };
@@ -68,7 +68,7 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
       attemptsUsed: 0,
       attemptsRemaining: 5,
       dailyLimit: 5,
-      vipTier: 'bronze',
+      vipTier: 'Bronze',
       resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     };
   }
@@ -199,31 +199,29 @@ export const shouldShowVIPUpgrade = (attemptsRemaining, vipTier) => {
 };
 
 // Get next VIP tier benefits
-export const getNextTierBenefits = (currentTier) => {
-  const tiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
-  const currentIndex = tiers.indexOf(currentTier);
-  
-  if (currentIndex === -1 || currentIndex === tiers.length - 1) {
-    return null;
+export const getNextTierBenefits = (currentVipLevel) => {
+  if (currentVipLevel >= 5) {
+    return null; // Already at max level
   }
   
-  const nextTier = tiers[currentIndex + 1];
-  const nextLimit = VIP_ATTEMPT_LIMITS[nextTier];
-  const currentLimit = VIP_ATTEMPT_LIMITS[currentTier];
+  const nextLevel = currentVipLevel + 1;
+  const currentLimit = getDailyGameLimit(currentVipLevel);
+  const nextLimit = getDailyGameLimit(nextLevel);
   const increase = nextLimit - currentLimit;
+  const nextConfig = getVIPConfig(nextLevel);
   
   return {
-    tier: nextTier,
+    tier: nextConfig.name,
+    level: nextLevel,
     limit: nextLimit,
     increase,
-    message: `Upgrade to ${nextTier.toUpperCase()} for ${increase} more daily attempts!`
+    message: `Upgrade to ${nextConfig.name} ${nextConfig.icon} for ${increase} more daily attempts!`
   };
 };
 
 export default {
-  VIP_ATTEMPT_LIMITS,
-  getVIPTier,
   getDailyAttemptLimit,
+  getVIPTierName,
   canPlayGame,
   recordGameAttempt,
   getGameStats,
