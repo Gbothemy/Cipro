@@ -51,16 +51,16 @@ function ConversionPage({ user, updateUser, addNotification }) {
     }
   };
 
-  // Conversion rates based on real crypto prices
+  // Conversion rates based on real crypto prices (Updated Nov 2025)
   // Base: 10,000 points = $1 USD (1 USDT or 1 USDC)
-  // SOL ≈ $100 → 1,000,000 points = 1 SOL
-  // ETH ≈ $2,000 → 20,000,000 points = 1 ETH
+  // SOL ≈ $140 → 1,400,000 points = 1 SOL
+  // ETH ≈ $3,300 → 33,000,000 points = 1 ETH
   // USDT = $1 → 10,000 points = 1 USDT
   // USDC = $1 → 10,000 points = 1 USDC
   
   const BASE_CONVERSION_RATES = {
-    sol: 1000000,    // 1 SOL = $100 = 1,000,000 points
-    eth: 20000000,   // 1 ETH = $2,000 = 20,000,000 points
+    sol: 1400000,    // 1 SOL = $140 = 1,400,000 points
+    eth: 33000000,   // 1 ETH = $3,300 = 33,000,000 points
     usdt: 10000,     // 1 USDT = $1 = 10,000 points
     usdc: 10000      // 1 USDC = $1 = 10,000 points
   };
@@ -73,11 +73,16 @@ function ConversionPage({ user, updateUser, addNotification }) {
     usdc: vipTier?.conversion_rate || BASE_CONVERSION_RATES.usdc
   };
 
+  // Minimum withdrawal amounts based on real crypto values
+  // SOL ≈ $140 → 0.1 SOL = $14 minimum
+  // ETH ≈ $3,300 → 0.005 ETH = $16.50 minimum  
+  // USDT = $1 → $15 minimum
+  // USDC = $1 → $15 minimum
   const MIN_WITHDRAW = {
-    sol: 0.01,
-    eth: 0.001,
-    usdt: 10,
-    usdc: 10
+    sol: 0.1,      // ~$14 (reasonable for Solana network fees)
+    eth: 0.005,    // ~$16.50 (covers Ethereum gas fees)
+    usdt: 15,      // $15 minimum
+    usdc: 15       // $15 minimum
   };
 
   const NETWORK_OPTIONS = {
@@ -87,11 +92,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
     usdc: ['Ethereum Mainnet', 'Solana (SPL)', 'Polygon', 'Arbitrum', 'Optimism', 'BSC (BEP20)']
   };
 
+  // Network fees based on current blockchain costs
   const NETWORK_FEES = {
-    'Solana Mainnet': 0.000005,
-    'Solana (SPL)': 0.01,
-    'Ethereum Mainnet': 5.0,
-    'Arbitrum': 0.5,
+    'Solana Mainnet': 0.001,    // ~$0.14 (typical SOL transfer)
+    'Solana (SPL)': 0.002,      // ~$0.28 (SPL token transfer)
+    'Ethereum Mainnet': 0.002,  // ~$6.60 (varies with gas)
+    'Arbitrum': 0.0005,         // ~$1.65 (L2 cheaper)
     'Optimism': 0.1,
     'Polygon': 0.1,
     'BSC (BEP20)': 0.8,
