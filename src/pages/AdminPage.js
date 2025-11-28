@@ -25,6 +25,16 @@ function AdminPage({ user, addNotification }) {
     pointsMultiplier: 1
   });
 
+  // Copy to clipboard function
+  const copyToClipboard = (text, label = 'Text') => {
+    navigator.clipboard.writeText(text).then(() => {
+      addNotification(`${label} copied to clipboard!`, 'success');
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      addNotification('Failed to copy to clipboard', 'error');
+    });
+  };
+
   // Check if user is admin
   if (!user.isAdmin) {
     return <Navigate to="/" replace />;
@@ -676,8 +686,25 @@ function AdminPage({ user, addNotification }) {
                         <td className="wallet-cell">
                           <div style={{fontSize: '0.9rem'}}>
                             <div style={{marginBottom: '5px'}}>
-                              <strong>Address:</strong>
-                              <code style={{display: 'block', wordBreak: 'break-all', marginTop: '3px'}}>
+                              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px'}}>
+                                <strong>Address:</strong>
+                                <button
+                                  onClick={() => copyToClipboard(request.wallet_address, 'Wallet address')}
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '0.8rem',
+                                    background: '#667eea',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Copy address"
+                                >
+                                  📋 Copy
+                                </button>
+                              </div>
+                              <code style={{display: 'block', wordBreak: 'break-all', padding: '5px', background: '#f5f5f5', borderRadius: '4px'}}>
                                 {request.wallet_address}
                               </code>
                             </div>
@@ -687,8 +714,24 @@ function AdminPage({ user, addNotification }) {
                               </div>
                             )}
                             {request.memo && (
-                              <div>
-                                <strong>Memo:</strong> {request.memo}
+                              <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <strong>Memo:</strong> 
+                                <span>{request.memo}</span>
+                                <button
+                                  onClick={() => copyToClipboard(request.memo, 'Memo')}
+                                  style={{
+                                    padding: '2px 6px',
+                                    fontSize: '0.75rem',
+                                    background: '#4caf50',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Copy memo"
+                                >
+                                  📋
+                                </button>
                               </div>
                             )}
                           </div>
