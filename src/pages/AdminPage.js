@@ -639,7 +639,7 @@ function AdminPage({ user, addNotification }) {
                       <th>User</th>
                       <th>Amount</th>
                       <th>Currency</th>
-                      <th>Wallet Address</th>
+                      <th>Wallet Details</th>
                       <th>Status</th>
                       <th>Request Date</th>
                       <th>Actions</th>
@@ -652,15 +652,46 @@ function AdminPage({ user, addNotification }) {
                         <td>
                           <div className="user-cell">
                             <strong>{request.username}</strong>
-                            <small>{request.userId}</small>
+                            <small>{request.user_id}</small>
                           </div>
                         </td>
-                        <td className="amount-cell">{request.amount.toFixed(2)}</td>
+                        <td className="amount-cell">
+                          <div>
+                            <strong>{request.amount} {request.currency.toUpperCase()}</strong>
+                            {request.network_fee && (
+                              <small style={{display: 'block', color: '#666'}}>
+                                Fee: {request.network_fee} {request.currency.toUpperCase()}
+                              </small>
+                            )}
+                            {request.net_amount && (
+                              <small style={{display: 'block', color: '#4caf50'}}>
+                                Net: {request.net_amount} {request.currency.toUpperCase()}
+                              </small>
+                            )}
+                          </div>
+                        </td>
                         <td>
-                          <span className="currency-badge">{request.currency}</span>
+                          <span className="currency-badge">{request.currency.toUpperCase()}</span>
                         </td>
                         <td className="wallet-cell">
-                          <code>{request.walletAddress}</code>
+                          <div style={{fontSize: '0.9rem'}}>
+                            <div style={{marginBottom: '5px'}}>
+                              <strong>Address:</strong>
+                              <code style={{display: 'block', wordBreak: 'break-all', marginTop: '3px'}}>
+                                {request.wallet_address}
+                              </code>
+                            </div>
+                            {request.network && (
+                              <div style={{marginBottom: '5px'}}>
+                                <strong>Network:</strong> {request.network}
+                              </div>
+                            )}
+                            {request.memo && (
+                              <div>
+                                <strong>Memo:</strong> {request.memo}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td>
                           <span className={`status-badge status-${request.status}`}>
@@ -668,9 +699,17 @@ function AdminPage({ user, addNotification }) {
                             {request.status === 'approved' && '✅ Approved'}
                             {request.status === 'rejected' && '❌ Rejected'}
                           </span>
+                          {request.transaction_hash && (
+                            <div style={{marginTop: '5px', fontSize: '0.8rem'}}>
+                              <strong>TX:</strong>
+                              <code style={{display: 'block', wordBreak: 'break-all'}}>
+                                {request.transaction_hash}
+                              </code>
+                            </div>
+                          )}
                         </td>
                         <td className="date-cell">
-                          {new Date(request.requestDate).toLocaleString()}
+                          {new Date(request.request_date).toLocaleString()}
                         </td>
                         <td className="actions-cell">
                           {request.status === 'pending' ? (
