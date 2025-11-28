@@ -55,8 +55,11 @@ const TriviaGame = ({ onComplete, onClose, difficulty = 'easy' }) => {
   };
 
   useEffect(() => {
+    // Use timestamp + random to ensure different questions each time
+    const seed = Date.now() + Math.random();
     const selectedQuestions = [...triviaQuestions[difficulty]]
       .sort(() => Math.random() - 0.5)
+      .sort(() => (seed % 2) - 0.5) // Double shuffle for more randomness
       .slice(0, settings.questions);
     setQuestions(selectedQuestions);
     soundManager.gameStart();

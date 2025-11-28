@@ -15,8 +15,11 @@ function MemoryGame({ onComplete, onClose }) {
   const emojis = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎸', '🎺'];
 
   const initGame = () => {
+    // Use timestamp for unique shuffle each time
+    const seed = Date.now();
     const shuffled = [...emojis, ...emojis]
       .sort(() => Math.random() - 0.5)
+      .sort(() => (seed % 3) - 0.5) // Double shuffle for more randomness
       .map((emoji, index) => ({ id: index, emoji, flipped: false }));
     setCards(shuffled);
     setFlipped([]);
