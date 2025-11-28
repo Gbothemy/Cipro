@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import Achievements from '../components/Achievements';
+import DailyMining from '../components/DailyMining';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
@@ -239,6 +240,9 @@ function GamePage({ user, updateUser, addNotification }) {
           );
         }) : <div style={{padding: '40px', textAlign: 'center', color: '#999'}}>Loading mining modes...</div>}
       </div>
+
+      {/* Daily Mining Section */}
+      <DailyMining user={user} updateUser={updateUser} addNotification={addNotification} />
 
       {/* Google AdSense - In-Article */}
       <GoogleAd slot={AdSlots.IN_ARTICLE} format="fluid" />
