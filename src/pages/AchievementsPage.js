@@ -69,7 +69,7 @@ function AchievementsPage({ user, updateUser, addNotification }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const categories = ['starter', 'points', 'games', 'streak', 'vip'];
+  const categories = ['starter', 'cipro', 'games', 'streak', 'vip'];
   const categoryIcons = {
     starter: '🎯',
     points: '💎',
@@ -79,7 +79,7 @@ function AchievementsPage({ user, updateUser, addNotification }) {
   };
   const categoryNames = {
     starter: 'Starter',
-    points: 'Points Master',
+    cipro: 'Cipro Master',
     games: 'Game Champion',
     streak: 'Streak Legend',
     vip: 'VIP Elite'
@@ -116,7 +116,7 @@ function AchievementsPage({ user, updateUser, addNotification }) {
           <div className="stat-icon">💎</div>
           <div className="stat-info">
             <div className="stat-value">{getTotalPoints()}</div>
-            <div className="stat-label">Points Earned</div>
+            <div className="stat-label">Cipro Earned</div>
           </div>
         </div>
         <div className="stat-card">
@@ -184,7 +184,7 @@ function AchievementsPage({ user, updateUser, addNotification }) {
                       </div>
                       <div className="achievement-reward">
                         <span className="reward-icon">💎</span>
-                        <span className="reward-amount">+{achievement.reward_points} pts</span>
+                        <span className="reward-amount">+{achievement.reward_points} CIPRO</span>
                       </div>
                       {unlocked && unlockedDate && (
                         <div className="achievement-date">

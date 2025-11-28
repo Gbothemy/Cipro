@@ -52,17 +52,17 @@ function ConversionPage({ user, updateUser, addNotification }) {
   };
 
   // Conversion rates based on real crypto prices (Updated Nov 2025)
-  // Base: 10,000 points = $1 USD (1 USDT or 1 USDC)
-  // SOL ≈ $140 → 1,400,000 points = 1 SOL
-  // ETH ≈ $3,300 → 33,000,000 points = 1 ETH
-  // USDT = $1 → 10,000 points = 1 USDT
-  // USDC = $1 → 10,000 points = 1 USDC
+  // Base: 10,000 Cipro = $1 USD (1 USDT or 1 USDC)
+  // SOL ≈ $140 → 1,400,000 Cipro = 1 SOL
+  // ETH ≈ $3,300 → 33,000,000 Cipro = 1 ETH
+  // USDT = $1 → 10,000 Cipro = 1 USDT
+  // USDC = $1 → 10,000 Cipro = 1 USDC
   
   const BASE_CONVERSION_RATES = {
-    sol: 1400000,    // 1 SOL = $140 = 1,400,000 points
-    eth: 33000000,   // 1 ETH = $3,300 = 33,000,000 points
-    usdt: 10000,     // 1 USDT = $1 = 10,000 points
-    usdc: 10000      // 1 USDC = $1 = 10,000 points
+    sol: 1400000,    // 1 SOL = $140 = 1,400,000 Cipro
+    eth: 33000000,   // 1 ETH = $3,300 = 33,000,000 Cipro
+    usdt: 10000,     // 1 USDT = $1 = 10,000 Cipro
+    usdc: 10000      // 1 USDC = $1 = 10,000 Cipro
   };
 
   // Apply VIP tier discount if available
@@ -116,13 +116,13 @@ function ConversionPage({ user, updateUser, addNotification }) {
     }
     
     if (points > user.points) {
-      addNotification('Insufficient points', 'error');
+      addNotification('Insufficient Cipro', 'error');
       return;
     }
 
     const minPoints = 1000;
     if (points < minPoints) {
-      addNotification(`Minimum conversion is ${minPoints.toLocaleString()} points`, 'error');
+      addNotification(`Minimum conversion is ${minPoints.toLocaleString()} Cipro`, 'error');
       return;
     }
     
@@ -159,7 +159,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
         amount: companyReceivesCrypto,
         feePercentage: 10,
         originalAmount: cryptoAmount,
-        description: `10% conversion fee from ${points.toLocaleString()} points to ${selectedCurrency.toUpperCase()}`
+        description: `10% conversion fee from ${points.toLocaleString()} Cipro to ${selectedCurrency.toUpperCase()}`
       });
 
       // Record conversion in history
@@ -173,7 +173,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
       // Log activity
       await db.logActivity(user.userId, {
         type: 'conversion',
-        description: `Converted ${points.toLocaleString()} points to ${cryptoAmount.toFixed(4)} ${selectedCurrency.toUpperCase()}`,
+        description: `Converted ${points.toLocaleString()} Cipro to ${cryptoAmount.toFixed(4)} ${selectedCurrency.toUpperCase()}`,
         pointsChange: -points
       });
       
@@ -186,14 +186,14 @@ function ConversionPage({ user, updateUser, addNotification }) {
         }
       });
       
-      addNotification(`Successfully converted ${points.toLocaleString()} points to ${userReceivesCrypto.toFixed(6)} ${selectedCurrency.toUpperCase()} (10% platform fee applied)`, 'success');
+      addNotification(`Successfully converted ${points.toLocaleString()} Cipro to ${userReceivesCrypto.toFixed(6)} ${selectedCurrency.toUpperCase()} (10% platform fee applied)`, 'success');
       setConvertAmount('');
       
       // Reload transaction history
       await loadTransactionHistory();
     } catch (error) {
-      console.error('Error converting points:', error);
-      addNotification('Failed to convert points. Please try again.', 'error');
+      console.error('Error converting Cipro:', error);
+      addNotification('Failed to convert Cipro. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -370,7 +370,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
     <div className="conversion-page">
       <div className="page-header">
         <h1 className="page-title">💰 Convert & Withdraw</h1>
-        <p className="page-subtitle">Convert points to crypto and withdraw to your wallet</p>
+        <p className="page-subtitle">Convert Cipro to crypto and withdraw to your wallet</p>
       </div>
 
       {/* Balance Overview */}
@@ -378,7 +378,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
         <div className="balance-card-conv points">
           <div className="balance-icon">💎</div>
           <div className="balance-info">
-            <span className="balance-label">Available Points</span>
+            <span className="balance-label">Available Cipro</span>
             <span className="balance-value">{user.points.toLocaleString()}</span>
           </div>
         </div>
@@ -415,7 +415,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
       {/* VIP Conversion Rate Info */}
       <div className="rate-info">
         <h3>📊 Your Conversion Rate {vipTier && `(${vipTier.tier_name} ${vipTier.tier_icon})`}</h3>
-        <p className="rate-text">1 {selectedCurrency.toUpperCase()} = {CONVERSION_RATES[selectedCurrency].toLocaleString()} Points</p>
+        <p className="rate-text">1 {selectedCurrency.toUpperCase()} = {CONVERSION_RATES[selectedCurrency].toLocaleString()} Cipro</p>
         <p className="rate-subtext">
           {vipTier && vipTier.tier_name !== 'Bronze' && 
             `You get ${((1 - CONVERSION_RATES[selectedCurrency] / 10000) * 100).toFixed(0)}% better rate as ${vipTier.tier_name} member!`
@@ -429,7 +429,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
           className={`tab-btn ${activeTab === 'convert' ? 'active' : ''}`}
           onClick={() => setActiveTab('convert')}
         >
-          🔄 Convert Points
+          🔄 Convert Cipro
         </button>
         <button 
           className={`tab-btn ${activeTab === 'withdraw' ? 'active' : ''}`}
@@ -464,12 +464,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
             </div>
 
             <div className="form-group">
-              <label>Points to Convert</label>
+              <label>Cipro to Convert</label>
               <input
                 type="number"
                 value={convertAmount}
                 onChange={(e) => setConvertAmount(e.target.value)}
-                placeholder="Enter points amount"
+                placeholder="Enter Cipro amount"
                 min="1000"
                 step="1"
                 disabled={loading}
@@ -497,7 +497,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
             <ul>
               <li>✅ Instant conversion</li>
               <li>✅ No conversion fees</li>
-              <li>✅ Minimum: 1,000 points</li>
+              <li>✅ Minimum: 1,000 Cipro</li>
               <li>✅ Better rates for VIP members</li>
               <li>✅ Converted crypto appears immediately</li>
             </ul>
@@ -541,7 +541,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
               />
               <div className="conversion-preview">
                 <span>Equivalent to:</span>
-                <span className="preview-amount">{calculatePoints(withdrawAmount)} Points</span>
+                <span className="preview-amount">{calculatePoints(withdrawAmount)} Cipro</span>
               </div>
             </div>
 
@@ -655,7 +655,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
                         Points Conversion
                       </div>
                       <div className="history-info">
-                        {tx.points_converted.toLocaleString()} points → {tx.amount_received.toFixed(6)} {tx.currency}
+                        {tx.points_converted.toLocaleString()} Cipro → {tx.amount_received.toFixed(6)} {tx.currency}
                       </div>
                       <div className="history-date">{formatDate(tx.created_at)}</div>
                     </div>

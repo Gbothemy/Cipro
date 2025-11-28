@@ -242,7 +242,7 @@ function TasksPage({ user, updateUser, addNotification }) {
           <h2>📅 Weekly Tasks</h2>
           <span className="section-info">
             {getCompletedCount(tasks.weekly)}/{tasks.weekly.length} • 
-            {getTotalRewards(tasks.weekly)} pts total
+            {getTotalRewards(tasks.weekly)} CIPRO total
           </span>
         </div>
         <div className="tasks-grid">
@@ -290,7 +290,7 @@ function TasksPage({ user, updateUser, addNotification }) {
           <h2>🗓️ Monthly Tasks</h2>
           <span className="section-info">
             {getCompletedCount(tasks.monthly)}/{tasks.monthly.length} • 
-            {getTotalRewards(tasks.monthly)} pts total
+            {getTotalRewards(tasks.monthly)} CIPRO total
           </span>
         </div>
         <div className="tasks-grid">

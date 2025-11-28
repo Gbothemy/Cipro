@@ -458,7 +458,7 @@ function AdminPage({ user, addNotification }) {
               <div className="stat-icon">💎</div>
               <div className="stat-info">
                 <div className="stat-value">{stats.totalPoints?.toLocaleString()}</div>
-                <div className="stat-label">Total Points</div>
+                <div className="stat-label">Total Cipro</div>
               </div>
             </div>
             <div className="admin-stat-card">
@@ -520,7 +520,7 @@ function AdminPage({ user, addNotification }) {
               🔄 Refresh Data
             </button>
             <button onClick={() => handleBulkAction('addPoints')} className="action-btn bulk">
-              💎 Give All Users 1000 Points
+              💎 Give All Users 1000 Cipro
             </button>
             <button onClick={() => handleBulkAction('resetCooldowns')} className="action-btn bulk">
               ⏰ Reset All Cooldowns
@@ -547,7 +547,7 @@ function AdminPage({ user, addNotification }) {
                     <th>Avatar</th>
                     <th>Username</th>
                     <th>User ID</th>
-                    <th>Points</th>
+                    <th>Cipro</th>
                     <th>Level</th>
                     <th>SOL</th>
                     <th>ETH</th>
@@ -588,7 +588,7 @@ function AdminPage({ user, addNotification }) {
             
             <div className="leaderboard-categories">
               <div className="leaderboard-category">
-                <h4>💎 Top Points</h4>
+                <h4>💎 Top Cipro</h4>
                 <div className="leaderboard-list">
                   {leaderboardData.points.length === 0 ? (
                     <p className="empty-state">No players yet</p>
@@ -599,7 +599,7 @@ function AdminPage({ user, addNotification }) {
                         <span className="player-avatar">{player.avatar}</span>
                         <div className="player-info">
                           <strong>{player.username}</strong>
-                          <small>{player.points.toLocaleString()} pts • VIP {player.vipLevel}</small>
+                          <small>{player.points.toLocaleString()} CIPRO • VIP {player.vipLevel}</small>
                         </div>
                         {player.rank <= 3 && <span className="trophy">{player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}</span>}
                       </div>
@@ -641,7 +641,7 @@ function AdminPage({ user, addNotification }) {
                         <span className="player-avatar">{player.avatar}</span>
                         <div className="player-info">
                           <strong>{player.username}</strong>
-                          <small>{player.streak} days • {player.points.toLocaleString()} pts</small>
+                          <small>{player.streak} days • {player.points.toLocaleString()} CIPRO</small>
                         </div>
                         {player.rank <= 3 && <span className="trophy">{player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}</span>}
                       </div>
@@ -877,7 +877,7 @@ function AdminPage({ user, addNotification }) {
                 />
               </label>
               <label>
-                Points Multiplier:
+                Cipro Multiplier:
                 <input 
                   type="number" 
                   step="0.1"
@@ -922,7 +922,7 @@ function AdminPage({ user, addNotification }) {
             <h2>Edit User: {selectedUser.username}</h2>
             <div className="edit-form">
               <label>Username: <input type="text" value={editForm.username} onChange={(e) => setEditForm({...editForm, username: e.target.value})} /></label>
-              <label>Points: <input type="number" value={editForm.points} onChange={(e) => setEditForm({...editForm, points: e.target.value})} /></label>
+              <label>Cipro: <input type="number" value={editForm.points} onChange={(e) => setEditForm({...editForm, points: e.target.value})} /></label>
               <label>VIP Level: <input type="number" min="1" max="99" value={editForm.vipLevel} onChange={(e) => setEditForm({...editForm, vipLevel: e.target.value})} /></label>
               <label>Completed Tasks: <input type="number" min="0" value={editForm.completedTasks} onChange={(e) => setEditForm({...editForm, completedTasks: e.target.value})} /></label>
               <label>SOL Balance: <input type="number" step="0.0001" value={editForm.sol} onChange={(e) => setEditForm({...editForm, sol: e.target.value})} /></label>

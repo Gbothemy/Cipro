@@ -116,7 +116,7 @@ function LeaderboardPage({ user }) {
         <div className="user-rank-stats">
           <div className="rank-stat">
             <span className="rank-stat-value">{user.points.toLocaleString()}</span>
-            <span className="rank-stat-label">Points</span>
+            <span className="rank-stat-label">Cipro</span>
           </div>
           <div className="rank-stat">
             <span className="rank-stat-value">Level {user.vipLevel}</span>
@@ -130,7 +130,7 @@ function LeaderboardPage({ user }) {
           className={activeTab === 'points' ? 'active' : ''}
           onClick={() => setActiveTab('points')}
         >
-          💎 Points
+          💎 Cipro
         </button>
         <button 
           className={activeTab === 'earnings' ? 'active' : ''}
@@ -159,7 +159,7 @@ function LeaderboardPage({ user }) {
             <div className="player-info">
               <h4>{player.username}</h4>
               {activeTab === 'points' && (
-                <p>{player.points.toLocaleString()} points • VIP {player.vipLevel}</p>
+                <p>{player.points.toLocaleString()} Cipro • VIP {player.vipLevel}</p>
               )}
               {activeTab === 'earnings' && (
                 <p>
@@ -170,7 +170,7 @@ function LeaderboardPage({ user }) {
                 </p>
               )}
               {activeTab === 'streak' && (
-                <p>{player.streak} days • {player.points.toLocaleString()} pts</p>
+                <p>{player.streak} days • {player.points.toLocaleString()} CIPRO</p>
               )}
             </div>
             {player.rank <= 3 && (

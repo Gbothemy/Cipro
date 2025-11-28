@@ -13,7 +13,7 @@ function VIPTiersPage({ user }) {
       benefits: [
         'Basic game access',
         'Standard cooldowns',
-        'Base conversion rate: 10,000 pts = 1 CATI',
+        'Base conversion rate: 10,000 CIPRO = 1 CATI',
         'Community support',
         '1x bonus multiplier',
         'Access to public events'
@@ -29,7 +29,7 @@ function VIPTiersPage({ user }) {
       benefits: [
         'All Bronze benefits',
         '10% reduced cooldowns',
-        'Better conversion: 9,500 pts = 1 CATI',
+        'Better conversion: 9,500 CIPRO = 1 CATI',
         'Priority email support',
         '1.2x bonus multiplier',
         'Silver-tier events access',
@@ -46,7 +46,7 @@ function VIPTiersPage({ user }) {
       benefits: [
         'All Silver benefits',
         '25% reduced cooldowns',
-        'Premium conversion: 9,000 pts = 1 CATI',
+        'Premium conversion: 9,000 CIPRO = 1 CATI',
         'Priority chat support',
         '1.5x bonus multiplier',
         'Gold-tier exclusive games',
@@ -64,7 +64,7 @@ function VIPTiersPage({ user }) {
       benefits: [
         'All Gold benefits',
         '40% reduced cooldowns',
-        'Elite conversion: 8,500 pts = 1 CATI',
+        'Elite conversion: 8,500 CIPRO = 1 CATI',
         '24/7 priority support',
         '2x bonus multiplier',
         'Platinum exclusive games',
@@ -83,7 +83,7 @@ function VIPTiersPage({ user }) {
       benefits: [
         'All Platinum benefits',
         '60% reduced cooldowns',
-        'Ultimate conversion: 8,000 pts = 1 CATI',
+        'Ultimate conversion: 8,000 CIPRO = 1 CATI',
         'Dedicated VIP manager',
         '3x bonus multiplier',
         'Diamond exclusive games',
@@ -263,7 +263,7 @@ function VIPTiersPage({ user }) {
           <div className="guide-card">
             <div className="guide-icon">🎮</div>
             <h3>Play Games</h3>
-            <p>Complete mining tasks to earn experience points</p>
+            <p>Complete mining tasks to earn experience Cipro</p>
           </div>
           <div className="guide-card">
             <div className="guide-icon">🎯</div>

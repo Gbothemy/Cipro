@@ -80,7 +80,7 @@ function AirdropPage({ user, updateUser, addNotification }) {
         dayStreak: user.dayStreak + 1
       });
 
-      addNotification(`🎁 Claimed: ${rewards.sol} SOL, ${rewards.eth} ETH, ${rewards.usdt} USDT, ${rewards.usdc} USDC, ${rewards.points} Points!`, 'success');
+      addNotification(`🎁 Claimed: ${rewards.sol} SOL, ${rewards.eth} ETH, ${rewards.usdt} USDT, ${rewards.usdc} USDC, ${rewards.points} Cipro!`, 'success');
       setClaimed(false);
       setCanClaim(false);
     } catch (error) {
