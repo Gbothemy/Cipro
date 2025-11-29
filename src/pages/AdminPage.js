@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { db } from '../db/supabase';
+import { getVIPConfig } from '../utils/vipConfig';
 import RevenueDashboard from './RevenueDashboard';
 import './AdminPage.css';
 
@@ -47,13 +48,15 @@ function AdminPage({ user, addNotification }) {
     loadLeaderboard();
     loadSystemSettings();
 
-    // Auto-refresh data every 5 seconds for live updates
+    // Auto-refresh data every 30 seconds for live updates (only when tab is visible)
     const interval = setInterval(() => {
-      loadAllData();
-      loadNotifications();
-      loadWithdrawalRequests();
-      loadLeaderboard();
-    }, 5000);
+      if (document.visibilityState === 'visible') {
+        loadAllData();
+        loadNotifications();
+        loadWithdrawalRequests();
+        loadLeaderboard();
+      }
+    }, 30000); // Reduced from 5s to 30s for better performance
 
     return () => clearInterval(interval);
   }, []);
@@ -563,7 +566,9 @@ function AdminPage({ user, addNotification }) {
                       <td>{u.username || 'Unknown'}</td>
                       <td className="user-id">{u.userId}</td>
                       <td>{(u.points || 0).toLocaleString()}</td>
-                      <td>Level {u.vipLevel || 1}</td>
+                      <td>
+                        {getVIPConfig(u.vipLevel || 1).icon} Level {u.vipLevel || 1} - {getVIPConfig(u.vipLevel || 1).name}
+                      </td>
                       <td>{(u.balance?.sol || 0).toFixed(4)}</td>
                       <td>{(u.balance?.eth || 0).toFixed(4)}</td>
                       <td>{(u.balance?.usdt || 0).toFixed(2)}</td>
@@ -923,7 +928,41 @@ function AdminPage({ user, addNotification }) {
             <div className="edit-form">
               <label>Username: <input type="text" value={editForm.username} onChange={(e) => setEditForm({...editForm, username: e.target.value})} /></label>
               <label>Cipro: <input type="number" value={editForm.points} onChange={(e) => setEditForm({...editForm, points: e.target.value})} /></label>
-              <label>VIP Level: <input type="number" min="1" max="99" value={editForm.vipLevel} onChange={(e) => setEditForm({...editForm, vipLevel: e.target.value})} /></label>
+              <label>
+                VIP Level: 
+                <select value={editForm.vipLevel} onChange={(e) => setEditForm({...editForm, vipLevel: parseInt(e.target.value)})}>
+                  <optgroup label="🥉 Bronze (FREE)">
+                    <option value="1">Level 1 - Bronze</option>
+                    <option value="2">Level 2 - Bronze</option>
+                    <option value="3">Level 3 - Bronze</option>
+                    <option value="4">Level 4 - Bronze</option>
+                  </optgroup>
+                  <optgroup label="🥈 Silver ($9.99/mo)">
+                    <option value="5">Level 5 - Silver</option>
+                    <option value="6">Level 6 - Silver</option>
+                    <option value="7">Level 7 - Silver</option>
+                    <option value="8">Level 8 - Silver</option>
+                  </optgroup>
+                  <optgroup label="🥇 Gold ($19.99/mo)">
+                    <option value="9">Level 9 - Gold</option>
+                    <option value="10">Level 10 - Gold</option>
+                    <option value="11">Level 11 - Gold</option>
+                    <option value="12">Level 12 - Gold</option>
+                  </optgroup>
+                  <optgroup label="💎 Platinum ($49.99/mo)">
+                    <option value="13">Level 13 - Platinum</option>
+                    <option value="14">Level 14 - Platinum</option>
+                    <option value="15">Level 15 - Platinum</option>
+                    <option value="16">Level 16 - Platinum</option>
+                  </optgroup>
+                  <optgroup label="💠 Diamond ($99.99/mo)">
+                    <option value="17">Level 17 - Diamond</option>
+                    <option value="18">Level 18 - Diamond</option>
+                    <option value="19">Level 19 - Diamond</option>
+                    <option value="20">Level 20 - Diamond</option>
+                  </optgroup>
+                </select>
+              </label>
               <label>Completed Tasks: <input type="number" min="0" value={editForm.completedTasks} onChange={(e) => setEditForm({...editForm, completedTasks: e.target.value})} /></label>
               <label>SOL Balance: <input type="number" step="0.0001" value={editForm.sol} onChange={(e) => setEditForm({...editForm, sol: e.target.value})} /></label>
               <label>ETH Balance: <input type="number" step="0.0001" value={editForm.eth} onChange={(e) => setEditForm({...editForm, eth: e.target.value})} /></label>

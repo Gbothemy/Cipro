@@ -95,6 +95,23 @@
   margin: 0;
 }
 
+.mining-description.mining-ready {
+  color: #48bb78;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.mining-description.mining-cooldown {
+  color: #ed8936;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.mining-description.mining-cooldown strong {
+  color: #dd6b20;
+  font-size: 18px;
+}
+
 .mining-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

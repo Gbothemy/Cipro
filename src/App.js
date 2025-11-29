@@ -209,7 +209,7 @@ function App() {
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/daily-rewards" element={<DailyRewardsPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               <Route path="/achievements" element={<AchievementsPage user={user} addNotification={addNotification} />} />
-              <Route path="/vip-tiers" element={<VIPTiersPage user={user} />} />
+              <Route path="/vip-tiers" element={<VIPTiersPage user={user} addNotification={addNotification} />} />
               <Route path="/notifications" element={<NotificationsPage user={user} addNotification={addNotification} />} />
               <Route path="/tasks" element={<TasksPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               <Route path="/profile" element={<ProfilePage user={user} updateUser={updateUser} addNotification={addNotification} onLogout={handleLogout} />} />

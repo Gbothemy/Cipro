@@ -63,64 +63,6 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
       </header>
 
       <div className="layout-wrapper">
-        {/* Desktop Sidebar - Hidden */}
-        <aside className="sidebar desktop-only" style={{ display: 'none' }}>
-          <div className="sidebar-header">
-            <div className="sidebar-avatar">{user.avatar}</div>
-            <div className="sidebar-user-info">
-              <h3>{user.username}</h3>
-              <p>{user.userId}</p>
-            </div>
-          </div>
-          <nav className="sidebar-nav">
-            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-              <span className="nav-icon">🎮</span>
-              <span className="nav-text">Game Mining</span>
-            </Link>
-            <Link to="/airdrop" className={location.pathname === '/airdrop' ? 'active' : ''}>
-              <span className="nav-icon">🎁</span>
-              <span className="nav-text">Airdrop</span>
-            </Link>
-            <Link to="/referral" className={location.pathname === '/referral' ? 'active' : ''}>
-              <span className="nav-icon">💰</span>
-              <span className="nav-text">Referral</span>
-            </Link>
-            <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
-              <span className="nav-icon">🏆</span>
-              <span className="nav-text">Leaderboard</span>
-            </Link>
-            <Link to="/conversion" className={location.pathname === '/conversion' ? 'active' : ''}>
-              <span className="nav-icon">🔄</span>
-              <span className="nav-text">Convert & Withdraw</span>
-            </Link>
-            <div className="nav-divider"></div>
-            <Link to="/" className="nav-secondary">
-              <span className="nav-icon">🧩</span>
-              <span className="nav-text">Puzzle Mining</span>
-            </Link>
-            <Link to="/" className="nav-secondary">
-              <span className="nav-icon">📹</span>
-              <span className="nav-text">Video Mining</span>
-            </Link>
-            <Link to="/" className="nav-secondary">
-              <span className="nav-icon">🎯</span>
-              <span className="nav-text">Mini-Games</span>
-            </Link>
-            <Link to="/" className="nav-secondary">
-              <span className="nav-icon">🎰</span>
-              <span className="nav-text">Spin Mining</span>
-            </Link>
-            <div className="nav-divider"></div>
-            <Link to="/" className="nav-secondary">
-              <span className="nav-icon">⚙️</span>
-              <span className="nav-text">Settings</span>
-            </Link>
-            <button onClick={onLogout} className="nav-secondary logout-btn">
-              <span className="nav-icon">🚪</span>
-              <span className="nav-text">Logout</span>
-            </button>
-          </nav>
-        </aside>
 
         {/* Hamburger Menu - All Views */}
         {menuOpen && (
@@ -148,54 +90,43 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                 ) : (
                   // User Menu
                   <>
-                    {/* Account Section */}
-                    <div className="menu-section-title">👤 Account</div>
+                    {/* Main Features */}
+                    <div className="menu-section-title">⭐ Main</div>
+                    <Link to="/" onClick={() => setMenuOpen(false)}>🎮 Mining Games</Link>
+                    <Link to="/tasks" onClick={() => setMenuOpen(false)}>📋 Tasks</Link>
+                    <Link to="/daily-rewards" onClick={() => setMenuOpen(false)}>🎁 Daily Rewards</Link>
+                    
+                    <div className="nav-divider"></div>
+                    
+                    {/* Earn More */}
+                    <div className="menu-section-title">💰 Earn More</div>
+                    <Link to="/airdrop" onClick={() => setMenuOpen(false)}>🎁 Airdrop</Link>
+                    <Link to="/referral" onClick={() => setMenuOpen(false)}>👥 Referral</Link>
+                    
+                    <div className="nav-divider"></div>
+                    
+                    {/* Wallet */}
+                    <div className="menu-section-title">💳 Wallet</div>
+                    <Link to="/conversion" onClick={() => setMenuOpen(false)}>🔄 Convert & Withdraw</Link>
+                    
+                    <div className="nav-divider"></div>
+                    
+                    {/* Community & Progress */}
+                    <div className="menu-section-title">🏆 Community</div>
+                    <Link to="/leaderboard" onClick={() => setMenuOpen(false)}>🏆 Leaderboard</Link>
+                    <Link to="/achievements" onClick={() => setMenuOpen(false)}>🎖️ Achievements</Link>
+                    <Link to="/vip-tiers" onClick={() => setMenuOpen(false)}>💎 VIP Tiers</Link>
+                    
+                    <div className="nav-divider"></div>
+                    
+                    {/* Account & Settings */}
+                    <div className="menu-section-title">⚙️ Settings</div>
                     <Link to="/profile" onClick={() => setMenuOpen(false)}>👤 My Profile</Link>
+                    <Link to="/notifications" onClick={() => setMenuOpen(false)}>🔔 Notifications</Link>
+                    <Link to="/faq" onClick={() => setMenuOpen(false)}>❓ FAQ</Link>
                     <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-logout-btn">
                       🚪 Logout
                     </button>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Earnings & Mining Section */}
-                    <div className="menu-section-title">💰 Earnings & Mining</div>
-                    <Link to="/" onClick={() => setMenuOpen(false)}>🎮 Game Mining</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Rewards & Bonuses Section */}
-                    <div className="menu-section-title">🎁 Rewards & Bonuses</div>
-                    <Link to="/daily-rewards" onClick={() => setMenuOpen(false)}>Daily Rewards</Link>
-                    <Link to="/tasks" onClick={() => setMenuOpen(false)}>📋 Tasks & Missions</Link>
-                    <Link to="/airdrop" onClick={() => setMenuOpen(false)}>Airdrop</Link>
-                    <Link to="/referral" onClick={() => setMenuOpen(false)}>Referral</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Finance Section */}
-                    <div className="menu-section-title">💳 Finance</div>
-                    <Link to="/conversion" onClick={() => setMenuOpen(false)}>Convert & Withdraw</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Community Section */}
-                    <div className="menu-section-title">🏆 Community</div>
-                    <Link to="/leaderboard" onClick={() => setMenuOpen(false)}>Leaderboard</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Progress & Stats Section */}
-                    <div className="menu-section-title">📊 Progress & Stats</div>
-                    <Link to="/achievements" onClick={() => setMenuOpen(false)}>Achievements</Link>
-                    <Link to="/vip-tiers" onClick={() => setMenuOpen(false)}>💎 VIP Tiers</Link>
-                    <Link to="/notifications" onClick={() => setMenuOpen(false)}>🔔 Notifications</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Help & Support Section */}
-                    <div className="menu-section-title">❓ Help & Support</div>
-                    <Link to="/faq" onClick={() => setMenuOpen(false)}>FAQ</Link>
-                    
                   </>
                 )}
               </nav>

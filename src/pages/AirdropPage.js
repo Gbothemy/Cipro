@@ -127,8 +127,17 @@ function AirdropPage({ user, updateUser, addNotification }) {
       <div className="claim-section">
         <h3>Daily Rewards</h3>
         <p className="claim-description">
-          {canClaim ? 'Claim your daily airdrop rewards now!' : `Next claim in: ${timeUntilNextClaim}`}
+          {canClaim ? 'Claim your daily airdrop rewards now!' : 'Come back later for your next reward'}
         </p>
+        {!canClaim && timeUntilNextClaim && (
+          <div className="countdown-timer">
+            <div className="timer-icon">⏰</div>
+            <div className="timer-display">
+              <div className="timer-label">Next claim in:</div>
+              <div className="timer-value">{timeUntilNextClaim}</div>
+            </div>
+          </div>
+        )}
         <div className="streak-info">
           <span className="streak-icon">🔥</span>
           <span className="streak-text">{user.dayStreak} Day Streak</span>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import ActivityFeed from '../components/ActivityFeed';
 import './LeaderboardPage.css';
 
 function LeaderboardPage({ user }) {
@@ -187,6 +188,11 @@ function LeaderboardPage({ user }) {
       <div className="leaderboard-footer">
         <p>🔄 Updates every hour</p>
         <p>Keep playing to climb the ranks!</p>
+      </div>
+
+      {/* Live Activity Feed */}
+      <div style={{ marginTop: '30px' }}>
+        <ActivityFeed user={user} maxItems={6} compact={true} />
       </div>
     </div>
   );

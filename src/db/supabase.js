@@ -96,6 +96,11 @@ export const db = {
       if (updates.username !== undefined) updateData.username = updates.username;
       if (updates.email !== undefined) updateData.email = updates.email;
       if (updates.avatar !== undefined) updateData.avatar = updates.avatar;
+      
+      // Add mining fields if provided
+      if (updates.last_mine_time !== undefined) updateData.last_mine_time = updates.last_mine_time;
+      if (updates.total_mined !== undefined) updateData.total_mined = updates.total_mined;
+      if (updates.mining_sessions !== undefined) updateData.mining_sessions = updates.mining_sessions;
 
       const { data, error } = await supabase
         .from("users")
@@ -1088,6 +1093,9 @@ export const db = {
       completedTasks: dbUser.completed_tasks || 0,
       dayStreak: dbUser.day_streak || 0,
       lastClaim: dbUser.last_claim,
+      last_mine_time: dbUser.last_mine_time,
+      total_mined: dbUser.total_mined || 0,
+      mining_sessions: dbUser.mining_sessions || 0,
       balance: {
         sol: dbUser.balances?.[0]?.sol || dbUser.balances?.sol || 0,
         eth: dbUser.balances?.[0]?.eth || dbUser.balances?.eth || 0,
@@ -1230,4 +1238,108 @@ export const db = {
       };
     }
   },
+
+  // ==================== ACTIVITY FEED ====================
+  
+  async getRecentActivities(limit = 20, filter = 'all') {
+    try {
+      // This would query a real activities table in production
+      // For now, return empty array to trigger sample data generation
+      return [];
+    } catch (error) {
+      console.error('Error getting recent activities:', error);
+      return [];
+    }
+  },
+
+  // ==================== GAME ATTEMPTS OPERATIONS ====================
+
+  async recordGameAttempt(user_id, game_type, result = {}) {
+    try {
+      const { data, error } = await supabase
+        .from('game_attempts')
+        .insert([
+          {
+            user_id,
+            game_type,
+            won: result.won || false,
+            score: result.score || 0,
+            difficulty: result.difficulty || 'normal',
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error recording game attempt:', error);
+      return { success: false, error };
+    }
+  },
+
+  async getGameAttempts(user_id, game_type = null, hoursAgo = 24) {
+    try {
+      const timeAgo = new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString();
+      
+      let query = supabase
+        .from('game_attempts')
+        .select('*')
+        .eq('user_id', user_id)
+        .gte('created_at', timeAgo)
+        .order('created_at', { ascending: true });
+
+      if (game_type) {
+        query = query.eq('game_type', game_type);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting game attempts:', error);
+      return [];
+    }
+  },
+
+  async getGameStats(user_id, game_type = null) {
+    try {
+      let query = supabase
+        .from('game_attempts')
+        .select('*')
+        .eq('user_id', user_id);
+
+      if (game_type) {
+        query = query.eq('game_type', game_type);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const totalGames = data?.length || 0;
+      const gamesWon = data?.filter(g => g.won).length || 0;
+      const totalScore = data?.reduce((sum, g) => sum + (g.score || 0), 0) || 0;
+      const winRate = totalGames > 0 ? ((gamesWon / totalGames) * 100).toFixed(1) : 0;
+
+      return {
+        totalGames,
+        gamesWon,
+        gamesLost: totalGames - gamesWon,
+        totalScore,
+        winRate,
+        averageScore: totalGames > 0 ? Math.round(totalScore / totalGames) : 0
+      };
+    } catch (error) {
+      console.error('Error getting game stats:', error);
+      return {
+        totalGames: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        totalScore: 0,
+        winRate: 0,
+        averageScore: 0
+      };
+    }
+  }
 };

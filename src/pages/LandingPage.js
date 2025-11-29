@@ -7,7 +7,7 @@ function LandingPage() {
   
   // Hardcoded stats - not retrieved from database
   const stats = [
-    { value: '1ook+', label: 'Active Players' },
+    { value: '100k+', label: 'Active Players' },
     { value: '$10k+', label: 'Rewards Paid' },
     { value: '500k+', label: 'Tasks Completed' },
     { value: '4.9/5', label: 'User Rating' }

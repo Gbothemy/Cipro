@@ -19,18 +19,42 @@ function DailyMining({ user, updateUser, addNotification }) {
   const MINING_DURATION = 5000; // 5 seconds mining animation
   const BASE_REWARD = 200; // Base Cipro reward
   const VIP_MULTIPLIER = {
-    1: 1,
-    2: 1.2,
-    3: 1.5,
-    4: 2,
-    5: 2.5
+    // Bronze Tier (Levels 1-4) - FREE
+    1: 1, 2: 1, 3: 1, 4: 1,
+    // Silver Tier (Levels 5-8) - Subscription
+    5: 1.2, 6: 1.2, 7: 1.2, 8: 1.2,
+    // Gold Tier (Levels 9-12) - Subscription
+    9: 1.5, 10: 1.5, 11: 1.5, 12: 1.5,
+    // Platinum Tier (Levels 13-16) - Subscription
+    13: 2.0, 14: 2.0, 15: 2.0, 16: 2.0,
+    // Diamond Tier (Levels 17-20) - Subscription
+    17: 2.5, 18: 2.5, 19: 2.5, 20: 2.5
   };
 
   useEffect(() => {
     loadMiningData();
-    const interval = setInterval(updateCooldown, 1000);
-    return () => clearInterval(interval);
   }, [user.userId]);
+
+  // Update local state when user prop changes (e.g., after mining)
+  useEffect(() => {
+    if (user.last_mine_time) {
+      const lastMine = new Date(user.last_mine_time).getTime();
+      setLastMineTime(lastMine);
+    }
+    if (user.total_mined !== undefined) {
+      setTotalMined(user.total_mined);
+    }
+  }, [user.last_mine_time, user.total_mined]);
+
+  // Update cooldown timer every second (only when tab is visible)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        updateCooldown();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastMineTime]);
 
   const loadMiningData = async () => {
     try {
@@ -52,7 +76,8 @@ function DailyMining({ user, updateUser, addNotification }) {
       return;
     }
 
-    const elapsed = Date.now() - lastMineTime;
+    const now = Date.now();
+    const elapsed = now - lastMineTime;
     const remaining = COOLDOWN_MS - elapsed;
 
     if (remaining <= 0) {
@@ -125,18 +150,20 @@ function DailyMining({ user, updateUser, addNotification }) {
         total_mined: newTotalMined
       });
 
-      // Update local state
+      // Update local mining state first
+      const nowMs = Date.now();
+      setLastMineTime(nowMs);
+      setTotalMined(newTotalMined);
+
+      // Update parent component state with all data including mining fields
       updateUser({
         ...user,
         points: newPoints,
         vipLevel: newLevel,
-        exp: finalExp
+        exp: finalExp,
+        last_mine_time: now,
+        total_mined: newTotalMined
       });
-
-      // Update local mining state
-      const nowMs = Date.now();
-      setLastMineTime(nowMs);
-      setTotalMined(newTotalMined);
 
       // Show success
       setMining(false);
@@ -185,9 +212,15 @@ function DailyMining({ user, updateUser, addNotification }) {
           <div className="mining-icon-large">⛏️</div>
           <div className="mining-info">
             <h4>8-Hour Mining Session</h4>
-            <p className="mining-description">
-              {isAvailable ? 'Ready to mine!' : `Next mining in ${formatTime(timeUntilNext)}`}
-            </p>
+            {isAvailable ? (
+              <p className="mining-description mining-ready">
+                ✅ Ready to mine!
+              </p>
+            ) : (
+              <p className="mining-description mining-cooldown">
+                ⏰ Cooldown: <strong>{formatTime(timeUntilNext)}</strong>
+              </p>
+            )}
           </div>
         </div>
 

@@ -21,7 +21,7 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('vip_level')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (userError) throw userError;
@@ -29,14 +29,14 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
     const vipLevel = userData?.vip_level || 1;
     const dailyLimit = getDailyAttemptLimit(vipLevel);
 
-    // Get attempts from last 24 hours
+    // Get ALL game attempts from last 24 hours (not filtered by game type)
+    // Daily limit applies to all games combined
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     
     const { data: attempts, error: attemptsError } = await supabase
       .from('game_attempts')
       .select('*')
       .eq('user_id', userId)
-      .eq('game_type', gameType)
       .gte('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: true });
 
@@ -77,6 +77,8 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
 // Record a game attempt
 export const recordGameAttempt = async (userId, gameType = 'puzzle', result = {}) => {
   try {
+    console.log('Recording game attempt:', { userId, gameType, result });
+    
     const { data, error } = await supabase
       .from('game_attempts')
       .insert([
@@ -85,17 +87,35 @@ export const recordGameAttempt = async (userId, gameType = 'puzzle', result = {}
           game_type: gameType,
           won: result.won || false,
           score: result.score || 0,
-          difficulty: result.difficulty || 'easy',
+          difficulty: result.difficulty || 'normal',
           created_at: new Date().toISOString()
         }
-      ]);
+      ])
+      .select()
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        fullError: error
+      });
+      throw error;
+    }
 
+    console.log('Game attempt recorded successfully:', data);
     return { success: true, data };
   } catch (error) {
-    console.error('Error recording game attempt:', error);
-    return { success: false, error };
+    console.error('Error recording game attempt:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+      fullError: error
+    });
+    return { success: false, error: error.message || 'Failed to record game attempt' };
   }
 };
 
@@ -200,7 +220,7 @@ export const shouldShowVIPUpgrade = (attemptsRemaining, vipTier) => {
 
 // Get next VIP tier benefits
 export const getNextTierBenefits = (currentVipLevel) => {
-  if (currentVipLevel >= 5) {
+  if (currentVipLevel >= 20) {
     return null; // Already at max level
   }
   
@@ -215,7 +235,7 @@ export const getNextTierBenefits = (currentVipLevel) => {
     level: nextLevel,
     limit: nextLimit,
     increase,
-    message: `Upgrade to ${nextConfig.name} ${nextConfig.icon} for ${increase} more daily attempts!`
+    message: increase > 0 ? `Upgrade to ${nextConfig.name} ${nextConfig.icon} for ${increase} more daily attempts!` : `Level up to ${nextConfig.name} Level ${nextLevel}!`
   };
 };
 

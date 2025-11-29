@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
-import Achievements from '../components/Achievements';
 import DailyMining from '../components/DailyMining';
+import ActivityFeed from '../components/ActivityFeed';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
 import TriviaGame from '../games/TriviaGame';
 import GoogleAd, { AdSlots } from '../components/GoogleAd';
+import gameAttemptManager from '../utils/gameAttemptManager';
 import './GamePage.css';
 
 function GamePage({ user, updateUser, addNotification }) {
   const [mining, setMining] = useState({});
   const [cooldowns, setCooldowns] = useState({});
   const [activeGame, setActiveGame] = useState(null);
+  const [gameAttempts, setGameAttempts] = useState({
+    canPlay: true,
+    attemptsUsed: 0,
+    attemptsRemaining: 5,
+    dailyLimit: 5,
+    vipTier: 'Bronze',
+    resetTime: null,
+    timeUntilReset: 'Loading...'
+  });
 
   const miningModes = [
     { id: 'puzzle', name: 'Puzzle Challenge', icon: '🧩', reward: 50, duration: 2000, cooldown: 30000, expReward: 10, hasGame: true, gameType: 'puzzle' },
@@ -41,7 +51,45 @@ function GamePage({ user, updateUser, addNotification }) {
         console.error('Error loading cooldowns:', e);
       }
     }
-  }, []);
+
+    // Load game attempt limits
+    loadGameAttempts();
+  }, [user.userId]);
+
+  // Update game attempts timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Only update when tab is visible (performance optimization)
+      if (document.visibilityState === 'visible' && gameAttempts.resetTime) {
+        const timeUntil = gameAttemptManager.getTimeUntilReset(gameAttempts.resetTime);
+        setGameAttempts(prev => ({
+          ...prev,
+          timeUntilReset: timeUntil.formatted
+        }));
+
+        // If reset time has passed, reload attempts
+        if (timeUntil.hours === 0 && timeUntil.minutes === 0) {
+          loadGameAttempts();
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameAttempts.resetTime]);
+
+  const loadGameAttempts = async () => {
+    try {
+      const attemptData = await gameAttemptManager.canPlayGame(user.userId, 'puzzle');
+      const timeUntil = gameAttemptManager.getTimeUntilReset(attemptData.resetTime);
+      
+      setGameAttempts({
+        ...attemptData,
+        timeUntilReset: timeUntil.formatted
+      });
+    } catch (error) {
+      console.error('Error loading game attempts:', error);
+    }
+  };
 
   useEffect(() => {
     // Save cooldowns to localStorage
@@ -65,11 +113,17 @@ function GamePage({ user, updateUser, addNotification }) {
     return () => timers.forEach(timer => timer && clearTimeout(timer));
   }, [cooldowns]);
 
-  const startMining = (mode) => {
+  const startMining = async (mode) => {
     if (mining[mode.id] || cooldowns[mode.id]) return;
 
-    // If it's a game, open the game modal
+    // If it's a game, check daily limits first
     if (mode.hasGame) {
+      if (!gameAttempts.canPlay) {
+        if (gameAttempts.attemptsRemaining === 0) {
+          addNotification(`Daily limit reached! ${gameAttempts.attemptsUsed}/${gameAttempts.dailyLimit} games played. Reset in ${gameAttempts.timeUntilReset}`, 'error');
+          return;
+        }
+      }
       setActiveGame(mode.gameType);
       return;
     }
@@ -152,10 +206,25 @@ function GamePage({ user, updateUser, addNotification }) {
     }
   };
 
-  const handleGameComplete = (won, points) => {
+  const handleGameComplete = async (won, points) => {
     const mode = miningModes.find(m => m.gameType === activeGame);
     if (mode) {
-      completeMining(mode, points);
+      // Record the game attempt FIRST
+      const recordResult = await gameAttemptManager.recordGameAttempt(user.userId, mode.gameType, {
+        won: won,
+        score: points,
+        difficulty: 'normal'
+      });
+
+      if (recordResult.success) {
+        // Complete mining and give rewards
+        await completeMining(mode, points);
+
+        // Reload game attempts from database to get updated count
+        await loadGameAttempts();
+      } else {
+        addNotification('Error recording game attempt. Please try again.', 'error');
+      }
     }
     setActiveGame(null);
   };
@@ -182,16 +251,16 @@ function GamePage({ user, updateUser, addNotification }) {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">🎯</div>
+          <div className="stat-icon">🎮</div>
           <div className="stat-info">
-            <div className="stat-value">{user.completedTasks}</div>
-            <div className="stat-label">Completed Tasks</div>
+            <div className="stat-value">{gameAttempts.attemptsRemaining}/{gameAttempts.dailyLimit}</div>
+            <div className="stat-label">Games Left</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">🔥</div>
           <div className="stat-info">
-            <div className="stat-value">7</div>
+            <div className="stat-value">{user.dayStreak || 0}</div>
             <div className="stat-label">Day Streak</div>
           </div>
         </div>
@@ -203,6 +272,23 @@ function GamePage({ user, updateUser, addNotification }) {
           </div>
         </div>
       </div>
+
+      {/* Daily Limits Info */}
+      {gameAttempts.attemptsRemaining === 0 && (
+        <div className="daily-limits-info">
+          <div className="limits-card">
+            <div className="limits-icon">⏰</div>
+            <div className="limits-content">
+              <h3>Daily Game Limit Reached</h3>
+              <p>You've played {gameAttempts.attemptsUsed}/{gameAttempts.dailyLimit} games today as a {gameAttempts.vipTier} member.</p>
+              <p className="reset-time">Games reset in: <strong>{gameAttempts.timeUntilReset}</strong></p>
+              {gameAttempts.vipTier !== 'Diamond' && (
+                <p className="upgrade-hint">💡 Upgrade your VIP level for more daily games!</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <h3 className="section-title">Mining Modes</h3>
       <div className="mining-grid">
@@ -222,9 +308,12 @@ function GamePage({ user, updateUser, addNotification }) {
               <button 
                 className="start-btn"
                 onClick={() => startMining(mode)}
-                disabled={isMining || isOnCooldown}
+                disabled={isMining || isOnCooldown || (mode.hasGame && !gameAttempts.canPlay)}
               >
-                {isMining ? 'Mining...' : isOnCooldown ? `${cooldownTime}s` : mode.hasGame ? 'Play Game' : 'Start'}
+                {isMining ? 'Mining...' : 
+                 isOnCooldown ? `${cooldownTime}s` : 
+                 mode.hasGame && !gameAttempts.canPlay ? 'Limit Reached' :
+                 mode.hasGame ? 'Play Game' : 'Start'}
               </button>
               {isMining && (
                 <div className="progress-bar">
@@ -247,7 +336,8 @@ function GamePage({ user, updateUser, addNotification }) {
       {/* Google AdSense - In-Article */}
       <GoogleAd slot={AdSlots.IN_ARTICLE} format="fluid" />
 
-      <Achievements user={user} />
+      {/* Live Activity Feed */}
+      <ActivityFeed user={user} maxItems={8} />
 
       {/* Game Modals */}
       {activeGame === 'puzzle' && (

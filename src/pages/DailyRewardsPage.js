@@ -23,6 +23,10 @@ function DailyRewardsPage({ user, updateUser, addNotification }) {
 
   useEffect(() => {
     checkClaimStatus();
+    
+    // Update timer every second
+    const interval = setInterval(checkClaimStatus, 1000);
+    return () => clearInterval(interval);
   }, [user.lastClaim]);
 
   const checkClaimStatus = () => {
