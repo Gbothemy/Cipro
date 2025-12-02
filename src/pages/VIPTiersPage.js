@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { VIP_LEVELS, getSubscriptionPrice, getYearlySavings, getSavingsPercentage } from '../utils/vipConfig';
+import DepositModal from '../components/DepositModal';
 import './VIPTiersPage.css';
 
 function VIPTiersPage({ user, addNotification }) {
   const [billingCycle, setBillingCycle] = useState('monthly'); // monthly or yearly
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedTier, setSelectedTier] = useState(null);
 
   const tiers = [
     {
@@ -364,6 +367,21 @@ function VIPTiersPage({ user, addNotification }) {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedTier && (
+        <DepositModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedTier(null);
+          }}
+          user={user}
+          addNotification={addNotification}
+          subscriptionTier={selectedTier}
+          billingCycle={billingCycle}
+        />
+      )}
     </div>
   );
 }

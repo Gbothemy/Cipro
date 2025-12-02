@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { db } from '../db/supabase';
 import { getVIPConfig } from '../utils/vipConfig';
+import { COMPANY_WALLETS } from '../config/walletConfig';
 import RevenueDashboard from './RevenueDashboard';
 import './AdminPage.css';
 
@@ -891,6 +892,56 @@ function AdminPage({ user, addNotification }) {
                 />
               </label>
               <button onClick={saveSystemSettings} className="save-btn">💾 Save Settings</button>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <h3>💰 Company Wallet Addresses</h3>
+            <div className="wallet-addresses">
+              {Object.entries(COMPANY_WALLETS).map(([currency, wallet]) => (
+                wallet.address && (
+                  <div key={currency} className="wallet-card">
+                    <div className="wallet-header">
+                      <span className="wallet-icon">{wallet.icon}</span>
+                      <h4>{wallet.displayName}</h4>
+                    </div>
+                    <div className="wallet-details">
+                      <div className="detail-row">
+                        <span className="label">Network:</span>
+                        <span className="value">{wallet.network}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="label">Address:</span>
+                        <div className="address-display">
+                          <code>{wallet.address}</code>
+                          <button
+                            onClick={() => copyToClipboard(wallet.address, `${currency} address`)}
+                            className="copy-icon-btn"
+                            title="Copy address"
+                          >
+                            📋
+                          </button>
+                        </div>
+                      </div>
+                      {wallet.trustWalletLink && (
+                        <div className="detail-row">
+                          <span className="label">Payment Link:</span>
+                          <button
+                            onClick={() => copyToClipboard(wallet.trustWalletLink, 'Payment link')}
+                            className="copy-link-small-btn"
+                          >
+                            📋 Copy Link
+                          </button>
+                        </div>
+                      )}
+                      <div className="detail-row">
+                        <span className="label">Min Deposit:</span>
+                        <span className="value">{wallet.minDeposit} {currency}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              ))}
             </div>
           </div>
 
