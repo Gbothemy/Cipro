@@ -200,15 +200,15 @@ const sendToCustomAnalytics = async (eventName, parameters) => {
 
 // Performance Monitoring
 export const trackPerformance = () => {
+  let lcpReported = false;
+  
   // Core Web Vitals
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      if (entry.entryType === 'largest-contentful-paint') {
+      if (entry.entryType === 'largest-contentful-paint' && !lcpReported) {
         const lcpValue = Math.round(entry.startTime);
-        trackEvent('lcp_measurement', {
-          value: lcpValue,
-          category: 'performance'
-        });
+        lcpReported = true; // Prevent duplicate reports
+        
         trackEvent('web_vital_lcp', {
           value: lcpValue,
           category: 'performance'

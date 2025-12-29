@@ -109,11 +109,11 @@ function GoogleAd({
 
 // Predefined ad slots for different positions
 export const AdSlots = {
-  HEADER_BANNER: '1234567890', // Replace with your actual slot IDs
-  SIDEBAR: '1234567891',
-  IN_ARTICLE: '1234567892',
-  FOOTER: '1234567893',
-  MOBILE_BANNER: '1234567894'
+  HEADER_BANNER: '3940256099942544', // Test banner slot
+  SIDEBAR: '6300978111', // Test sidebar slot  
+  IN_ARTICLE: '1033173712', // Test in-article slot
+  FOOTER: '8865606923', // Test footer slot
+  MOBILE_BANNER: '4411991915' // Test mobile banner slot
 };
 
 export default GoogleAd;
