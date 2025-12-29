@@ -345,6 +345,3 @@ export const initializeAnalytics = (config = {}) => {
 
   console.log('🔍 Analytics initialized successfully');
 };
-
-// Export for use in components
-export { trackEvent, trackCryptoEvents };
