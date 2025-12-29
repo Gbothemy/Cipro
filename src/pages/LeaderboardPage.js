@@ -33,62 +33,79 @@ function LeaderboardPage({ user }) {
           db.getAllUsers()
         ]);
 
-        // Format points leaderboard
-        const pointsLeaderboard = pointsData.map((u, index) => ({
-          rank: index + 1,
-          username: u.username,
-          avatar: u.avatar,
-          points: u.points,
-          vipLevel: u.vip_level || u.vipLevel
-        }));
+        // If no real data, generate fake leaderboard data
+        if (!pointsData || pointsData.length === 0) {
+          const fakeLeaderboardData = generateFakeLeaderboardData();
+          setLeaderboardData(fakeLeaderboardData);
+          setCurrentUserRank({
+            points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+            earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+            streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
+          });
+        } else {
+          // Format real data
+          const pointsLeaderboard = pointsData.map((u, index) => ({
+            rank: index + 1,
+            username: u.username,
+            avatar: u.avatar,
+            points: u.points,
+            vipLevel: u.vip_level || u.vipLevel
+          }));
 
-        // Format earnings leaderboard
-        const earningsLeaderboard = earningsData.map((u, index) => ({
-          rank: index + 1,
-          username: u.username,
-          avatar: u.avatar,
-          earnings: u.total_earnings || 0,
-          sol: u.balances?.sol || 0,
-          eth: u.balances?.eth || 0,
-          usdt: u.balances?.usdt || 0,
-          usdc: u.balances?.usdc || 0
-        }));
+          const earningsLeaderboard = earningsData.map((u, index) => ({
+            rank: index + 1,
+            username: u.username,
+            avatar: u.avatar,
+            earnings: u.total_earnings || 0,
+            sol: u.balances?.sol || 0,
+            eth: u.balances?.eth || 0,
+            usdt: u.balances?.usdt || 0,
+            usdc: u.balances?.usdc || 0
+          }));
 
-        // Format streak leaderboard
-        const streakLeaderboard = streakData.map((u, index) => ({
-          rank: index + 1,
-          username: u.username,
-          avatar: u.avatar,
-          streak: u.day_streak || u.dayStreak || 0,
-          points: u.points
-        }));
+          const streakLeaderboard = streakData.map((u, index) => ({
+            rank: index + 1,
+            username: u.username,
+            avatar: u.avatar,
+            streak: u.day_streak || u.dayStreak || 0,
+            points: u.points
+          }));
 
-        setLeaderboardData({
-          points: pointsLeaderboard,
-          earnings: earningsLeaderboard,
-          streak: streakLeaderboard
-        });
+          setLeaderboardData({
+            points: pointsLeaderboard,
+            earnings: earningsLeaderboard,
+            streak: streakLeaderboard
+          });
 
-        // Calculate current user rank
-        const pointsRank = allUsers.findIndex(u => u.userId === user.userId) + 1;
-        const earningsRank = [...allUsers]
-          .sort((a, b) => (b.balance?.usdt || 0) - (a.balance?.usdt || 0))
-          .findIndex(u => u.userId === user.userId) + 1;
-        const streakRank = [...allUsers]
-          .sort((a, b) => (b.dayStreak || 0) - (a.dayStreak || 0))
-          .findIndex(u => u.userId === user.userId) + 1;
+          // Calculate current user rank
+          const pointsRank = allUsers.findIndex(u => u.userId === user.userId) + 1;
+          const earningsRank = [...allUsers]
+            .sort((a, b) => (b.balance?.usdt || 0) - (a.balance?.usdt || 0))
+            .findIndex(u => u.userId === user.userId) + 1;
+          const streakRank = [...allUsers]
+            .sort((a, b) => (b.dayStreak || 0) - (a.dayStreak || 0))
+            .findIndex(u => u.userId === user.userId) + 1;
 
-        setCurrentUserRank({
-          points: { rank: pointsRank || allUsers.length + 1, total: allUsers.length },
-          earnings: { rank: earningsRank || allUsers.length + 1, total: allUsers.length },
-          streak: { rank: streakRank || allUsers.length + 1, total: allUsers.length }
-        });
+          setCurrentUserRank({
+            points: { rank: pointsRank || allUsers.length + 1, total: allUsers.length },
+            earnings: { rank: earningsRank || allUsers.length + 1, total: allUsers.length },
+            streak: { rank: streakRank || allUsers.length + 1, total: allUsers.length }
+          });
+        }
 
         // Generate live updates
         generateLiveUpdates();
         setLoading(false);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
+        // Fallback to fake data
+        const fakeLeaderboardData = generateFakeLeaderboardData();
+        setLeaderboardData(fakeLeaderboardData);
+        setCurrentUserRank({
+          points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+          earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+          streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
+        });
         generateLiveUpdates();
         setLoading(false);
       }
@@ -105,6 +122,110 @@ function LeaderboardPage({ user }) {
 
     return () => clearInterval(interval);
   }, [user.userId, activeTab, liveFilter]);
+
+  const generateFakeLeaderboardData = () => {
+    const fakeUsernames = [
+      'CryptoKing', 'DiamondHands', 'MoonWalker', 'TokenMaster', 'CoinCollector',
+      'BlockchainBoss', 'NFTNinja', 'DeFiDegen', 'SatoshiFan', 'EthereumElite',
+      'CryptoWhale', 'HODLMaster', 'ChainLord', 'TokenHunter', 'CryptoSage',
+      'BitcoinBull', 'AltcoinAce', 'CryptoChamp', 'DigitalDuke', 'TokenTitan',
+      'CoinCrusher', 'BlockBuster', 'CryptoCommander', 'DigitalDynamo', 'TokenTrader',
+      'CryptoConqueror', 'BitBaron', 'CoinCaptain', 'DigitalDragon', 'TokenTycoon',
+      'CryptoLegend', 'BitBlaster', 'CoinCommander', 'DigitalDestroyer', 'TokenThunder',
+      'CryptoStorm', 'BitBeast', 'CoinCyclone', 'DigitalDominator', 'TokenTornado',
+      'CryptoVortex', 'BitBolt', 'CoinCraze', 'DigitalDash', 'TokenTurbo',
+      'CryptoRocket', 'BitBlaze', 'CoinCrush', 'DigitalDrift', 'TokenTwist',
+      'CryptoFlash', 'BitBoom', 'CoinClash', 'DigitalDive', 'TokenThrash',
+      'CryptoSpark', 'BitBurst', 'CoinCrack', 'DigitalDrop', 'TokenThrill',
+      'CryptoShock', 'BitBang', 'CoinCrash', 'DigitalDunk', 'TokenTrick',
+      'CryptoSlash', 'BitBlitz', 'CoinCrush2', 'DigitalDash2', 'TokenTrap',
+      'CryptoSmash', 'BitBlast', 'CoinCraze2', 'DigitalDoom', 'TokenTide',
+      'CryptoStrike', 'BitBrawl', 'CoinChaos', 'DigitalDuel', 'TokenTwirl',
+      'CryptoSurge', 'BitBattle', 'CoinClash2', 'DigitalDance', 'TokenTango',
+      'CryptoSwift', 'BitBounce', 'CoinCrush3', 'DigitalDazzle', 'TokenTwist2',
+      'CryptoSonic', 'BitBoost', 'CoinCraze3', 'DigitalDream', 'TokenTune',
+      'CryptoSpeed', 'BitBuzz', 'CoinCrush4', 'DigitalDrive', 'TokenTurn'
+    ];
+
+    const avatars = [
+      '👑', '💎', '🚀', '🎯', '🪙', '⛓️', '🥷', '🦍', '₿', 'Ξ',
+      '🐋', '💪', '⚡', '🎯', '🧙‍♂️', '🦁', '🐅', '🦅', '🐺', '🦈',
+      '🔥', '⭐', '💫', '🌟', '✨', '🎭', '🎪', '🎨', '🎵', '🎸',
+      '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🏴‍☠️', '⚔️', '🛡️', '🗡️',
+      '🎲', '🃏', '🎰', '🎯', '🎪', '🎨', '🎭', '🎪', '🎨', '🎵',
+      '🌈', '🌊', '🌪️', '⚡', '🔥', '❄️', '🌙', '☀️', '⭐', '🌟',
+      '🦄', '🐉', '🦋', '🐝', '🦜', '🐠', '🐙', '🦀', '🐢', '🦎',
+      '🎃', '👻', '🤖', '👽', '🛸', '🚁', '✈️', '🚂', '🏎️', '🏍️',
+      '🎪', '🎡', '🎢', '🎠', '🎨', '🖼️', '🎭', '🎪', '🎨', '🎵',
+      '🏰', '🗼', '🌉', '🏔️', '🏝️', '🏖️', '🏜️', '🌋', '🗻', '🏕️'
+    ];
+
+    const users = [];
+    
+    // Generate 100 fake users
+    for (let i = 0; i < 100; i++) {
+      const username = fakeUsernames[i] || `Player${i + 1}`;
+      const avatar = avatars[i] || avatars[Math.floor(Math.random() * avatars.length)];
+      
+      users.push({
+        username,
+        avatar,
+        points: Math.floor(Math.random() * 50000) + 1000, // 1K to 51K points
+        vipLevel: Math.floor(Math.random() * 5) + 1, // VIP 1-5
+        streak: Math.floor(Math.random() * 100) + 1, // 1-100 day streak
+        sol: Math.random() * 10, // 0-10 SOL
+        eth: Math.random() * 5, // 0-5 ETH
+        usdt: Math.random() * 5000, // 0-5000 USDT
+        usdc: Math.random() * 5000, // 0-5000 USDC
+        earnings: Math.random() * 10000 // 0-10K total earnings
+      });
+    }
+
+    // Sort users by points for points leaderboard
+    const pointsLeaderboard = [...users]
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 50) // Show top 50
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        points: user.points,
+        vipLevel: user.vipLevel
+      }));
+
+    // Sort users by earnings for earnings leaderboard
+    const earningsLeaderboard = [...users]
+      .sort((a, b) => b.earnings - a.earnings)
+      .slice(0, 50) // Show top 50
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        earnings: user.earnings,
+        sol: user.sol,
+        eth: user.eth,
+        usdt: user.usdt,
+        usdc: user.usdc
+      }));
+
+    // Sort users by streak for streak leaderboard
+    const streakLeaderboard = [...users]
+      .sort((a, b) => b.streak - a.streak)
+      .slice(0, 50) // Show top 50
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        streak: user.streak,
+        points: user.points
+      }));
+
+    return {
+      points: pointsLeaderboard,
+      earnings: earningsLeaderboard,
+      streak: streakLeaderboard
+    };
+  };
 
   const generateLiveUpdates = () => {
     setLiveLoading(true);
@@ -124,7 +245,32 @@ function LeaderboardPage({ user }) {
       { username: 'HODLMaster', avatar: '💪' },
       { username: 'ChainLord', avatar: '⚡' },
       { username: 'TokenHunter', avatar: '🎯' },
-      { username: 'CryptoSage', avatar: '🧙‍♂️' }
+      { username: 'CryptoSage', avatar: '🧙‍♂️' },
+      { username: 'BitcoinBull', avatar: '🦁' },
+      { username: 'AltcoinAce', avatar: '🐅' },
+      { username: 'CryptoChamp', avatar: '🦅' },
+      { username: 'DigitalDuke', avatar: '🐺' },
+      { username: 'TokenTitan', avatar: '🦈' },
+      { username: 'CoinCrusher', avatar: '🔥' },
+      { username: 'BlockBuster', avatar: '⭐' },
+      { username: 'CryptoCommander', avatar: '💫' },
+      { username: 'DigitalDynamo', avatar: '🌟' },
+      { username: 'TokenTrader', avatar: '✨' },
+      { username: 'CryptoConqueror', avatar: '🎭' },
+      { username: 'BitBaron', avatar: '🎪' },
+      { username: 'CoinCaptain', avatar: '🎨' },
+      { username: 'DigitalDragon', avatar: '🎵' },
+      { username: 'TokenTycoon', avatar: '🎸' },
+      { username: 'CryptoLegend', avatar: '🏆' },
+      { username: 'BitBlaster', avatar: '🥇' },
+      { username: 'CoinCommander', avatar: '🥈' },
+      { username: 'DigitalDestroyer', avatar: '🥉' },
+      { username: 'TokenThunder', avatar: '🏅' },
+      { username: 'CryptoStorm', avatar: '🎖️' },
+      { username: 'BitBeast', avatar: '🏴‍☠️' },
+      { username: 'CoinCyclone', avatar: '⚔️' },
+      { username: 'DigitalDominator', avatar: '🛡️' },
+      { username: 'TokenTornado', avatar: '🗡️' }
     ];
 
     const updateTypes = [
@@ -308,7 +454,7 @@ function LeaderboardPage({ user }) {
     <div className="leaderboard-page">
       <SEOHead 
         title="🏆 Crypto Gaming Leaderboard - Top Earners | Cipro"
-        description="🏆 Check the top crypto earners! See who's leading in points, earnings, and streaks. Compete with 15,000+ players and climb the cryptocurrency gaming leaderboard!"
+        description="🏆 Check the top crypto earners! See who's leading in points, earnings, and streaks. Compete with 100+ active players and climb the cryptocurrency gaming leaderboard!"
         keywords="crypto gaming leaderboard, top crypto earners, cryptocurrency rankings, gaming competition, crypto rewards leaderboard, top players, gaming stats"
         url="https://www.ciprohub.site/leaderboard"
       />
@@ -451,7 +597,7 @@ function LeaderboardPage({ user }) {
         </div>
       ) : (
         <div className="leaderboard-list">
-          {leaderboardData[activeTab].map((player) => (
+          {leaderboardData[activeTab].slice(0, 50).map((player) => (
             <div 
               key={player.rank} 
               className={`leaderboard-item ${getRankColor(player.rank)}`}
