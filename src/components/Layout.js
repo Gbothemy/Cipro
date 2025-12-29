@@ -10,6 +10,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [isDarkMode, setIsDarkMode] = useState(themeManager.isDark());
   const [logoError, setLogoError] = useState(false);
+  const [logoRetryCount, setLogoRetryCount] = useState(0);
   const location = useLocation();
 
   const toggleSound = () => {
@@ -46,30 +47,48 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="header-logo">
               {!logoError ? (
                 <img 
-                  src="/ciprohub.png"
-                  alt="CIPRO" 
+                  src={`/ciprohub.png?v=${logoRetryCount}`}
+                  alt="CIPRO Logo" 
                   className="logo-image"
+                  loading="eager"
                   onError={(e) => {
-                    console.log('Direct path failed, trying with PUBLIC_URL');
-                    if (!e.target.src.includes('PUBLIC_URL')) {
-                      e.target.src = `${process.env.PUBLIC_URL}/ciprohub.png`;
-                    } else if (!e.target.src.includes('.svg')) {
+                    console.log('Logo loading error:', e.target.src);
+                    const currentSrc = e.target.src;
+                    
+                    if (currentSrc.includes('/ciprohub.png') && !currentSrc.includes('PUBLIC_URL')) {
+                      console.log('Trying with PUBLIC_URL prefix');
+                      e.target.src = `${process.env.PUBLIC_URL}/ciprohub.png?v=${logoRetryCount}`;
+                    } else if (currentSrc.includes('ciprohub.png')) {
+                      console.log('Trying SVG fallback');
                       e.target.src = `${process.env.PUBLIC_URL}/cipro-logo.svg`;
-                    } else if (!e.target.src.includes('backup')) {
+                    } else if (currentSrc.includes('cipro-logo.svg')) {
+                      console.log('Trying backup SVG');
                       e.target.src = `${process.env.PUBLIC_URL}/cipro-logo-backup.svg`;
                     } else {
                       console.log('All logo attempts failed, using text fallback');
                       setLogoError(true);
                     }
                   }}
-                  onLoad={() => {
-                    console.log('Logo loaded successfully');
+                  onLoad={(e) => {
+                    console.log('Logo loaded successfully:', e.target.src);
+                    setLogoError(false);
                   }}
                 />
               ) : (
                 <div className="logo-text-container">
                   <span className="logo-text">CIPRO</span>
                   <span className="logo-subtitle">CRYPTO GAMING</span>
+                  <button 
+                    className="logo-retry-btn"
+                    onClick={() => {
+                      console.log('Retrying logo load, attempt:', logoRetryCount + 1);
+                      setLogoRetryCount(prev => prev + 1);
+                      setLogoError(false);
+                    }}
+                    title="Retry loading logo"
+                  >
+                    🔄
+                  </button>
                 </div>
               )}
             </div>
