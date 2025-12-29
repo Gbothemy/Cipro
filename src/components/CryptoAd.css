@@ -1,0 +1,245 @@
+.crypto-ad {
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.crypto-ad:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.crypto-ad::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.crypto-ad:hover::before {
+  opacity: 1;
+}
+
+.crypto-ad-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+}
+
+.crypto-ad-text {
+  flex: 1;
+}
+
+.crypto-ad-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.crypto-ad-description {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.95;
+  line-height: 1.3;
+}
+
+.crypto-ad-cta {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin-left: 16px;
+}
+
+.crypto-ad-cta:hover {
+  background: white;
+  color: #333;
+  transform: scale(1.05);
+}
+
+.crypto-ad-indicator {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+
+.indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+.indicator-dot:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+/* Banner specific styles */
+.crypto-ad-banner {
+  height: 90px;
+  max-width: 728px;
+}
+
+.crypto-ad-banner .crypto-ad-title {
+  font-size: 18px;
+}
+
+.crypto-ad-banner .crypto-ad-description {
+  font-size: 14px;
+}
+
+/* Square specific styles */
+.crypto-ad-square {
+  width: 300px;
+  height: 250px;
+  flex-direction: column;
+  text-align: center;
+  padding: 24px;
+}
+
+.crypto-ad-square .crypto-ad-content {
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.crypto-ad-square .crypto-ad-text {
+  margin-bottom: 16px;
+}
+
+.crypto-ad-square .crypto-ad-title {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.crypto-ad-square .crypto-ad-description {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.crypto-ad-square .crypto-ad-cta {
+  margin-left: 0;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+/* Skyscraper specific styles */
+.crypto-ad-skyscraper {
+  width: 160px;
+  height: 600px;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px 12px;
+}
+
+.crypto-ad-skyscraper .crypto-ad-content {
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.crypto-ad-skyscraper .crypto-ad-text {
+  margin-bottom: 20px;
+}
+
+.crypto-ad-skyscraper .crypto-ad-title {
+  font-size: 16px;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.crypto-ad-skyscraper .crypto-ad-description {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.crypto-ad-skyscraper .crypto-ad-cta {
+  margin-left: 0;
+  padding: 10px 16px;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .crypto-ad {
+    margin: 12px 0;
+    padding: 12px;
+  }
+  
+  .crypto-ad-title {
+    font-size: 14px;
+  }
+  
+  .crypto-ad-description {
+    font-size: 12px;
+  }
+  
+  .crypto-ad-cta {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .crypto-ad-square {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    padding: 16px;
+  }
+  
+  .crypto-ad-skyscraper {
+    display: none; /* Hide skyscraper on mobile */
+  }
+}
+
+/* Animation for ad transitions */
+@keyframes fadeInAd {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.crypto-ad {
+  animation: fadeInAd 0.5s ease;
+}
