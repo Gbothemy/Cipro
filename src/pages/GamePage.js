@@ -341,7 +341,13 @@ function GamePage({ user, updateUser, addNotification }) {
       <DailyMining user={user} updateUser={updateUser} addNotification={addNotification} />
 
       {/* Google AdSense - In-Article */}
-      <GoogleAd slot={AdSlots.IN_ARTICLE} format="fluid" />
+      <GoogleAd 
+        slot={AdSlots.IN_ARTICLE} 
+        format="auto" 
+        width={300} 
+        height={250}
+        style={{ margin: '20px auto', maxWidth: '100%' }}
+      />
 
       {/* Live Activity Feed */}
       <ActivityFeed user={user} maxItems={8} />

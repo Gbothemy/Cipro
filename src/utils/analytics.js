@@ -204,8 +204,13 @@ export const trackPerformance = () => {
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       if (entry.entryType === 'largest-contentful-paint') {
+        const lcpValue = Math.round(entry.startTime);
+        trackEvent('lcp_measurement', {
+          value: lcpValue,
+          category: 'performance'
+        });
         trackEvent('web_vital_lcp', {
-          value: Math.round(entry.startTime),
+          value: lcpValue,
           category: 'performance'
         });
       }
@@ -226,15 +231,26 @@ export const trackPerformance = () => {
     }
   });
 
-  observer.observe({entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']});
+  try {
+    observer.observe({entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']});
+  } catch (error) {
+    console.warn('Performance observer not supported:', error);
+  }
 
   // Page Load Performance
   window.addEventListener('load', () => {
-    const perfData = performance.getEntriesByType('navigation')[0];
-    trackEvent('page_load_time', {
-      value: Math.round(perfData.loadEventEnd - perfData.loadEventStart),
-      category: 'performance'
-    });
+    setTimeout(() => {
+      const perfData = performance.getEntriesByType('navigation')[0];
+      if (perfData && perfData.loadEventEnd > 0 && perfData.loadEventStart > 0) {
+        const loadTime = Math.round(perfData.loadEventEnd - perfData.loadEventStart);
+        if (loadTime > 0) {
+          trackEvent('page_load_time', {
+            value: loadTime,
+            category: 'performance'
+          });
+        }
+      }
+    }, 100); // Small delay to ensure timing data is available
   });
 };
 

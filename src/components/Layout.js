@@ -46,16 +46,29 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="header-logo">
               {!logoError ? (
                 <img 
-                  src="/cipro-logo.png" 
+                  src={`${process.env.PUBLIC_URL}/cipro-logo.png`}
                   alt="CIPRO" 
                   className="logo-image"
-                  onError={() => {
-                    console.log('Logo failed to load');
-                    setLogoError(true);
+                  onError={(e) => {
+                    console.log('PNG logo failed, trying SVG');
+                    // Try SVG fallback
+                    if (!e.target.src.includes('.svg')) {
+                      e.target.src = `${process.env.PUBLIC_URL}/cipro-logo.svg`;
+                    } else if (!e.target.src.includes('backup')) {
+                      e.target.src = `${process.env.PUBLIC_URL}/cipro-logo-backup.svg`;
+                    } else {
+                      setLogoError(true);
+                    }
+                  }}
+                  onLoad={() => {
+                    console.log('Logo loaded successfully');
                   }}
                 />
               ) : (
-                <span className="logo-text">CIPRO</span>
+                <div className="logo-text-container">
+                  <span className="logo-text">CIPRO</span>
+                  <span className="logo-subtitle">CRYPTO GAMING</span>
+                </div>
               )}
             </div>
           </div>
@@ -151,12 +164,24 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
 
         <main className="main-content">
           {/* Google AdSense - Top Banner */}
-          <GoogleAd slot={AdSlots.HEADER_BANNER} format="horizontal" />
+          <GoogleAd 
+            slot={AdSlots.HEADER_BANNER} 
+            format="auto" 
+            width={728} 
+            height={90}
+            style={{ maxWidth: '100%' }}
+          />
           
           {children}
           
           {/* Google AdSense - Footer Banner */}
-          <GoogleAd slot={AdSlots.FOOTER} format="horizontal" />
+          <GoogleAd 
+            slot={AdSlots.FOOTER} 
+            format="auto" 
+            width={728} 
+            height={90}
+            style={{ maxWidth: '100%' }}
+          />
           
           <footer className="footer desktop-only">
             <p>&copy; 2024 Cipro. All rights reserved.</p>

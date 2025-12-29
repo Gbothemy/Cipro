@@ -1,10 +1,13 @@
 .google-ad-container {
   margin: 20px 0;
   text-align: center;
-  min-height: 90px;
+  min-height: 250px;
+  min-width: 250px;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  max-width: 100%;
 }
 
 .google-ad-placeholder {
@@ -13,11 +16,14 @@
   background: white;
   border-radius: 10px;
   border: 1px solid #e0e0e0;
-  min-height: 90px;
+  min-height: 250px;
+  min-width: 250px;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .ad-placeholder-content {
@@ -88,6 +94,7 @@
   .google-ad-container,
   .google-ad-placeholder {
     margin: 15px 0;
-    min-height: 50px;
+    min-height: 250px;
+    min-width: 250px;
   }
 }
