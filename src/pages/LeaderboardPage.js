@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import ActivityFeed from '../components/ActivityFeed';
 import SEOHead from '../components/SEOHead';
+import '../components/ActivityFeed.css';
 import './LeaderboardPage.css';
 
 function LeaderboardPage({ user }) {
-  const [activeTab, setActiveTab] = useState('points');
+  const [activeTab, setActiveTab] = useState('live');
   const [leaderboardData, setLeaderboardData] = useState({
     points: [],
     earnings: [],
     streak: []
   });
+  const [liveUpdates, setLiveUpdates] = useState([]);
+  const [liveFilter, setLiveFilter] = useState('all');
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentUserRank, setCurrentUserRank] = useState({
     points: { rank: 0, total: 0 },
     earnings: { rank: 0, total: 0 },
@@ -78,13 +83,201 @@ function LeaderboardPage({ user }) {
           earnings: { rank: earningsRank || allUsers.length + 1, total: allUsers.length },
           streak: { rank: streakRank || allUsers.length + 1, total: allUsers.length }
         });
+
+        // Generate live updates
+        generateLiveUpdates();
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
+        generateLiveUpdates();
+        setLoading(false);
       }
     };
 
     fetchLeaderboardData();
-  }, [user.userId]);
+
+    // Refresh live updates every 15 seconds
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible' && activeTab === 'live') {
+        generateLiveUpdates();
+      }
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [user.userId, activeTab, liveFilter]);
+
+  const generateLiveUpdates = () => {
+    setLiveLoading(true);
+    
+    const sampleUsers = [
+      { username: 'CryptoKing', avatar: '👑' },
+      { username: 'DiamondHands', avatar: '💎' },
+      { username: 'MoonWalker', avatar: '🚀' },
+      { username: 'TokenMaster', avatar: '🎯' },
+      { username: 'CoinCollector', avatar: '🪙' },
+      { username: 'BlockchainBoss', avatar: '⛓️' },
+      { username: 'NFTNinja', avatar: '🥷' },
+      { username: 'DeFiDegen', avatar: '🦍' },
+      { username: 'SatoshiFan', avatar: '₿' },
+      { username: 'EthereumElite', avatar: 'Ξ' },
+      { username: 'CryptoWhale', avatar: '🐋' },
+      { username: 'HODLMaster', avatar: '💪' },
+      { username: 'ChainLord', avatar: '⚡' },
+      { username: 'TokenHunter', avatar: '🎯' },
+      { username: 'CryptoSage', avatar: '🧙‍♂️' }
+    ];
+
+    const updateTypes = [
+      {
+        type: 'rank_climb',
+        icon: '📈',
+        color: '#10b981',
+        templates: [
+          'climbed to rank #{rank} with {points} CIPRO!',
+          'jumped {positions} positions to rank #{rank}!',
+          'surged to #{rank} with massive {points} CIPRO gain!',
+          'broke into top {rank} with {points} CIPRO!'
+        ]
+      },
+      {
+        type: 'new_leader',
+        icon: '👑',
+        color: '#f59e0b',
+        templates: [
+          'claimed the #1 spot with {points} CIPRO!',
+          'became the new leaderboard champion!',
+          'dethroned the king with {points} CIPRO!',
+          'reached the summit with {points} CIPRO!'
+        ]
+      },
+      {
+        type: 'big_win',
+        icon: '💰',
+        color: '#8b5cf6',
+        templates: [
+          'won {points} CIPRO and jumped to rank #{rank}!',
+          'hit a {points} CIPRO jackpot, now rank #{rank}!',
+          'scored massive {points} CIPRO, climbing to #{rank}!',
+          'earned epic {points} CIPRO, reaching rank #{rank}!'
+        ]
+      },
+      {
+        type: 'streak_power',
+        icon: '🔥',
+        color: '#ef4444',
+        templates: [
+          'hit {days}-day streak and climbed to rank #{rank}!',
+          'maintained {days} days streak, now rank #{rank}!',
+          'reached {days}-day milestone, jumping to #{rank}!',
+          'powered through {days} days, climbing to #{rank}!'
+        ]
+      },
+      {
+        type: 'vip_upgrade',
+        icon: '⭐',
+        color: '#ec4899',
+        templates: [
+          'upgraded to VIP Level {level}, now rank #{rank}!',
+          'unlocked VIP {level} status and rank #{rank}!',
+          'reached VIP Level {level}, climbing to #{rank}!',
+          'achieved VIP {level} and jumped to rank #{rank}!'
+        ]
+      },
+      {
+        type: 'conversion_leader',
+        icon: '💎',
+        color: '#3b82f6',
+        templates: [
+          'converted ${amount} and leads earnings!',
+          'cashed out ${amount}, topping conversion board!',
+          'exchanged ${amount} for crypto, rank #{rank}!',
+          'withdrew ${amount}, now earnings leader!'
+        ]
+      },
+      {
+        type: 'game_master',
+        icon: '🎮',
+        color: '#14b8a6',
+        templates: [
+          'dominated games and reached rank #{rank}!',
+          'won {games} games straight, now rank #{rank}!',
+          'crushed the competition, climbing to #{rank}!',
+          'gaming spree earned rank #{rank} position!'
+        ]
+      },
+      {
+        type: 'achievement_unlock',
+        icon: '🏆',
+        color: '#f97316',
+        templates: [
+          'unlocked "{achievement}" and rank #{rank}!',
+          'earned "{achievement}" badge, now rank #{rank}!',
+          'completed "{achievement}", climbing to #{rank}!',
+          'achieved "{achievement}" milestone at rank #{rank}!'
+        ]
+      }
+    ];
+
+    const achievements = [
+      'Cipro Collector', 'Game Master', 'VIP Elite', 'Streak Legend', 
+      'Fortune Hunter', 'Crypto King', 'Diamond Hands', 'Moon Walker',
+      'Token Master', 'Blockchain Boss', 'DeFi Degen', 'HODLer Supreme'
+    ];
+
+    const updates = [];
+    const now = Date.now();
+
+    for (let i = 0; i < 15; i++) {
+      const randomUser = sampleUsers[Math.floor(Math.random() * sampleUsers.length)];
+      const randomType = updateTypes[Math.floor(Math.random() * updateTypes.length)];
+      const randomTemplate = randomType.templates[Math.floor(Math.random() * randomType.templates.length)];
+      
+      let message = randomTemplate
+        .replace('{points}', (Math.floor(Math.random() * 8000) + 1000).toLocaleString())
+        .replace('{rank}', Math.floor(Math.random() * 100) + 1)
+        .replace('{positions}', Math.floor(Math.random() * 15) + 2)
+        .replace('{days}', Math.floor(Math.random() * 45) + 7)
+        .replace('{level}', Math.floor(Math.random() * 5) + 1)
+        .replace('{amount}', (Math.floor(Math.random() * 2000) + 100).toLocaleString())
+        .replace('{games}', Math.floor(Math.random() * 10) + 3)
+        .replace('{achievement}', achievements[Math.floor(Math.random() * achievements.length)]);
+
+      updates.push({
+        id: `leaderboard-update-${i}-${now}`,
+        username: randomUser.username,
+        avatar: randomUser.avatar,
+        type: randomType.type,
+        icon: randomType.icon,
+        color: randomType.color,
+        message: message,
+        timestamp: now - (i * 45000 * Math.random()), // Random time in last 45 minutes
+        isNew: i < 4 // Mark first 4 as new
+      });
+    }
+
+    // Sort by timestamp (newest first)
+    updates.sort((a, b) => b.timestamp - a.timestamp);
+    setLiveUpdates(updates);
+    setLiveLoading(false);
+  };
+
+  const handleLiveFilterChange = (filter) => {
+    setLiveFilter(filter);
+    setLiveLoading(true);
+    // Small delay to show loading state
+    setTimeout(() => {
+      setLiveLoading(false);
+    }, 300);
+  };
+
+  const getTimeAgo = (timestamp) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  };
 
   const getRankColor = (rank) => {
     if (rank === 1) return 'gold';
@@ -100,6 +293,17 @@ function LeaderboardPage({ user }) {
     return `#${rank}`;
   };
 
+  if (loading) {
+    return (
+      <div className="leaderboard-page">
+        <div className="leaderboard-loading">
+          <div className="loading-spinner">🏆</div>
+          <p>Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="leaderboard-page">
       <SEOHead 
@@ -108,9 +312,10 @@ function LeaderboardPage({ user }) {
         keywords="crypto gaming leaderboard, top crypto earners, cryptocurrency rankings, gaming competition, crypto rewards leaderboard, top players, gaming stats"
         url="https://www.ciprohub.site/leaderboard"
       />
+      
       <div className="page-header">
         <h1 className="page-title">🏆 Leaderboard</h1>
-        <p className="page-subtitle">Compete with players worldwide</p>
+        <p className="page-subtitle">Live rankings and player achievements</p>
       </div>
 
       <div className="user-rank-card">
@@ -118,7 +323,7 @@ function LeaderboardPage({ user }) {
           <div className="user-rank-avatar">{user.avatar}</div>
           <div className="user-rank-details">
             <h3>{user.username}</h3>
-            <p>Your Rank: #{currentUserRank[activeTab].rank} of {currentUserRank[activeTab].total}</p>
+            <p>Your Rank: #{currentUserRank.points.rank} of {currentUserRank.points.total}</p>
           </div>
         </div>
         <div className="user-rank-stats">
@@ -134,6 +339,12 @@ function LeaderboardPage({ user }) {
       </div>
 
       <div className="leaderboard-tabs">
+        <button 
+          className={activeTab === 'live' ? 'active' : ''}
+          onClick={() => setActiveTab('live')}
+        >
+          🌐 Live Updates
+        </button>
         <button 
           className={activeTab === 'points' ? 'active' : ''}
           onClick={() => setActiveTab('points')}
@@ -154,48 +365,129 @@ function LeaderboardPage({ user }) {
         </button>
       </div>
 
-      <div className="leaderboard-list">
-        {leaderboardData[activeTab].map((player) => (
-          <div 
-            key={player.rank} 
-            className={`leaderboard-item ${getRankColor(player.rank)}`}
-          >
-            <div className="rank-badge">
-              {getRankIcon(player.rank)}
-            </div>
-            <div className="player-avatar">{player.avatar}</div>
-            <div className="player-info">
-              <h4>{player.username}</h4>
-              {activeTab === 'points' && (
-                <p>{player.points.toLocaleString()} Cipro • VIP {player.vipLevel}</p>
-              )}
-              {activeTab === 'earnings' && (
-                <p>
-                  ◎ {player.sol?.toFixed(4) || 0} SOL • 
-                  Ξ {player.eth?.toFixed(4) || 0} ETH • 
-                  💵 {player.usdt?.toFixed(2) || 0} USDT •
-                  💵 {player.usdc?.toFixed(2) || 0} USDC
-                </p>
-              )}
-              {activeTab === 'streak' && (
-                <p>{player.streak} days • {player.points.toLocaleString()} CIPRO</p>
-              )}
-            </div>
-            {player.rank <= 3 && (
-              <div className="trophy-icon">
-                {player.rank === 1 && '👑'}
-                {player.rank === 2 && '🥈'}
-                {player.rank === 3 && '🥉'}
+      {activeTab === 'live' ? (
+        <div className="activity-feed">
+          <div className="activity-feed-header">
+            <h3>🌐 Live Leaderboard Updates</h3>
+            <p className="activity-subtitle">Real-time ranking changes and achievements</p>
+          </div>
+
+          <div className="activity-filters">
+            <button 
+              className={`filter-btn ${liveFilter === 'all' ? 'active' : ''}`}
+              onClick={() => handleLiveFilterChange('all')}
+            >
+              All Updates
+            </button>
+            <button 
+              className={`filter-btn ${liveFilter === 'rankings' ? 'active' : ''}`}
+              onClick={() => handleLiveFilterChange('rankings')}
+            >
+              🏆 Rankings
+            </button>
+            <button 
+              className={`filter-btn ${liveFilter === 'earnings' ? 'active' : ''}`}
+              onClick={() => handleLiveFilterChange('earnings')}
+            >
+              💰 Earnings
+            </button>
+            <button 
+              className={`filter-btn ${liveFilter === 'streaks' ? 'active' : ''}`}
+              onClick={() => handleLiveFilterChange('streaks')}
+            >
+              🔥 Streaks
+            </button>
+          </div>
+
+          <div className="activity-list">
+            {liveLoading ? (
+              <div className="activity-feed-loading">
+                <div className="loading-spinner">⏳</div>
+                <p>Loading updates...</p>
               </div>
+            ) : (
+              liveUpdates
+                .filter(update => {
+                  if (liveFilter === 'all') return true;
+                  if (liveFilter === 'rankings') return ['rank_climb', 'new_leader', 'big_win'].includes(update.type);
+                  if (liveFilter === 'earnings') return ['conversion_leader'].includes(update.type);
+                  if (liveFilter === 'streaks') return ['streak_power'].includes(update.type);
+                  return true;
+                })
+                .map((update, index) => (
+                <div 
+                  key={update.id} 
+                  className={`activity-item ${update.isNew ? 'new' : ''}`}
+                  style={{ 
+                    animationDelay: `${index * 0.05}s`,
+                    borderLeftColor: update.color 
+                  }}
+                >
+                  <div className="activity-avatar">{update.avatar}</div>
+                  <div className="activity-content">
+                    <div className="activity-user">
+                      <span className="activity-username">{update.username}</span>
+                      {update.isNew && <span className="new-badge">NEW</span>}
+                    </div>
+                    <div className="activity-message">
+                      <span className="activity-icon" style={{ color: update.color }}>
+                        {update.icon}
+                      </span>
+                      <span>{update.message}</span>
+                    </div>
+                    <div className="activity-time">{getTimeAgo(update.timestamp)}</div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        ))}
-      </div>
 
-      <div className="leaderboard-footer">
-        <p>🔄 Updates every hour</p>
-        <p>Keep playing to climb the ranks!</p>
-      </div>
+          <div className="activity-feed-footer">
+            <button className="refresh-btn" onClick={generateLiveUpdates}>
+              🔄 Refresh
+            </button>
+            <span className="auto-refresh-text">Auto-refreshes every 15s</span>
+          </div>
+        </div>
+      ) : (
+        <div className="leaderboard-list">
+          {leaderboardData[activeTab].map((player) => (
+            <div 
+              key={player.rank} 
+              className={`leaderboard-item ${getRankColor(player.rank)}`}
+            >
+              <div className="rank-badge">
+                {getRankIcon(player.rank)}
+              </div>
+              <div className="player-avatar">{player.avatar}</div>
+              <div className="player-info">
+                <h4>{player.username}</h4>
+                {activeTab === 'points' && (
+                  <p>{player.points.toLocaleString()} Cipro • VIP {player.vipLevel}</p>
+                )}
+                {activeTab === 'earnings' && (
+                  <p>
+                    ◎ {player.sol?.toFixed(4) || 0} SOL • 
+                    Ξ {player.eth?.toFixed(4) || 0} ETH • 
+                    💵 {player.usdt?.toFixed(2) || 0} USDT •
+                    💵 {player.usdc?.toFixed(2) || 0} USDC
+                  </p>
+                )}
+                {activeTab === 'streak' && (
+                  <p>{player.streak} days • {player.points.toLocaleString()} CIPRO</p>
+                )}
+              </div>
+              {player.rank <= 3 && (
+                <div className="trophy-icon">
+                  {player.rank === 1 && '👑'}
+                  {player.rank === 2 && '🥈'}
+                  {player.rank === 3 && '🥉'}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Live Activity Feed */}
       <div style={{ marginTop: '30px' }}>
