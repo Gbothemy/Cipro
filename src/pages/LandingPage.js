@@ -93,8 +93,8 @@ function LandingPage() {
     <div className="landing-page">
       <SEOHead 
         title="🎮 Cipro - Play Games, Earn Real Cryptocurrency | Free SOL, ETH, USDT, USDC Rewards"
-        description="🚀 Join 15,000+ players earning real cryptocurrency by playing fun games! Earn SOL, ETH, USDT & USDC daily. Free to start, no investment required. Start earning crypto now!"
-        keywords="earn cryptocurrency, play to earn games, free crypto, SOL rewards, ETH rewards, USDT rewards, USDC rewards, blockchain games, crypto gaming, cryptocurrency platform, earn bitcoin, free cryptocurrency, crypto airdrops, gaming rewards, play games earn money, cryptocurrency mining games, crypto faucet, earn crypto online, free crypto games, blockchain gaming platform"
+        description="🚀 Join 100,000+ players earning real cryptocurrency by playing fun games! Earn SOL, ETH, USDT & USDC daily. Free to start, no investment required. Start earning crypto now!"
+        keywords="earn cryptocurrency, play to earn games, free crypto, SOL rewards, ETH rewards, USDT rewards, USDC rewards, blockchain games, crypto gaming, cryptocurrency platform, earn bitcoin, free cryptocurrency, crypto airdrops, gaming rewards, play games earn money, cryptocurrency mining games, crypto faucet, earn crypto online, free crypto games, blockchain gaming platform, ciprohub, cipro gaming, crypto tasks, daily crypto rewards"
         url="https://www.ciprohub.site"
         structuredData={structuredData}
       />
