@@ -32,11 +32,23 @@ function ReferralPage({ user, updateUser, addNotification }) {
         db.getReferralStats(user.userId)
       ]);
 
-      setReferrals(referralsData);
+      setReferrals(referralsData || []);
       setReferrer(referrerData);
-      setStats(statsData);
+      setStats(statsData || {
+        totalReferrals: 0,
+        activeReferrals: 0,
+        totalEarnings: { sol: 0, eth: 0, usdt: 0, usdc: 0 }
+      });
     } catch (error) {
       console.error('Error loading referral data:', error);
+      // Set fallback data instead of showing error
+      setReferrals([]);
+      setReferrer(null);
+      setStats({
+        totalReferrals: 0,
+        activeReferrals: 0,
+        totalEarnings: { sol: 0, eth: 0, usdt: 0, usdc: 0 }
+      });
       addNotification('Failed to load referral data', 'error');
     } finally {
       setLoading(false);
@@ -75,7 +87,7 @@ function ReferralPage({ user, updateUser, addNotification }) {
     window.open(url, '_blank');
   };
 
-  const totalEarnings = stats.totalEarnings;
+  const totalEarnings = stats?.totalEarnings || { sol: 0, eth: 0, usdt: 0, usdc: 0 };
 
   if (loading) {
     return (
@@ -170,18 +182,18 @@ function ReferralPage({ user, updateUser, addNotification }) {
 
       <div className="referral-stats">
         <div className="stat-item">
-          <span className="stat-value">{stats.totalReferrals}</span>
+          <span className="stat-value">{stats?.totalReferrals || 0}</span>
           <span className="stat-label">Total Referrals</span>
         </div>
         <div className="stat-item">
-          <span className="stat-value">{stats.activeReferrals}</span>
+          <span className="stat-value">{stats?.activeReferrals || 0}</span>
           <span className="stat-label">Active Referrals</span>
         </div>
       </div>
 
-      <h3 className="section-title">Your Referrals ({referrals.length})</h3>
+      <h3 className="section-title">Your Referrals ({referrals?.length || 0})</h3>
       
-      {referrals.length === 0 ? (
+      {!referrals || referrals.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">👥</div>
           <h4>No referrals yet</h4>
@@ -201,10 +213,10 @@ function ReferralPage({ user, updateUser, addNotification }) {
                 </div>
                 <p className="joined-date">Joined: {new Date(ref.joined).toLocaleDateString()}</p>
                 <div className="referral-earnings">
-                  <span>◎ {ref.sol.toFixed(4)}</span>
-                  <span>Ξ {ref.eth.toFixed(4)}</span>
-                  <span>💵 {ref.usdt.toFixed(2)}</span>
-                  <span>💵 {ref.usdc.toFixed(2)}</span>
+                  <span>◎ {(ref.sol || 0).toFixed(4)}</span>
+                  <span>Ξ {(ref.eth || 0).toFixed(4)}</span>
+                  <span>💵 {(ref.usdt || 0).toFixed(2)}</span>
+                  <span>💵 {(ref.usdc || 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>
