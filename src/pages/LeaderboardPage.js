@@ -25,79 +25,20 @@ function LeaderboardPage({ user }) {
   useEffect(() => {
     const fetchLeaderboardData = async () => {
       try {
-        // Fetch leaderboard data from Supabase
-        const [pointsData, earningsData, streakData, allUsers] = await Promise.all([
-          db.getLeaderboard('points', 10),
-          db.getLeaderboard('earnings', 10),
-          db.getLeaderboard('streak', 10),
-          db.getAllUsers()
-        ]);
-
-        // If no real data, generate fake leaderboard data
-        if (!pointsData || pointsData.length === 0) {
-          const fakeLeaderboardData = generateFakeLeaderboardData();
-          setLeaderboardData(fakeLeaderboardData);
-          setCurrentUserRank({
-            points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-            earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-            streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
-          });
-        } else {
-          // Format real data
-          const pointsLeaderboard = pointsData.map((u, index) => ({
-            rank: index + 1,
-            username: u.username,
-            avatar: u.avatar,
-            points: u.points,
-            vipLevel: u.vip_level || u.vipLevel
-          }));
-
-          const earningsLeaderboard = earningsData.map((u, index) => ({
-            rank: index + 1,
-            username: u.username,
-            avatar: u.avatar,
-            earnings: u.total_earnings || 0,
-            sol: u.balances?.sol || 0,
-            eth: u.balances?.eth || 0,
-            usdt: u.balances?.usdt || 0,
-            usdc: u.balances?.usdc || 0
-          }));
-
-          const streakLeaderboard = streakData.map((u, index) => ({
-            rank: index + 1,
-            username: u.username,
-            avatar: u.avatar,
-            streak: u.day_streak || u.dayStreak || 0,
-            points: u.points
-          }));
-
-          setLeaderboardData({
-            points: pointsLeaderboard,
-            earnings: earningsLeaderboard,
-            streak: streakLeaderboard
-          });
-
-          // Calculate current user rank
-          const pointsRank = allUsers.findIndex(u => u.userId === user.userId) + 1;
-          const earningsRank = [...allUsers]
-            .sort((a, b) => (b.balance?.usdt || 0) - (a.balance?.usdt || 0))
-            .findIndex(u => u.userId === user.userId) + 1;
-          const streakRank = [...allUsers]
-            .sort((a, b) => (b.dayStreak || 0) - (a.dayStreak || 0))
-            .findIndex(u => u.userId === user.userId) + 1;
-
-          setCurrentUserRank({
-            points: { rank: pointsRank || allUsers.length + 1, total: allUsers.length },
-            earnings: { rank: earningsRank || allUsers.length + 1, total: allUsers.length },
-            streak: { rank: streakRank || allUsers.length + 1, total: allUsers.length }
-          });
-        }
+        // Always use fake leaderboard data for now to show the 100 fake users
+        const fakeLeaderboardData = generateFakeLeaderboardData();
+        setLeaderboardData(fakeLeaderboardData);
+        setCurrentUserRank({
+          points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+          earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
+          streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
+        });
 
         // Generate live updates
         generateLiveUpdates();
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching leaderboard data:', error);
+        console.error('Error generating leaderboard data:', error);
         // Fallback to fake data
         const fakeLeaderboardData = generateFakeLeaderboardData();
         setLeaderboardData(fakeLeaderboardData);
