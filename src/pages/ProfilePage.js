@@ -267,136 +267,262 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
         </div>
       </div>
 
-      {/* Profile Edit Form */}
+      {/* Profile Edit Form - Redesigned */}
       {isEditing && (
-        <div className="profile-edit-section">
-          <div className="edit-form-card">
-            <h3>✏️ Edit Profile Information</h3>
-            <form onSubmit={handleEditSubmit} className="profile-edit-form">
-              
-              {/* Avatar Selection */}
-              <div className="form-group">
-                <label>Choose Avatar</label>
-                <div className="avatar-grid">
-                  {avatarOptions.map((avatar, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className={`avatar-option ${editForm.avatar === avatar ? 'selected' : ''}`}
-                      onClick={() => handleInputChange('avatar', avatar)}
-                    >
-                      {avatar}
-                    </button>
-                  ))}
+        <div className="profile-edit-overlay">
+          <div className="profile-edit-modal">
+            <div className="edit-modal-header">
+              <h2>✨ Edit Your Profile</h2>
+              <button 
+                className="close-edit-btn" 
+                onClick={handleCancelEdit}
+                disabled={loading}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="edit-modal-content">
+              {/* Live Preview Section */}
+              <div className="edit-preview-section">
+                <div className="preview-header">
+                  <h3>👀 Live Preview</h3>
+                  <p>See how your profile will look</p>
                 </div>
-              </div>
-
-              {/* Username */}
-              <div className="form-group">
-                <label htmlFor="username">Username</label>
-                <input
-                  type="text"
-                  id="username"
-                  value={editForm.username}
-                  onChange={(e) => handleInputChange('username', e.target.value)}
-                  className={errors.username ? 'error' : ''}
-                  placeholder="Enter your username"
-                  disabled={loading}
-                />
-                {errors.username && <span className="error-message">{errors.username}</span>}
-                <small className="form-hint">3-20 characters, letters, numbers, and underscores only</small>
-              </div>
-
-              {/* Email */}
-              <div className="form-group">
-                <label htmlFor="email">Email (Optional)</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={editForm.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={errors.email ? 'error' : ''}
-                  placeholder="Enter your email address"
-                  disabled={loading}
-                />
-                {errors.email && <span className="error-message">{errors.email}</span>}
-                <small className="form-hint">Used for important notifications and account recovery</small>
-              </div>
-
-              {/* Preview */}
-              <div className="profile-preview">
-                <h4>Preview</h4>
-                <div className="preview-card">
-                  <div className="preview-avatar">{editForm.avatar}</div>
-                  <div className="preview-info">
-                    <div className="preview-username">{editForm.username || 'Username'}</div>
-                    <div className="preview-email">{editForm.email || 'No email provided'}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Password Change Section */}
-              <div className="password-section">
-                <div className="password-header">
-                  <h4>🔒 Change Password</h4>
-                  <button
-                    type="button"
-                    className="toggle-password-btn"
-                    onClick={() => setShowPasswordSection(!showPasswordSection)}
-                  >
-                    {showPasswordSection ? 'Hide' : 'Change Password'}
-                  </button>
-                </div>
-                
-                {showPasswordSection && (
-                  <div className="password-form">
-                    <div className="form-group">
-                      <label htmlFor="currentPassword">Current Password</label>
-                      <input
-                        type="password"
-                        id="currentPassword"
-                        value={passwordForm.currentPassword}
-                        onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                        className={errors.currentPassword ? 'error' : ''}
-                        placeholder="Enter your current password"
-                        disabled={loading}
-                      />
-                      {errors.currentPassword && <span className="error-message">{errors.currentPassword}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="newPassword">New Password</label>
-                      <input
-                        type="password"
-                        id="newPassword"
-                        value={passwordForm.newPassword}
-                        onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                        className={errors.newPassword ? 'error' : ''}
-                        placeholder="Enter your new password"
-                        disabled={loading}
-                      />
-                      {errors.newPassword && <span className="error-message">{errors.newPassword}</span>}
-                      <small className="form-hint">At least 8 characters with uppercase, lowercase, and number</small>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="confirmPassword">Confirm New Password</label>
-                      <input
-                        type="password"
-                        id="confirmPassword"
-                        value={passwordForm.confirmPassword}
-                        onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                        className={errors.confirmPassword ? 'error' : ''}
-                        placeholder="Confirm your new password"
-                        disabled={loading}
-                      />
-                      {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                <div className="live-preview-card">
+                  <div className="preview-banner" style={{ background: `linear-gradient(135deg, ${tier.color} 0%, #764ba2 100%)` }}>
+                    <div className="preview-avatar-large">{editForm.avatar}</div>
+                    <div className="preview-profile-info">
+                      <h3>{editForm.username || 'Your Username'}</h3>
+                      <p>{editForm.email || 'your.email@example.com'}</p>
+                      <div className="preview-tier-badge" style={{ background: tier.color }}>
+                        <span>{tier.icon}</span>
+                        <span>{tier.name} Tier</span>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
-            </form>
+              {/* Edit Form Section */}
+              <div className="edit-form-section">
+                <form onSubmit={handleEditSubmit} className="modern-edit-form">
+                  
+                  {/* Avatar Selection - Redesigned */}
+                  <div className="form-section">
+                    <div className="section-header">
+                      <h4>🎭 Choose Your Avatar</h4>
+                      <p>Pick an avatar that represents you</p>
+                    </div>
+                    <div className="avatar-selector">
+                      <div className="current-avatar">
+                        <div className="current-avatar-display">{editForm.avatar}</div>
+                        <span>Current</span>
+                      </div>
+                      <div className="avatar-options-grid">
+                        {avatarOptions.slice(0, 20).map((avatar, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            className={`avatar-option-modern ${editForm.avatar === avatar ? 'selected' : ''}`}
+                            onClick={() => handleInputChange('avatar', avatar)}
+                          >
+                            {avatar}
+                          </button>
+                        ))}
+                      </div>
+                      <button 
+                        type="button" 
+                        className="show-more-avatars"
+                        onClick={() => {
+                          const grid = document.querySelector('.avatar-options-grid');
+                          const isExpanded = grid.classList.contains('expanded');
+                          if (isExpanded) {
+                            grid.innerHTML = '';
+                            avatarOptions.slice(0, 20).forEach((avatar, index) => {
+                              const btn = document.createElement('button');
+                              btn.type = 'button';
+                              btn.className = `avatar-option-modern ${editForm.avatar === avatar ? 'selected' : ''}`;
+                              btn.textContent = avatar;
+                              btn.onclick = () => handleInputChange('avatar', avatar);
+                              grid.appendChild(btn);
+                            });
+                            grid.classList.remove('expanded');
+                            document.querySelector('.show-more-avatars').textContent = 'Show More Avatars';
+                          } else {
+                            grid.innerHTML = '';
+                            avatarOptions.forEach((avatar, index) => {
+                              const btn = document.createElement('button');
+                              btn.type = 'button';
+                              btn.className = `avatar-option-modern ${editForm.avatar === avatar ? 'selected' : ''}`;
+                              btn.textContent = avatar;
+                              btn.onclick = () => handleInputChange('avatar', avatar);
+                              grid.appendChild(btn);
+                            });
+                            grid.classList.add('expanded');
+                            document.querySelector('.show-more-avatars').textContent = 'Show Less';
+                          }
+                        }}
+                      >
+                        Show More Avatars
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Personal Information */}
+                  <div className="form-section">
+                    <div className="section-header">
+                      <h4>👤 Personal Information</h4>
+                      <p>Update your basic profile details</p>
+                    </div>
+                    
+                    <div className="input-group">
+                      <div className="input-wrapper">
+                        <label htmlFor="username" className="modern-label">
+                          <span className="label-icon">👤</span>
+                          <span className="label-text">Username</span>
+                          <span className="required-indicator">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="username"
+                          value={editForm.username}
+                          onChange={(e) => handleInputChange('username', e.target.value)}
+                          className={`modern-input ${errors.username ? 'error' : ''}`}
+                          placeholder="Enter your unique username"
+                          disabled={loading}
+                        />
+                        {errors.username && <span className="error-message-modern">{errors.username}</span>}
+                        <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
+                      </div>
+
+                      <div className="input-wrapper">
+                        <label htmlFor="email" className="modern-label">
+                          <span className="label-icon">📧</span>
+                          <span className="label-text">Email Address</span>
+                          <span className="optional-indicator">Optional</span>
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={editForm.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          className={`modern-input ${errors.email ? 'error' : ''}`}
+                          placeholder="your.email@example.com"
+                          disabled={loading}
+                        />
+                        {errors.email && <span className="error-message-modern">{errors.email}</span>}
+                        <small className="input-hint">Used for important notifications and account recovery</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Security Section */}
+                  <div className="form-section">
+                    <div className="section-header">
+                      <h4>🔒 Security Settings</h4>
+                      <p>Keep your account secure</p>
+                    </div>
+                    
+                    <div className="security-toggle">
+                      <button
+                        type="button"
+                        className={`toggle-security-btn ${showPasswordSection ? 'active' : ''}`}
+                        onClick={() => setShowPasswordSection(!showPasswordSection)}
+                      >
+                        <span className="toggle-icon">🔑</span>
+                        <span className="toggle-text">Change Password</span>
+                        <span className="toggle-arrow">{showPasswordSection ? '▼' : '▶'}</span>
+                      </button>
+                    </div>
+                    
+                    {showPasswordSection && (
+                      <div className="password-section-modern">
+                        <div className="password-inputs">
+                          <div className="input-wrapper">
+                            <label htmlFor="currentPassword" className="modern-label">
+                              <span className="label-icon">🔐</span>
+                              <span className="label-text">Current Password</span>
+                            </label>
+                            <input
+                              type="password"
+                              id="currentPassword"
+                              value={passwordForm.currentPassword}
+                              onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                              className={`modern-input ${errors.currentPassword ? 'error' : ''}`}
+                              placeholder="Enter your current password"
+                              disabled={loading}
+                            />
+                            {errors.currentPassword && <span className="error-message-modern">{errors.currentPassword}</span>}
+                          </div>
+
+                          <div className="input-wrapper">
+                            <label htmlFor="newPassword" className="modern-label">
+                              <span className="label-icon">🔑</span>
+                              <span className="label-text">New Password</span>
+                            </label>
+                            <input
+                              type="password"
+                              id="newPassword"
+                              value={passwordForm.newPassword}
+                              onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                              className={`modern-input ${errors.newPassword ? 'error' : ''}`}
+                              placeholder="Enter your new password"
+                              disabled={loading}
+                            />
+                            {errors.newPassword && <span className="error-message-modern">{errors.newPassword}</span>}
+                            <small className="input-hint">At least 8 characters with uppercase, lowercase, and number</small>
+                          </div>
+
+                          <div className="input-wrapper">
+                            <label htmlFor="confirmPassword" className="modern-label">
+                              <span className="label-icon">✅</span>
+                              <span className="label-text">Confirm New Password</span>
+                            </label>
+                            <input
+                              type="password"
+                              id="confirmPassword"
+                              value={passwordForm.confirmPassword}
+                              onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                              className={`modern-input ${errors.confirmPassword ? 'error' : ''}`}
+                              placeholder="Confirm your new password"
+                              disabled={loading}
+                            />
+                            {errors.confirmPassword && <span className="error-message-modern">{errors.confirmPassword}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                </form>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="edit-modal-footer">
+              <button 
+                className="cancel-btn-modern" 
+                onClick={handleCancelEdit} 
+                disabled={loading}
+              >
+                <span className="btn-icon">❌</span>
+                <span>Cancel</span>
+              </button>
+              <button 
+                className="save-btn-modern" 
+                onClick={(e) => {
+                  console.log('Save button clicked');
+                  e.preventDefault();
+                  handleSaveProfile();
+                }} 
+                disabled={loading}
+                type="button"
+              >
+                <span className="btn-icon">{loading ? '⏳' : '✅'}</span>
+                <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
