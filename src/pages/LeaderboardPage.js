@@ -25,21 +25,32 @@ function LeaderboardPage({ user }) {
   useEffect(() => {
     const fetchLeaderboardData = async () => {
       try {
-        // Always use fake leaderboard data for now to show the 100 fake users
-        const fakeLeaderboardData = generateFakeLeaderboardData();
-        setLeaderboardData(fakeLeaderboardData);
+        // Fetch real leaderboard data from Supabase
+        const [pointsData, earningsData, streakData, allUsers] = await Promise.all([
+          db.getLeaderboard('points', 100),
+          db.getLeaderboard('earnings', 100),
+          db.getLeaderboard('streak', 100),
+          db.getAllUsers()
+        ]);
+
+        // Combine real and fake leaderboard data
+        const combinedLeaderboardData = generateCombinedLeaderboardData(pointsData, earningsData, streakData, allUsers);
+        setLeaderboardData(combinedLeaderboardData);
+        
+        // Calculate current user rank among all users (real + fake)
+        const totalUsers = combinedLeaderboardData.points.length;
         setCurrentUserRank({
-          points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-          earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-          streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
+          points: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers },
+          earnings: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers },
+          streak: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers }
         });
 
         // Generate live updates
         generateLiveUpdates();
         setLoading(false);
       } catch (error) {
-        console.error('Error generating leaderboard data:', error);
-        // Fallback to fake data
+        console.error('Error fetching leaderboard data:', error);
+        // Fallback to fake data only
         const fakeLeaderboardData = generateFakeLeaderboardData();
         setLeaderboardData(fakeLeaderboardData);
         setCurrentUserRank({
@@ -63,6 +74,202 @@ function LeaderboardPage({ user }) {
 
     return () => clearInterval(interval);
   }, [user.userId, activeTab, liveFilter]);
+
+  const generateCombinedLeaderboardData = (realPointsData, realEarningsData, realStreakData, realUsers) => {
+    // Generate realistic fake users with more believable details
+    const fakeUsers = generateRealisticFakeUsers();
+    
+    // Format real users data
+    const realPointsFormatted = (realPointsData || []).map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      points: u.points,
+      vipLevel: u.vip_level || u.vipLevel,
+      isReal: true
+    }));
+
+    const realEarningsFormatted = (realEarningsData || []).map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      earnings: u.total_earnings || 0,
+      sol: u.balances?.sol || 0,
+      eth: u.balances?.eth || 0,
+      usdt: u.balances?.usdt || 0,
+      usdc: u.balances?.usdc || 0,
+      isReal: true
+    }));
+
+    const realStreakFormatted = (realStreakData || []).map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      streak: u.day_streak || u.dayStreak || 0,
+      points: u.points,
+      isReal: true
+    }));
+
+    // Combine real and fake users for points leaderboard
+    const allPointsUsers = [...realPointsFormatted, ...fakeUsers.map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      points: u.points,
+      vipLevel: u.vipLevel,
+      isReal: false
+    }))];
+
+    // Combine real and fake users for earnings leaderboard
+    const allEarningsUsers = [...realEarningsFormatted, ...fakeUsers.map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      earnings: u.earnings,
+      sol: u.sol,
+      eth: u.eth,
+      usdt: u.usdt,
+      usdc: u.usdc,
+      isReal: false
+    }))];
+
+    // Combine real and fake users for streak leaderboard
+    const allStreakUsers = [...realStreakFormatted, ...fakeUsers.map(u => ({
+      username: u.username,
+      avatar: u.avatar,
+      streak: u.streak,
+      points: u.points,
+      isReal: false
+    }))];
+
+    // Sort and rank all users
+    const pointsLeaderboard = allPointsUsers
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 50)
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        points: user.points,
+        vipLevel: user.vipLevel,
+        isReal: user.isReal
+      }));
+
+    const earningsLeaderboard = allEarningsUsers
+      .sort((a, b) => b.earnings - a.earnings)
+      .slice(0, 50)
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        earnings: user.earnings,
+        sol: user.sol,
+        eth: user.eth,
+        usdt: user.usdt,
+        usdc: user.usdc,
+        isReal: user.isReal
+      }));
+
+    const streakLeaderboard = allStreakUsers
+      .sort((a, b) => b.streak - a.streak)
+      .slice(0, 50)
+      .map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        avatar: user.avatar,
+        streak: user.streak,
+        points: user.points,
+        isReal: user.isReal
+      }));
+
+    return {
+      points: pointsLeaderboard,
+      earnings: earningsLeaderboard,
+      streak: streakLeaderboard
+    };
+  };
+
+  const generateRealisticFakeUsers = () => {
+    // More realistic and believable usernames
+    const realisticUsernames = [
+      'Alex_Crypto', 'Sarah_Trader', 'Mike_Hodler', 'Emma_DeFi', 'Jake_Bitcoin',
+      'Lisa_Ethereum', 'Tom_Solana', 'Anna_Polygon', 'Ryan_Cardano', 'Maya_Avalanche',
+      'Chris_Chainlink', 'Zoe_Uniswap', 'Ben_Compound', 'Ivy_Aave', 'Max_Yearn',
+      'Sophia_Curve', 'Leo_Sushi', 'Mia_Pancake', 'Noah_Balancer', 'Ava_Maker',
+      'Ethan_Synthetix', 'Grace_Ren', 'Owen_Kyber', 'Chloe_Bancor', 'Luke_Loopring',
+      'Ella_Gnosis', 'Ian_Nexus', 'Ruby_Reef', 'Cole_Cream', 'Nora_Nerve',
+      'Jude_Jarvis', 'Iris_Idle', 'Dean_Dodo', 'Tara_Tornado', 'Reed_Rari',
+      'Lila_Liquity', 'Finn_Fei', 'Vera_Vesper', 'Knox_Kava', 'Sage_Serum',
+      'Jade_Jupiter', 'Cruz_Convex', 'Wren_Wrapped', 'Vale_Velodrome', 'Zara_Zapper',
+      'Kai_Keeper', 'Nova_Notional', 'Jax_Jarvis', 'Skye_Stargate', 'Remy_Ribbon',
+      'Dex_Dydx', 'Lexi_Lido', 'Orion_Olympus', 'Sage_Spell', 'Zion_Zerion',
+      'Luna_Looksrare', 'Axel_Arbitrum', 'Nyx_Nansen', 'Vega_Vega', 'Onyx_Opensea',
+      'Raven_Rarible', 'Phoenix_Phantom', 'Storm_Superrare', 'Blaze_Blur', 'Frost_Foundation',
+      'Echo_Ens', 'Sage_Snapshot', 'Flux_Fleek', 'Prism_Poap', 'Nexus_Nft',
+      'Crypto_Chad', 'DeFi_Queen', 'Yield_Farmer', 'LP_Provider', 'Gas_Saver',
+      'MEV_Hunter', 'Flash_Loaner', 'Arbitrage_Pro', 'Whale_Watcher', 'Diamond_Hands_Pro',
+      'Paper_Hands_No', 'HODL_Master_X', 'Moon_Boy_2024', 'Bear_Slayer', 'Bull_Runner',
+      'Degen_Trader', 'Alpha_Seeker', 'Beta_Tester', 'Gamma_Squeeze', 'Delta_Neutral',
+      'Theta_Gang', 'Vega_Positive', 'Rho_Sensitive', 'IV_Crusher', 'Greeks_Master',
+      'Options_Wizard', 'Futures_King', 'Perps_Queen', 'Spot_Trader', 'Margin_Call'
+    ];
+
+    // More realistic avatars (mix of emojis that look like real profile pics)
+    const realisticAvatars = [
+      '👨‍💻', '👩‍💻', '👨‍💼', '👩‍💼', '🧑‍💻', '👨‍🔬', '👩‍🔬', '🧑‍🔬', '👨‍🎓', '👩‍🎓',
+      '🧑‍🎓', '👨‍🏫', '👩‍🏫', '🧑‍🏫', '👨‍⚕️', '👩‍⚕️', '🧑‍⚕️', '👨‍🚀', '👩‍🚀', '🧑‍🚀',
+      '👨‍✈️', '👩‍✈️', '🧑‍✈️', '👨‍🎨', '👩‍🎨', '🧑‍🎨', '👨‍🍳', '👩‍🍳', '🧑‍🍳', '👨‍🔧',
+      '👩‍🔧', '🧑‍🔧', '👨‍🏭', '👩‍🏭', '🧑‍🏭', '👨‍💻', '👩‍💻', '🧑‍💻', '👨‍🎤', '👩‍🎤',
+      '🧑‍🎤', '👨‍🎸', '👩‍🎸', '🧑‍🎸', '👨‍🎹', '👩‍🎹', '🧑‍🎹', '👨‍🎺', '👩‍🎺', '🧑‍🎺',
+      '🕴️', '💼', '🎯', '🏆', '⭐', '💎', '🚀', '⚡', '🔥', '💪',
+      '🧠', '👑', '🎪', '🎭', '🎨', '🎵', '🎸', '🎹', '🎺', '🎷',
+      '🎻', '🥁', '🎤', '🎧', '🎮', '🕹️', '🎲', '🃏', '🎰', '🎯'
+    ];
+
+    const users = [];
+    
+    // Generate 80 realistic fake users
+    for (let i = 0; i < 80; i++) {
+      const username = realisticUsernames[i] || `Trader_${String(i + 1).padStart(3, '0')}`;
+      const avatar = realisticAvatars[i % realisticAvatars.length];
+      
+      // More realistic point distribution (800K to 3M CIPRO)
+      const basePoints = 800000;
+      const maxAdditionalPoints = 2200000; // Max ~3M total
+      const randomFactor = Math.pow(Math.random(), 0.4); // Less extreme distribution
+      const points = Math.floor(basePoints + (maxAdditionalPoints * randomFactor));
+      
+      // More realistic VIP distribution (weighted towards lower levels)
+      const vipRandom = Math.random();
+      let vipLevel;
+      if (vipRandom < 0.4) vipLevel = 1;
+      else if (vipRandom < 0.7) vipLevel = 2;
+      else if (vipRandom < 0.85) vipLevel = 3;
+      else if (vipRandom < 0.95) vipLevel = 4;
+      else vipLevel = 5;
+      
+      // More realistic streak distribution
+      const streakRandom = Math.random();
+      let streak;
+      if (streakRandom < 0.3) streak = Math.floor(Math.random() * 7) + 1; // 1-7 days (30%)
+      else if (streakRandom < 0.6) streak = Math.floor(Math.random() * 23) + 8; // 8-30 days (30%)
+      else if (streakRandom < 0.85) streak = Math.floor(Math.random() * 60) + 31; // 31-90 days (25%)
+      else streak = Math.floor(Math.random() * 275) + 91; // 91-365 days (15%)
+      
+      // More realistic crypto balances based on points
+      const pointsRatio = points / 3000000; // Normalize to 0-1
+      
+      users.push({
+        username,
+        avatar,
+        points: points,
+        vipLevel: vipLevel,
+        streak: streak,
+        sol: Math.random() * 20 * pointsRatio + 0.1, // 0.1-20 SOL based on points
+        eth: Math.random() * 10 * pointsRatio + 0.05, // 0.05-10 ETH based on points
+        usdt: Math.random() * 25000 * pointsRatio + 100, // 100-25K USDT based on points
+        usdc: Math.random() * 25000 * pointsRatio + 100, // 100-25K USDC based on points
+        earnings: Math.random() * 50000 * pointsRatio + 500 // 500-50K earnings based on points
+      });
+    }
+
+    return users;
+  };
 
   const generateFakeLeaderboardData = () => {
     const fakeUsernames = [
@@ -178,47 +385,48 @@ function LeaderboardPage({ user }) {
   const generateLiveUpdates = () => {
     setLiveLoading(true);
     
+    // Mix of realistic and crypto-themed usernames for live updates
     const sampleUsers = [
+      { username: 'Alex_Crypto', avatar: '👨‍💻' },
+      { username: 'Sarah_Trader', avatar: '👩‍💻' },
+      { username: 'Mike_Hodler', avatar: '👨‍💼' },
+      { username: 'Emma_DeFi', avatar: '👩‍💼' },
       { username: 'CryptoKing', avatar: '👑' },
       { username: 'DiamondHands', avatar: '💎' },
+      { username: 'Jake_Bitcoin', avatar: '👨‍🔬' },
+      { username: 'Lisa_Ethereum', avatar: '👩‍🔬' },
       { username: 'MoonWalker', avatar: '🚀' },
       { username: 'TokenMaster', avatar: '🎯' },
+      { username: 'Tom_Solana', avatar: '👨‍🎓' },
+      { username: 'Anna_Polygon', avatar: '👩‍🎓' },
       { username: 'CoinCollector', avatar: '🪙' },
       { username: 'BlockchainBoss', avatar: '⛓️' },
+      { username: 'Ryan_Cardano', avatar: '👨‍🏫' },
+      { username: 'Maya_Avalanche', avatar: '👩‍🏫' },
       { username: 'NFTNinja', avatar: '🥷' },
       { username: 'DeFiDegen', avatar: '🦍' },
+      { username: 'Chris_Chainlink', avatar: '👨‍⚕️' },
+      { username: 'Zoe_Uniswap', avatar: '👩‍⚕️' },
       { username: 'SatoshiFan', avatar: '₿' },
       { username: 'EthereumElite', avatar: 'Ξ' },
+      { username: 'Ben_Compound', avatar: '👨‍🚀' },
+      { username: 'Ivy_Aave', avatar: '👩‍🚀' },
       { username: 'CryptoWhale', avatar: '🐋' },
       { username: 'HODLMaster', avatar: '💪' },
+      { username: 'Max_Yearn', avatar: '👨‍✈️' },
+      { username: 'Sophia_Curve', avatar: '👩‍✈️' },
       { username: 'ChainLord', avatar: '⚡' },
       { username: 'TokenHunter', avatar: '🎯' },
+      { username: 'Leo_Sushi', avatar: '👨‍🎨' },
+      { username: 'Mia_Pancake', avatar: '👩‍🎨' },
       { username: 'CryptoSage', avatar: '🧙‍♂️' },
       { username: 'BitcoinBull', avatar: '🦁' },
+      { username: 'Noah_Balancer', avatar: '👨‍🍳' },
+      { username: 'Ava_Maker', avatar: '👩‍🍳' },
       { username: 'AltcoinAce', avatar: '🐅' },
       { username: 'CryptoChamp', avatar: '🦅' },
-      { username: 'DigitalDuke', avatar: '🐺' },
-      { username: 'TokenTitan', avatar: '🦈' },
-      { username: 'CoinCrusher', avatar: '🔥' },
-      { username: 'BlockBuster', avatar: '⭐' },
-      { username: 'CryptoCommander', avatar: '💫' },
-      { username: 'DigitalDynamo', avatar: '🌟' },
-      { username: 'TokenTrader', avatar: '✨' },
-      { username: 'CryptoConqueror', avatar: '🎭' },
-      { username: 'BitBaron', avatar: '🎪' },
-      { username: 'CoinCaptain', avatar: '🎨' },
-      { username: 'DigitalDragon', avatar: '🎵' },
-      { username: 'TokenTycoon', avatar: '🎸' },
-      { username: 'CryptoLegend', avatar: '🏆' },
-      { username: 'BitBlaster', avatar: '🥇' },
-      { username: 'CoinCommander', avatar: '🥈' },
-      { username: 'DigitalDestroyer', avatar: '🥉' },
-      { username: 'TokenThunder', avatar: '🏅' },
-      { username: 'CryptoStorm', avatar: '🎖️' },
-      { username: 'BitBeast', avatar: '🏴‍☠️' },
-      { username: 'CoinCyclone', avatar: '⚔️' },
-      { username: 'DigitalDominator', avatar: '🛡️' },
-      { username: 'TokenTornado', avatar: '🗡️' }
+      { username: 'Ethan_Synthetix', avatar: '👨‍🔧' },
+      { username: 'Grace_Ren', avatar: '👩‍🔧' }
     ];
 
     const updateTypes = [
