@@ -4,24 +4,42 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   background-attachment: fixed;
   min-height: 100vh;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .app-container {
+  width: 100vw;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
   min-height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {
   .app-container {
-    padding-bottom: 80px;
+    padding-bottom: 70px; /* Space for mobile nav */
+  }
+  
+  body {
+    overflow-x: hidden;
+    position: relative;
   }
 }
 
