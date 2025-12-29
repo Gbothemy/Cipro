@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../db/supabase';
 import './ProfilePage.css';
@@ -6,6 +6,155 @@ import './ProfilePage.css';
 function ProfilePage({ user, updateUser, addNotification, onLogout }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    username: user.username || '',
+    email: user.email || '',
+    avatar: user.avatar || '👤'
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // Available avatar options
+  const avatarOptions = [
+    '👤', '👨', '👩', '🧑', '👦', '👧', '👴', '👵', '🧔', '👨‍💼', '👩‍💼', '👨‍💻', '👩‍💻',
+    '🤖', '👽', '🎭', '🎨', '🎯', '🎮', '🎲', '🎪', '🎨', '🎭', '🎪', '🎯', '🎮', '🎲',
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰',
+    '😍', '🤩', '😘', '😗', '😚', '😙', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭'
+  ];
+
+  useEffect(() => {
+    setEditForm({
+      username: user.username || '',
+      email: user.email || '',
+      avatar: user.avatar || '👤'
+    });
+  }, [user]);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Username validation
+    if (!editForm.username.trim()) {
+      newErrors.username = 'Username is required';
+    } else if (editForm.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    } else if (editForm.username.length > 20) {
+      newErrors.username = 'Username must not exceed 20 characters';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(editForm.username)) {
+      newErrors.username = 'Username can only contain letters, numbers, and underscores';
+    }
+
+    // Email validation (optional)
+    if (editForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Password validation (if changing password)
+    if (showPasswordSection) {
+      if (!passwordForm.currentPassword) {
+        newErrors.currentPassword = 'Current password is required';
+      }
+      
+      if (!passwordForm.newPassword) {
+        newErrors.newPassword = 'New password is required';
+      } else if (passwordForm.newPassword.length < 8) {
+        newErrors.newPassword = 'Password must be at least 8 characters';
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordForm.newPassword)) {
+        newErrors.newPassword = 'Password must contain uppercase, lowercase, and number';
+      }
+      
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      // Update user in database
+      await db.updateUser(user.userId, {
+        username: editForm.username,
+        email: editForm.email,
+        avatar: editForm.avatar,
+        points: user.points,
+        vipLevel: user.vipLevel,
+        exp: user.exp,
+        completedTasks: user.completedTasks,
+        dayStreak: user.dayStreak,
+        lastClaim: user.lastClaim
+      });
+
+      // Update local state
+      updateUser({
+        username: editForm.username,
+        email: editForm.email,
+        avatar: editForm.avatar
+      });
+
+      // Update localStorage
+      const authUser = JSON.parse(localStorage.getItem('authUser') || '{}');
+      authUser.username = editForm.username;
+      authUser.email = editForm.email;
+      authUser.avatar = editForm.avatar;
+      localStorage.setItem('authUser', JSON.stringify(authUser));
+
+      addNotification('Profile updated successfully!', 'success');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      addNotification('Failed to update profile. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditForm({
+      username: user.username || '',
+      email: user.email || '',
+      avatar: user.avatar || '👤'
+    });
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setShowPasswordSection(false);
+    setErrors({});
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handlePasswordChange = (field, value) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -61,9 +210,9 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
       <div className="profile-header">
         <div className="profile-banner" style={{ background: `linear-gradient(135deg, ${tier.color} 0%, #764ba2 100%)` }}>
           <div className="banner-content">
-            <div className="profile-avatar-large">{user.avatar}</div>
+            <div className="profile-avatar-large">{isEditing ? editForm.avatar : user.avatar}</div>
             <div className="profile-info">
-              <h1>{user.username}</h1>
+              <h1>{isEditing ? editForm.username : user.username}</h1>
               <p className="user-id-display">{user.userId}</p>
               <div className="tier-badge" style={{ background: tier.color }}>
                 <span>{tier.icon}</span>
@@ -71,11 +220,156 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
               </div>
             </div>
           </div>
-          <button className="edit-profile-btn" onClick={() => navigate('/profile/edit')}>
-            ✏️ Edit Profile
-          </button>
+          {!isEditing ? (
+            <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+              ✏️ Edit Profile
+            </button>
+          ) : (
+            <div className="edit-actions">
+              <button className="save-profile-btn" onClick={handleEditSubmit} disabled={loading}>
+                {loading ? '⏳ Saving...' : '✅ Save'}
+              </button>
+              <button className="cancel-profile-btn" onClick={handleCancelEdit} disabled={loading}>
+                ❌ Cancel
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Profile Edit Form */}
+      {isEditing && (
+        <div className="profile-edit-section">
+          <div className="edit-form-card">
+            <h3>✏️ Edit Profile Information</h3>
+            <form onSubmit={handleEditSubmit} className="profile-edit-form">
+              
+              {/* Avatar Selection */}
+              <div className="form-group">
+                <label>Choose Avatar</label>
+                <div className="avatar-grid">
+                  {avatarOptions.map((avatar, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`avatar-option ${editForm.avatar === avatar ? 'selected' : ''}`}
+                      onClick={() => handleInputChange('avatar', avatar)}
+                    >
+                      {avatar}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Username */}
+              <div className="form-group">
+                <label htmlFor="username">Username</label>
+                <input
+                  type="text"
+                  id="username"
+                  value={editForm.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  className={errors.username ? 'error' : ''}
+                  placeholder="Enter your username"
+                  disabled={loading}
+                />
+                {errors.username && <span className="error-message">{errors.username}</span>}
+                <small className="form-hint">3-20 characters, letters, numbers, and underscores only</small>
+              </div>
+
+              {/* Email */}
+              <div className="form-group">
+                <label htmlFor="email">Email (Optional)</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={editForm.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className={errors.email ? 'error' : ''}
+                  placeholder="Enter your email address"
+                  disabled={loading}
+                />
+                {errors.email && <span className="error-message">{errors.email}</span>}
+                <small className="form-hint">Used for important notifications and account recovery</small>
+              </div>
+
+              {/* Preview */}
+              <div className="profile-preview">
+                <h4>Preview</h4>
+                <div className="preview-card">
+                  <div className="preview-avatar">{editForm.avatar}</div>
+                  <div className="preview-info">
+                    <div className="preview-username">{editForm.username || 'Username'}</div>
+                    <div className="preview-email">{editForm.email || 'No email provided'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Change Section */}
+              <div className="password-section">
+                <div className="password-header">
+                  <h4>🔒 Change Password</h4>
+                  <button
+                    type="button"
+                    className="toggle-password-btn"
+                    onClick={() => setShowPasswordSection(!showPasswordSection)}
+                  >
+                    {showPasswordSection ? 'Hide' : 'Change Password'}
+                  </button>
+                </div>
+                
+                {showPasswordSection && (
+                  <div className="password-form">
+                    <div className="form-group">
+                      <label htmlFor="currentPassword">Current Password</label>
+                      <input
+                        type="password"
+                        id="currentPassword"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                        className={errors.currentPassword ? 'error' : ''}
+                        placeholder="Enter your current password"
+                        disabled={loading}
+                      />
+                      {errors.currentPassword && <span className="error-message">{errors.currentPassword}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="newPassword">New Password</label>
+                      <input
+                        type="password"
+                        id="newPassword"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                        className={errors.newPassword ? 'error' : ''}
+                        placeholder="Enter your new password"
+                        disabled={loading}
+                      />
+                      {errors.newPassword && <span className="error-message">{errors.newPassword}</span>}
+                      <small className="form-hint">At least 8 characters with uppercase, lowercase, and number</small>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">Confirm New Password</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                        className={errors.confirmPassword ? 'error' : ''}
+                        placeholder="Confirm your new password"
+                        disabled={loading}
+                      />
+                      {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* VIP Progress */}
       <div className="vip-progress-card">
@@ -122,6 +416,12 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
           onClick={() => setActiveTab('activity')}
         >
           📜 Activity
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'security' ? 'active' : ''}`}
+          onClick={() => setActiveTab('security')}
+        >
+          🔒 Security
         </button>
       </div>
 
@@ -300,12 +600,90 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
             </div>
           </div>
         )}
+
+        {/* Security Tab */}
+        {activeTab === 'security' && (
+          <div className="security-tab">
+            <div className="account-security">
+              <h3>🔒 Account Security</h3>
+              <div className="security-items">
+                <div className="security-item">
+                  <div className="security-item-info">
+                    <div className="security-item-icon">👤</div>
+                    <div className="security-item-text">
+                      <div className="security-item-title">Username</div>
+                      <div className="security-item-desc">Your unique identifier</div>
+                    </div>
+                  </div>
+                  <div className="security-status secure">✓ Set</div>
+                </div>
+
+                <div className="security-item">
+                  <div className="security-item-info">
+                    <div className="security-item-icon">📧</div>
+                    <div className="security-item-text">
+                      <div className="security-item-title">Email Address</div>
+                      <div className="security-item-desc">For account recovery and notifications</div>
+                    </div>
+                  </div>
+                  <div className={`security-status ${user.email ? 'secure' : 'warning'}`}>
+                    {user.email ? '✓ Verified' : '⚠ Not Set'}
+                  </div>
+                </div>
+
+                <div className="security-item">
+                  <div className="security-item-info">
+                    <div className="security-item-icon">🔑</div>
+                    <div className="security-item-text">
+                      <div className="security-item-title">Password</div>
+                      <div className="security-item-desc">Secure your account access</div>
+                    </div>
+                  </div>
+                  <div className="security-status secure">✓ Protected</div>
+                </div>
+
+                <div className="security-item">
+                  <div className="security-item-info">
+                    <div className="security-item-icon">🛡️</div>
+                    <div className="security-item-text">
+                      <div className="security-item-title">Account Status</div>
+                      <div className="security-item-desc">Your account verification status</div>
+                    </div>
+                  </div>
+                  <div className="security-status secure">✓ Active</div>
+                </div>
+
+                <div className="security-item">
+                  <div className="security-item-info">
+                    <div className="security-item-icon">💎</div>
+                    <div className="security-item-text">
+                      <div className="security-item-title">VIP Status</div>
+                      <div className="security-item-desc">Your current membership level</div>
+                    </div>
+                  </div>
+                  <div className="security-status secure">{tier.icon} {tier.name}</div>
+                </div>
+              </div>
+
+              <div className="security-tips">
+                <h5>🛡️ Security Tips</h5>
+                <ul>
+                  <li>Use a strong, unique password for your account</li>
+                  <li>Add an email address for account recovery</li>
+                  <li>Never share your login credentials with anyone</li>
+                  <li>Log out from shared or public devices</li>
+                  <li>Contact support if you notice suspicious activity</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Account Actions */}
       <div className="account-actions">
-        <button className="action-btn-profile secondary" onClick={() => navigate('/profile/edit')}>
-          ✏️ Edit Profile
+        <button className="action-btn-profile secondary" onClick={() => setIsEditing(!isEditing)}>
+          {isEditing ? '❌ Cancel Edit' : '✏️ Edit Profile'}
         </button>
         <button className="action-btn-profile secondary" onClick={() => navigate('/notifications')}>
           🔔 Notifications

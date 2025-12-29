@@ -1260,3 +1260,135 @@ body.dark-mode .copy-link-small-btn {
   border-color: #4a5568;
   color: #e2e8f0;
 }
+
+/* Deposits Section */
+.deposits-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.deposits-table {
+  overflow-x: auto;
+}
+
+.deposits-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.deposits-table th,
+.deposits-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.deposits-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.deposit-type {
+  display: flex;
+  align-items: center;
+}
+
+.subscription-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.balance-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.currency-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.request-row.pending {
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.request-row.approved {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.request-row.rejected {
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.amount-info strong {
+  color: #4CAF50;
+  font-size: 16px;
+}
+
+.date-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-info strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.date-info small {
+  color: #666;
+  font-size: 12px;
+}
+
+.processed-info {
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
+.processed-info small {
+  line-height: 1.4;
+}

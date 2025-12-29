@@ -1039,14 +1039,13 @@ export const db = {
             revenue_generated: 0,
           },
         ])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     } catch (error) {
       console.error("Error recording user session:", error);
-      throw error;
+      return null; // Don't throw, just return null
     }
   },
 
@@ -1063,14 +1062,13 @@ export const db = {
           last_activity: new Date().toISOString(),
         })
         .eq("session_id", sessionId)
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     } catch (error) {
       console.error("Error updating user session:", error);
-      throw error;
+      return null; // Don't throw, just return null
     }
   },
 
@@ -1252,7 +1250,290 @@ export const db = {
     }
   },
 
-  // ==================== GAME ATTEMPTS OPERATIONS ====================
+  // ==================== VIP SUBSCRIPTION OPERATIONS ====================
+
+  async createSubscription(subscriptionData) {
+    try {
+      const { data, error } = await supabase
+        .rpc('create_subscription', {
+          p_user_id: subscriptionData.user_id,
+          p_vip_tier: subscriptionData.vip_tier,
+          p_billing_cycle: subscriptionData.billing_cycle,
+          p_price: subscriptionData.price,
+          p_payment_method: subscriptionData.payment_method,
+          p_payment_id: subscriptionData.payment_id
+        });
+
+      if (error) throw error;
+      return { success: true, subscription_id: data };
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      return { success: false, error };
+    }
+  },
+
+  async getUserSubscription(user_id) {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user_id)
+        .eq('status', 'active')
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+      return data;
+    } catch (error) {
+      console.error('Error getting user subscription:', error);
+      return null;
+    }
+  },
+
+  async hasActiveSubscription(user_id) {
+    try {
+      const { data, error } = await supabase
+        .rpc('has_active_subscription', { p_user_id: user_id });
+
+      if (error) throw error;
+      return data || false;
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      return false;
+    }
+  },
+
+  async getSubscriptionTier(user_id) {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_subscription_tier', { p_user_id: user_id });
+
+      if (error) throw error;
+      return data || 1; // Default to Bronze
+    } catch (error) {
+      console.error('Error getting subscription tier:', error);
+      return 1;
+    }
+  },
+
+  async cancelSubscription(user_id, reason = null) {
+    try {
+      const { data, error } = await supabase
+        .rpc('cancel_subscription', {
+          p_user_id: user_id,
+          p_reason: reason
+        });
+
+      if (error) throw error;
+      return { success: data };
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      return { success: false, error };
+    }
+  },
+
+  async getSubscriptionHistory(user_id, limit = 10) {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_history')
+        .select('*')
+        .eq('user_id', user_id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting subscription history:', error);
+      return [];
+    }
+  },
+
+  async recordPaymentTransaction(transactionData) {
+    try {
+      const { data, error } = await supabase
+        .from('payment_transactions')
+        .insert([{
+          user_id: transactionData.user_id,
+          subscription_id: transactionData.subscription_id,
+          transaction_type: transactionData.transaction_type,
+          amount: transactionData.amount,
+          currency: transactionData.currency || 'USD',
+          payment_method: transactionData.payment_method,
+          payment_id: transactionData.payment_id,
+          payment_status: transactionData.payment_status || 'pending',
+          payment_date: transactionData.payment_date || new Date().toISOString(),
+          metadata: transactionData.metadata || {}
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error recording payment transaction:', error);
+      return { success: false, error };
+    }
+  },
+
+  async getActiveSubscriptions() {
+    try {
+      const { data, error } = await supabase
+        .from('active_subscriptions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting active subscriptions:', error);
+      return [];
+    }
+  },
+
+  async getSubscriptionRevenue(startDate = null, endDate = null) {
+    try {
+      let query = supabase
+        .from('subscription_revenue')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (startDate) {
+        query = query.gte('date', startDate);
+      }
+      if (endDate) {
+        query = query.lte('date', endDate);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting subscription revenue:', error);
+      return [];
+    }
+  },
+
+  // ==================== DEPOSIT OPERATIONS ====================
+
+  async createDepositRequest(depositData) {
+    try {
+      const { data, error } = await supabase
+        .from('deposit_requests')
+        .insert([{
+          id: depositData.id,
+          user_id: depositData.user_id,
+          username: depositData.username,
+          currency: depositData.currency,
+          amount: depositData.amount,
+          wallet_address: depositData.wallet_address,
+          status: depositData.status || 'pending',
+          deposit_type: depositData.deposit_type || 'balance',
+          subscription_tier: depositData.subscription_tier,
+          billing_cycle: depositData.billing_cycle,
+          created_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating deposit request:', error);
+      return { success: false, error };
+    }
+  },
+
+  async getDepositRequests(status = null) {
+    try {
+      let query = supabase
+        .from('deposit_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting deposit requests:', error);
+      return [];
+    }
+  },
+
+  async updateDepositStatus(id, status, processed_by = null) {
+    try {
+      const { data, error } = await supabase
+        .from('deposit_requests')
+        .update({
+          status,
+          processed_date: new Date().toISOString(),
+          processed_by
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // If deposit is approved and it's a subscription, activate the subscription
+      if (status === 'approved' && data.deposit_type === 'subscription') {
+        await this.activateSubscriptionFromDeposit(data);
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating deposit status:', error);
+      return { success: false, error };
+    }
+  },
+
+  async activateSubscriptionFromDeposit(depositData) {
+    try {
+      // Map tier names to tier numbers
+      const tierMap = {
+        'Silver': 5,
+        'Gold': 9,
+        'Platinum': 13,
+        'Diamond': 17
+      };
+
+      const vipTier = tierMap[depositData.subscription_tier] || 5;
+
+      const subscriptionResult = await this.createSubscription({
+        user_id: depositData.user_id,
+        vip_tier: vipTier,
+        billing_cycle: depositData.billing_cycle,
+        price: depositData.amount,
+        payment_method: 'crypto',
+        payment_id: depositData.id
+      });
+
+      if (subscriptionResult.success) {
+        // Create notification for user
+        await this.createNotification(depositData.user_id, {
+          type: 'subscription',
+          title: '🎉 VIP Subscription Activated!',
+          message: `Your ${depositData.subscription_tier} subscription has been activated. Welcome to VIP!`,
+          icon: '💎'
+        });
+
+        // Log activity
+        await this.logActivity(depositData.user_id, {
+          type: 'subscription_activated',
+          description: `VIP ${depositData.subscription_tier} subscription activated`,
+          pointsChange: 0
+        });
+      }
+
+      return subscriptionResult;
+    } catch (error) {
+      console.error('Error activating subscription from deposit:', error);
+      return { success: false, error };
+    }
+  },
 
   async recordGameAttempt(user_id, game_type, result = {}) {
     try {

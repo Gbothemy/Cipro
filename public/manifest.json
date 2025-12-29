@@ -1,93 +1,105 @@
 {
-  "name": "Cipro - Play & Earn Crypto",
+  "name": "🎮 Cipro - Play Games, Earn Real Cryptocurrency",
   "short_name": "Cipro",
-  "description": "Play games and earn cryptocurrency rewards",
+  "description": "🚀 Play fun games and earn real cryptocurrency! Join 15,000+ players earning SOL, ETH, USDT & USDC daily. Free to start, VIP tiers available.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#667eea",
   "background_color": "#ffffff",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "en",
+  "lang": "en-US",
+  "dir": "ltr",
   "categories": ["games", "finance", "entertainment"],
-  "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
   "screenshots": [
     {
-      "src": "/screenshots/home.png",
-      "sizes": "540x720",
-      "type": "image/png"
+      "src": "/screenshot-mobile.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "platform": "narrow"
+    },
+    {
+      "src": "/screenshot-desktop.png", 
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo512.png",
+      "sizes": "512x512", 
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Play Games",
+      "name": "🎮 Play Games",
       "short_name": "Games",
-      "description": "Play games and earn points",
-      "url": "/games",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+      "description": "Start playing games and earning crypto",
+      "url": "/game",
+      "icons": [
+        {
+          "src": "/game-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
-      "name": "Daily Tasks",
-      "short_name": "Tasks",
-      "description": "Complete daily tasks",
-      "url": "/tasks",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+      "name": "🎁 Daily Airdrop",
+      "short_name": "Airdrop", 
+      "description": "Claim your daily crypto rewards",
+      "url": "/airdrop",
+      "icons": [
+        {
+          "src": "/airdrop-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
-      "name": "Convert Points",
+      "name": "💰 Convert Points",
       "short_name": "Convert",
-      "description": "Convert points to crypto",
-      "url": "/conversion",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+      "description": "Convert points to cryptocurrency",
+      "url": "/convert",
+      "icons": [
+        {
+          "src": "/convert-icon.png", 
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "👥 Referrals",
+      "short_name": "Refer",
+      "description": "Earn by referring friends",
+      "url": "/referral",
+      "icons": [
+        {
+          "src": "/referral-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import SEOHead from '../components/SEOHead';
+import { generateStructuredData } from '../utils/seoOptimization';
 import './FAQPage.css';
 
 function FAQPage() {
@@ -142,12 +144,34 @@ function FAQPage() {
     ]
   };
 
+  // Generate FAQ structured data for SEO
+  const generateFAQStructuredData = () => {
+    const allFAQs = Object.values(faqs).flat();
+    return generateStructuredData('FAQPage', {
+      faqs: allFAQs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    });
+  };
+
   const toggleQuestion = (index) => {
     setOpenQuestion(openQuestion === index ? null : index);
   };
 
   return (
     <div className="faq-page">
+      <SEOHead 
+        title="🤔 FAQ - Frequently Asked Questions | Cipro Crypto Gaming"
+        description="Get answers to common questions about earning cryptocurrency through gaming on Cipro. Learn about games, rewards, withdrawals, VIP tiers, and more!"
+        keywords="cipro faq, crypto gaming questions, play to earn help, cryptocurrency rewards faq, gaming platform support, crypto withdrawal questions, VIP tier questions"
+        url="https://www.ciprohub.site/faq"
+        structuredData={generateFAQStructuredData()}
+      />
       <div className="page-header">
         <h1 className="page-title">❓ Frequently Asked Questions</h1>
         <p className="page-subtitle">Find answers to common questions about Cipro</p>

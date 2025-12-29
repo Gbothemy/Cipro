@@ -1,0 +1,57 @@
+# Robots.txt for Cipro - Cryptocurrency Gaming Platform
+# https://www.ciprohub.site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /notifications/
+
+# Allow important pages for SEO
+Allow: /
+Allow: /login
+Allow: /game
+Allow: /vip-tiers
+Allow: /leaderboard
+Allow: /airdrop
+Allow: /referral
+Allow: /convert
+Allow: /tasks
+Allow: /achievements
+Allow: /daily-rewards
+Allow: /about
+Allow: /support
+Allow: /faq
+Allow: /privacy
+Allow: /terms
+
+# Sitemap location
+Sitemap: https://www.ciprohub.site/sitemap.xml
+
+# Crawl delay (be nice to servers)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

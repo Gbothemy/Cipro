@@ -1,8 +1,12 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
+import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { db } from './db/supabase';
 import trafficTracker from './utils/trafficTracker';
+import { initializeAnalytics, trackCryptoEvents } from './utils/analytics';
+import { initializeSEO } from './utils/seoOptimization';
 import './App.css';
 
 // Lazy load pages
@@ -23,6 +27,10 @@ const VIPTiersPage = lazy(() => import('./pages/VIPTiersPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const TasksPage = lazy(() => import('./pages/TasksPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
+const SupportPage = lazy(() => import('./pages/SupportPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 // Component to track route changes
 function RouteTracker() {
@@ -71,6 +79,13 @@ function App() {
 
   // Check authentication on mount and restore session
   useEffect(() => {
+    // Initialize SEO and Analytics
+    initializeSEO();
+    initializeAnalytics({
+      ga4MeasurementId: process.env.REACT_APP_GA4_MEASUREMENT_ID,
+      facebookPixelId: process.env.REACT_APP_FACEBOOK_PIXEL_ID
+    });
+
     const savedAuthUser = localStorage.getItem('authUser');
     if (savedAuthUser) {
       try {
@@ -120,27 +135,33 @@ function App() {
     setAuthUser(userData);
     setIsAuthenticated(true);
     
-    // Check if user is admin
-    const isAdmin = userData.userId?.startsWith('ADMIN-') || userData.email?.endsWith('@admin.com');
+    // Check if user is admin - fix the admin detection logic
+    const isAdmin = userData.userId?.startsWith('ADMIN-') || 
+                   userData.email?.endsWith('@admin.com') || 
+                   userData.email?.endsWith('@ciprohub.site') ||
+                   userData.isAdmin === true;
     
     try {
       // Check if user exists in database
       let dbUser = await db.getUser(userData.userId);
       
       if (dbUser) {
-        // Existing user - load their data
-        setUser(dbUser);
+        // Existing user - load their data and preserve admin status
+        const userWithAdminStatus = { ...dbUser, isAdmin: isAdmin || dbUser.isAdmin };
+        setUser(userWithAdminStatus);
         addNotification(`Welcome back, ${userData.username}!`, 'success');
         
-        // Update "Daily Login" task progress
-        try {
-          const allTasks = await db.getTasks('daily');
-          const loginTask = allTasks.find(t => t.task_name === 'Daily Login');
-          if (loginTask) {
-            await db.updateTaskProgress(userData.userId, loginTask.id, 1);
+        // Update "Daily Login" task progress (only for non-admin users)
+        if (!isAdmin) {
+          try {
+            const allTasks = await db.getTasks('daily');
+            const loginTask = allTasks.find(t => t.task_name === 'Daily Login');
+            if (loginTask) {
+              await db.updateTaskProgress(userData.userId, loginTask.id, 1);
+            }
+          } catch (taskError) {
+            console.error('Error updating login task:', taskError);
           }
-        } catch (taskError) {
-          console.error('Error updating login task:', taskError);
         }
       } else {
         // New user - create in database
@@ -151,7 +172,8 @@ function App() {
           avatar: userData.avatar,
           is_admin: isAdmin
         });
-        setUser(newUser);
+        const userWithAdminStatus = { ...newUser, isAdmin: isAdmin || newUser.isAdmin };
+        setUser(userWithAdminStatus);
         addNotification(`Welcome to Cipro, ${userData.username}!`, 'success');
       }
       
@@ -177,17 +199,28 @@ function App() {
   };
 
   return (
-    <Router>
-      <RouteTracker />
+    <HelmetProvider>
+      <PerformanceOptimizer />
+      <Router>
+        <RouteTracker />
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '1.5rem' }}>Loading...</div>}>
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
             <Route path="/admin/login" element={<AdminLoginPage onLogin={handleLogin} />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        ) : user.isAdmin ? (
+        ) : (() => {
+          // Debug logging
+          console.log('Routing decision - User:', user);
+          console.log('Is Admin?', user?.isAdmin);
+          return user?.isAdmin;
+        })() ? (
           // Admin Layout - Only Admin Panel
           <Layout user={user} notifications={notifications} onLogout={handleLogout} isAdmin={true}>
             <Routes>
@@ -213,12 +246,17 @@ function App() {
               <Route path="/notifications" element={<NotificationsPage user={user} addNotification={addNotification} />} />
               <Route path="/tasks" element={<TasksPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               <Route path="/profile" element={<ProfilePage user={user} updateUser={updateUser} addNotification={addNotification} onLogout={handleLogout} />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
         )}
       </Suspense>
     </Router>
+    </HelmetProvider>
   );
 }
 

@@ -14,7 +14,7 @@ function ReferralPage({ user, updateUser, addNotification }) {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  const referralLink = `https://cipro1.vercel.app/login?ref=${user.userId}`;
+  const referralLink = `https://www.ciprohub.site/login?ref=${user.userId}`;
 
   useEffect(() => {
     loadReferralData();

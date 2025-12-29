@@ -74,7 +74,7 @@ function AdminLoginPage({ onLogin }) {
             adminUser = await db.createUser({
               user_id: 'ADMIN-DEFAULT-001',
               username: 'admin',
-              email: 'admin@cryptoearning.com',
+              email: 'admin@ciprohub.site',
               avatar: '🛡️',
               is_admin: true
             });
@@ -85,7 +85,7 @@ function AdminLoginPage({ onLogin }) {
           adminUser = {
             userId: 'ADMIN-DEFAULT-001',
             username: 'admin',
-            email: 'admin@cryptoearning.com',
+            email: 'admin@ciprohub.site',
             avatar: '🛡️',
             isAdmin: true,
             points: 0,
@@ -106,6 +106,7 @@ function AdminLoginPage({ onLogin }) {
           isAdmin: true
         };
 
+        console.log('Admin login successful:', adminData); // Debug log
         localStorage.setItem('authUser', JSON.stringify(adminData));
         onLogin(adminData, navigate);
       } else {

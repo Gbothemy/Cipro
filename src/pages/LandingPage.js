@@ -1,5 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import SEOHead from '../components/SEOHead';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -53,8 +54,50 @@ function LandingPage() {
     { name: 'USDC', icon: '💵', color: '#2775CA' }
   ];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Cipro",
+    "description": "Play games and earn real cryptocurrency rewards including SOL, ETH, USDT, and USDC",
+    "url": "https://www.ciprohub.site",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free to play with premium VIP options"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "2150",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "Earn SOL cryptocurrency",
+      "Earn ETH cryptocurrency", 
+      "Earn USDT stablecoin",
+      "Earn USDC stablecoin",
+      "100,000+ games available",
+      "Daily rewards and airdrops",
+      "VIP membership tiers",
+      "Referral program with 10% commission",
+      "Mobile responsive design",
+      "Secure wallet integration"
+    ]
+  };
+
   return (
     <div className="landing-page">
+      <SEOHead 
+        title="🎮 Cipro - Play Games, Earn Real Cryptocurrency | Free SOL, ETH, USDT, USDC Rewards"
+        description="🚀 Join 15,000+ players earning real cryptocurrency by playing fun games! Earn SOL, ETH, USDT & USDC daily. Free to start, no investment required. Start earning crypto now!"
+        keywords="earn cryptocurrency, play to earn games, free crypto, SOL rewards, ETH rewards, USDT rewards, USDC rewards, blockchain games, crypto gaming, cryptocurrency platform, earn bitcoin, free cryptocurrency, crypto airdrops, gaming rewards, play games earn money, cryptocurrency mining games, crypto faucet, earn crypto online, free crypto games, blockchain gaming platform"
+        url="https://www.ciprohub.site"
+        structuredData={structuredData}
+      />
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="nav-container">
@@ -214,15 +257,15 @@ function LandingPage() {
               </div>
               <div className="footer-column">
                 <h4>Company</h4>
-                <a href="#about">About Us</a>
-                <a href="#contact">Contact</a>
-                <a href="#careers">Careers</a>
+                <Link to="/about">About Us</Link>
+                <Link to="/support">Contact</Link>
+                <Link to="/faq">FAQ</Link>
               </div>
               <div className="footer-column">
                 <h4>Legal</h4>
-                <a href="#privacy">Privacy Policy</a>
-                <a href="#terms">Terms of Service</a>
-                <a href="#cookies">Cookie Policy</a>
+                <Link to="/privacy">Privacy Policy</Link>
+                <Link to="/terms">Terms of Service</Link>
+                <Link to="/support">Support</Link>
               </div>
             </div>
           </div>

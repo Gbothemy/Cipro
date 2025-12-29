@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { db } from '../db/supabase';
 import './LoginPage.css';
 
@@ -360,8 +360,8 @@ function LoginPage({ onLogin }) {
         <div className="login-footer">
           <p className="terms-text">
             By {isLogin ? 'logging in' : 'creating an account'}, you agree to our{' '}
-            <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a> and{' '}
-            <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+            <Link to="/terms">Terms of Service</Link> and{' '}
+            <Link to="/privacy">Privacy Policy</Link>
           </p>
           {!isLogin && (
             <p className="security-note">

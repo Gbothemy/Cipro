@@ -42,7 +42,9 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         <div className="header-content">
           <div className="header-left">
             <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-            <h1 className="header-title">💎 Cipro</h1>
+            <div className="header-logo">
+              <img src="/cipro-logo.png" alt="CIPRO" className="logo-image" />
+            </div>
           </div>
           <div className="header-right">
             <button onClick={toggleTheme} className="theme-toggle" title={isDarkMode ? 'Light Mode' : 'Dark Mode'}>
@@ -146,9 +148,9 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
           <footer className="footer desktop-only">
             <p>&copy; 2024 Cipro. All rights reserved.</p>
             <div className="footer-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Support</a>
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms of Service</Link>
+              <Link to="/support">Support</Link>
             </div>
           </footer>
         </main>

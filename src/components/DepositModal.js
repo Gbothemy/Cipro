@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { COMPANY_WALLETS, generatePaymentLink, generateQRData } from '../config/walletConfig';
+import { db } from '../db/supabase';
 import './DepositModal.css';
 
 function DepositModal({ isOpen, onClose, user, addNotification, subscriptionTier = null, billingCycle = 'monthly' }) {
@@ -38,22 +39,49 @@ function DepositModal({ isOpen, onClose, user, addNotification, subscriptionTier
   };
 
   const handleSubmitDeposit = async () => {
-    if (!amount || parseFloat(amount) < wallet.minDeposit) {
+    const depositAmount = isSubscription ? subscriptionAmount : amount;
+    
+    if (!isSubscription && (!amount || parseFloat(amount) < wallet.minDeposit)) {
       addNotification(`Minimum deposit is ${wallet.minDeposit} ${selectedCurrency}`, 'error');
       return;
     }
 
-    // In production, this would create a deposit record in the database
-    addNotification(`Deposit request created! Send ${amount} ${selectedCurrency} to the address shown.`, 'info');
-    
-    // TODO: Create deposit record in database
-    // await db.createDepositRequest({
-    //   user_id: user.userId,
-    //   currency: selectedCurrency,
-    //   amount: parseFloat(amount),
-    //   wallet_address: wallet.address,
-    //   status: 'pending'
-    // });
+    try {
+      // Create deposit record in database
+      const depositData = {
+        id: `DEP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        user_id: user.userId,
+        username: user.username,
+        currency: selectedCurrency.toLowerCase(),
+        amount: parseFloat(depositAmount),
+        wallet_address: wallet.address,
+        status: 'pending',
+        deposit_type: isSubscription ? 'subscription' : 'balance',
+        subscription_tier: isSubscription ? subscriptionTier.name : null,
+        billing_cycle: isSubscription ? billingCycle : null
+      };
+
+      // Create deposit request in database
+      const result = await db.createDepositRequest(depositData);
+      
+      if (result.success) {
+        if (isSubscription) {
+          addNotification(`🎉 VIP ${subscriptionTier.name} subscription payment submitted! You'll be upgraded once payment is confirmed.`, 'success');
+        } else {
+          addNotification(`Deposit request created! Send ${depositAmount} ${selectedCurrency} to the address shown.`, 'info');
+        }
+        
+        // Log the deposit for admin tracking
+        console.log('Deposit request created:', depositData);
+        
+        onClose();
+      } else {
+        throw new Error(result.error?.message || 'Failed to create deposit request');
+      }
+    } catch (error) {
+      console.error('Error creating deposit request:', error);
+      addNotification('Error creating deposit request. Please try again.', 'error');
+    }
   };
 
   return (

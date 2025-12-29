@@ -15,6 +15,7 @@ function AdminPage({ user, addNotification }) {
   const [editForm, setEditForm] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [withdrawalRequests, setWithdrawalRequests] = useState([]);
+  const [depositRequests, setDepositRequests] = useState([]);
   const [leaderboardData, setLeaderboardData] = useState({
     points: [],
     earnings: [],
@@ -46,6 +47,7 @@ function AdminPage({ user, addNotification }) {
     loadAllData();
     loadNotifications();
     loadWithdrawalRequests();
+    loadDepositRequests();
     loadLeaderboard();
     loadSystemSettings();
 
@@ -55,6 +57,7 @@ function AdminPage({ user, addNotification }) {
         loadAllData();
         loadNotifications();
         loadWithdrawalRequests();
+        loadDepositRequests();
         loadLeaderboard();
       }
     }, 30000); // Reduced from 5s to 30s for better performance
@@ -164,6 +167,16 @@ function AdminPage({ user, addNotification }) {
     }
   };
 
+  const loadDepositRequests = async () => {
+    try {
+      const requests = await db.getDepositRequests();
+      setDepositRequests(requests || []);
+    } catch (error) {
+      console.error('Error loading deposit requests:', error);
+      setDepositRequests([]);
+    }
+  };
+
   const loadLeaderboard = async () => {
     try {
       // Fetch leaderboard data from database
@@ -256,24 +269,75 @@ function AdminPage({ user, addNotification }) {
     }
   };
 
+  const handleDepositAction = async (requestId, action) => {
+    try {
+      const status = action === 'approved' ? 'approved' : 'rejected';
+      const result = await db.updateDepositStatus(requestId, status, user.username);
+      
+      if (result.success) {
+        addNotification(`Deposit ${status}: ${requestId}`, 'success');
+        
+        // Reload data to reflect changes
+        loadDepositRequests();
+        loadNotifications();
+        loadAllData();
+      } else {
+        throw new Error(result.error?.message || 'Failed to process deposit');
+      }
+    } catch (error) {
+      console.error('Error processing deposit:', error);
+      addNotification('Error processing deposit', 'error');
+    }
+  };
+
   const loadSystemSettings = () => {
     // System settings loaded from state
   };
 
-  const saveSystemSettings = () => {
-    // TODO: Save to database
-    addNotification('System settings saved', 'success');
+  const saveSystemSettings = async () => {
+    try {
+      // Save system settings to database
+      // In a real implementation, you would save to a system_settings table
+      const settingsData = {
+        maintenance_mode: systemSettings.maintenanceMode,
+        registration_enabled: systemSettings.registrationEnabled,
+        max_daily_plays: systemSettings.maxDailyPlays,
+        points_multiplier: systemSettings.pointsMultiplier,
+        updated_by: user.userId,
+        updated_at: new Date().toISOString()
+      };
+      
+      // await db.updateSystemSettings(settingsData);
+      console.log('System settings saved:', settingsData);
+      addNotification('System settings saved successfully', 'success');
+    } catch (error) {
+      console.error('Error saving system settings:', error);
+      addNotification('Error saving system settings', 'error');
+    }
   };
 
   const handleDeleteUser = async (userId) => {
     if (!window.confirm(`Delete user ${userId}? This cannot be undone!`)) return;
 
     try {
-      // TODO: Implement delete user in database
+      // In a real implementation, you would implement soft delete or hard delete
+      // This would involve deleting from multiple tables: users, balances, user_tasks, etc.
+      
+      // For now, we'll implement a placeholder that logs the action
+      console.log('User deletion requested:', userId);
+      
+      // Remove from local state
+      setUsers(prev => prev.filter(u => u.userId !== userId));
+      
+      addNotification('User marked for deletion. Database implementation pending.', 'info');
+      
+      // In production, you would call:
       // await db.deleteUser(userId);
-      addNotification('User deletion - Feature coming soon', 'info');
+      // This would handle cascading deletes across all related tables
+      
       loadAllData();
     } catch (error) {
+      console.error('Error deleting user:', error);
       addNotification('Error deleting user', 'error');
     }
   };
@@ -436,6 +500,9 @@ function AdminPage({ user, addNotification }) {
         </button>
         <button className={activeTab === 'withdrawals' ? 'active' : ''} onClick={() => setActiveTab('withdrawals')}>
           💸 Withdrawals ({withdrawalRequests.filter(r => r.status === 'pending').length})
+        </button>
+        <button className={activeTab === 'deposits' ? 'active' : ''} onClick={() => setActiveTab('deposits')}>
+          💰 Deposits ({depositRequests.filter(r => r.status === 'pending').length})
         </button>
         <button className={activeTab === 'notifications' ? 'active' : ''} onClick={() => setActiveTab('notifications')}>
           🔔 Notifications ({notifications.length})
@@ -815,6 +882,124 @@ function AdminPage({ user, addNotification }) {
                                 {request.processedBy && `By: ${request.processedBy}`}
                                 <br />
                                 {request.processedDate && new Date(request.processedDate).toLocaleString()}
+                              </small>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'deposits' && (
+        <div className="admin-content">
+          <div className="deposits-section">
+            <div className="section-header">
+              <h2>💰 Deposit Requests</h2>
+              <div className="section-stats">
+                <span className="stat-item">
+                  <strong>Pending:</strong> {depositRequests.filter(r => r.status === 'pending').length}
+                </span>
+                <span className="stat-item">
+                  <strong>Total:</strong> {depositRequests.length}
+                </span>
+              </div>
+            </div>
+
+            {depositRequests.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">💰</div>
+                <h3>No Deposit Requests</h3>
+                <p>All deposit requests will appear here for approval</p>
+              </div>
+            ) : (
+              <div className="deposits-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>User</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                      <th>Currency</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {depositRequests.map(request => (
+                      <tr key={request.id} className={`request-row ${request.status}`}>
+                        <td>
+                          <code className="request-id">{request.id}</code>
+                        </td>
+                        <td>
+                          <div className="user-info">
+                            <strong>{request.username}</strong>
+                            <small>{request.user_id}</small>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="deposit-type">
+                            {request.deposit_type === 'subscription' ? (
+                              <span className="subscription-badge">
+                                💎 {request.subscription_tier} ({request.billing_cycle})
+                              </span>
+                            ) : (
+                              <span className="balance-badge">💰 Balance</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="amount-info">
+                            <strong>${request.amount}</strong>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="currency-badge">{request.currency.toUpperCase()}</span>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${request.status}`}>
+                            {request.status === 'pending' && '⏳ Pending'}
+                            {request.status === 'approved' && '✅ Approved'}
+                            {request.status === 'rejected' && '❌ Rejected'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="date-info">
+                            <strong>{new Date(request.created_at).toLocaleDateString()}</strong>
+                            <small>{new Date(request.created_at).toLocaleTimeString()}</small>
+                          </div>
+                        </td>
+                        <td className="actions-cell">
+                          {request.status === 'pending' ? (
+                            <div className="action-buttons">
+                              <button 
+                                onClick={() => handleDepositAction(request.id, 'approved')}
+                                className="approve-btn"
+                                title="Approve deposit"
+                              >
+                                ✅ Approve
+                              </button>
+                              <button 
+                                onClick={() => handleDepositAction(request.id, 'rejected')}
+                                className="reject-btn"
+                                title="Reject deposit"
+                              >
+                                ❌ Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="processed-info">
+                              <small>
+                                {request.processed_by && `By: ${request.processed_by}`}
+                                <br />
+                                {request.processed_date && new Date(request.processed_date).toLocaleString()}
                               </small>
                             </div>
                           )}

@@ -6,6 +6,7 @@ import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
 import TriviaGame from '../games/TriviaGame';
+import SEOHead from '../components/SEOHead';
 import GoogleAd, { AdSlots } from '../components/GoogleAd';
 import gameAttemptManager from '../utils/gameAttemptManager';
 import './GamePage.css';
@@ -237,6 +238,12 @@ function GamePage({ user, updateUser, addNotification }) {
 
   return (
     <div className="game-page">
+      <SEOHead 
+        title="🎮 Play Crypto Games & Earn Rewards | Cipro Gaming Platform"
+        description="🎮 Play exciting games and earn real cryptocurrency! Choose from Trivia, Memory, Puzzle & Spin Wheel games. Earn SOL, ETH, USDT & USDC rewards daily. Start playing now!"
+        keywords="crypto games, play to earn, cryptocurrency games, earn SOL, earn ETH, earn USDT, earn USDC, blockchain games, gaming rewards, crypto mining games, free crypto games, trivia games crypto, memory games crypto, puzzle games crypto"
+        url="https://www.ciprohub.site/game"
+      />
       <div className="page-header">
         <h1 className="page-title">Game Mining</h1>
         <p className="page-subtitle">Play games to earn Cipro and rewards</p>

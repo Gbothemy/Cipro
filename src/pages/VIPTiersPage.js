@@ -103,8 +103,9 @@ function VIPTiersPage({ user, addNotification }) {
       return;
     }
     
-    // In production, integrate with payment gateway (Stripe, PayPal, etc.)
-    addNotification(`Subscription feature coming soon! ${tier.name} tier: $${billingCycle === 'yearly' ? tier.priceYearly : tier.price}/${billingCycle === 'yearly' ? 'year' : 'month'}`, 'info');
+    // Open payment modal for subscription
+    setSelectedTier(tier);
+    setShowPaymentModal(true);
   };
 
   return (

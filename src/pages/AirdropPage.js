@@ -43,11 +43,11 @@ function AirdropPage({ user, updateUser, addNotification }) {
     setClaimed(true);
     
     const rewards = {
-      sol: parseFloat((Math.random() * 0.05 + 0.01).toFixed(4)),
-      eth: parseFloat((Math.random() * 0.002 + 0.001).toFixed(4)),
-      usdt: parseFloat((Math.random() * 10 + 5).toFixed(2)),
-      usdc: parseFloat((Math.random() * 10 + 5).toFixed(2)),
-      points: Math.floor(Math.random() * 500 + 200)
+      sol: parseFloat((Math.random() * 0.000167 + 0.000033).toFixed(6)), // Max: 0.0002 SOL (~$0.005)
+      eth: parseFloat((Math.random() * 0.000001 + 0.0000003).toFixed(7)), // Max: 0.0000013 ETH (~$0.003)
+      usdt: parseFloat((Math.random() * 0.0033 + 0.0017).toFixed(4)), // Max: 0.005 USDT
+      usdc: parseFloat((Math.random() * 0.0033 + 0.0017).toFixed(4)), // Max: 0.005 USDC
+      points: Math.floor(Math.random() * 17 + 7) // Max: 24 points (scaled down from 700)
     };
 
     try {
@@ -80,7 +80,7 @@ function AirdropPage({ user, updateUser, addNotification }) {
         dayStreak: user.dayStreak + 1
       });
 
-      addNotification(`🎁 Claimed: ${rewards.sol} SOL, ${rewards.eth} ETH, ${rewards.usdt} USDT, ${rewards.usdc} USDC, ${rewards.points} Cipro!`, 'success');
+      addNotification(`🎁 Claimed: ${rewards.sol.toFixed(6)} SOL, ${rewards.eth.toFixed(7)} ETH, ${rewards.usdt.toFixed(4)} USDT, ${rewards.usdc.toFixed(4)} USDC, ${rewards.points} Cipro!`, 'success');
       setClaimed(false);
       setCanClaim(false);
     } catch (error) {
@@ -104,21 +104,21 @@ function AirdropPage({ user, updateUser, addNotification }) {
             <div className="currency-icon">◎</div>
             <div className="currency-info">
               <span className="currency-name">SOL</span>
-              <span className="currency-amount">{user.balance.sol.toFixed(4)}</span>
+              <span className="currency-amount">{user.balance.sol.toFixed(6)}</span>
             </div>
           </div>
           <div className="balance-item">
             <div className="currency-icon">Ξ</div>
             <div className="currency-info">
               <span className="currency-name">ETH</span>
-              <span className="currency-amount">{user.balance.eth.toFixed(4)}</span>
+              <span className="currency-amount">{user.balance.eth.toFixed(7)}</span>
             </div>
           </div>
           <div className="balance-item">
             <div className="currency-icon">💵</div>
             <div className="currency-info">
               <span className="currency-name">USDT</span>
-              <span className="currency-amount">{user.balance.usdt}</span>
+              <span className="currency-amount">{user.balance.usdt.toFixed(4)}</span>
             </div>
           </div>
         </div>
