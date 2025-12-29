@@ -97,6 +97,15 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="menu-overlay" onClick={() => setMenuOpen(false)}></div>
             <div className="menu-content">
               <div className="menu-header">
+                <div className="menu-logo">
+                  <img 
+                    src={`${process.env.PUBLIC_URL}/ciprohub.png`}
+                    alt="Cipro"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
                 <div className="menu-avatar">{user.avatar}</div>
                 <div className="menu-user-info">
                   <h3>{user.username}</h3>
