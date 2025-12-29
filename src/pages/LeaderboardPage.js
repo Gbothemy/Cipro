@@ -162,22 +162,29 @@ function LeaderboardPage({ user }) {
 
     const users = [];
     
-    // Generate 100 fake users
+    // Generate 100 fake users with CIPRO ranging from 800K to 5M+
     for (let i = 0; i < 100; i++) {
       const username = fakeUsernames[i] || `Player${i + 1}`;
       const avatar = avatars[i] || avatars[Math.floor(Math.random() * avatars.length)];
       
+      // Generate points from 800K to 5M+ CIPRO
+      // Use exponential distribution to create realistic gaps between top players
+      const basePoints = 800000; // 800K minimum
+      const maxAdditionalPoints = 4200000; // Up to 4.2M additional (total max ~5M)
+      const randomFactor = Math.pow(Math.random(), 0.3); // Exponential distribution favoring higher values
+      const points = Math.floor(basePoints + (maxAdditionalPoints * randomFactor));
+      
       users.push({
         username,
         avatar,
-        points: Math.floor(Math.random() * 50000) + 1000, // 1K to 51K points
+        points: points,
         vipLevel: Math.floor(Math.random() * 5) + 1, // VIP 1-5
         streak: Math.floor(Math.random() * 100) + 1, // 1-100 day streak
-        sol: Math.random() * 10, // 0-10 SOL
-        eth: Math.random() * 5, // 0-5 ETH
-        usdt: Math.random() * 5000, // 0-5000 USDT
-        usdc: Math.random() * 5000, // 0-5000 USDC
-        earnings: Math.random() * 10000 // 0-10K total earnings
+        sol: Math.random() * 50, // 0-50 SOL (increased for high-value players)
+        eth: Math.random() * 25, // 0-25 ETH (increased for high-value players)
+        usdt: Math.random() * 50000, // 0-50K USDT (increased for high-value players)
+        usdc: Math.random() * 50000, // 0-50K USDC (increased for high-value players)
+        earnings: Math.random() * 100000 // 0-100K total earnings (increased for high-value players)
       });
     }
 
@@ -282,7 +289,8 @@ function LeaderboardPage({ user }) {
           'climbed to rank #{rank} with {points} CIPRO!',
           'jumped {positions} positions to rank #{rank}!',
           'surged to #{rank} with massive {points} CIPRO gain!',
-          'broke into top {rank} with {points} CIPRO!'
+          'broke into top {rank} with {points} CIPRO!',
+          'earned {points} CIPRO and climbed to #{rank}!'
         ]
       },
       {
@@ -293,7 +301,8 @@ function LeaderboardPage({ user }) {
           'claimed the #1 spot with {points} CIPRO!',
           'became the new leaderboard champion!',
           'dethroned the king with {points} CIPRO!',
-          'reached the summit with {points} CIPRO!'
+          'reached the summit with {points} CIPRO!',
+          'conquered the leaderboard with {points} CIPRO!'
         ]
       },
       {
@@ -304,7 +313,8 @@ function LeaderboardPage({ user }) {
           'won {points} CIPRO and jumped to rank #{rank}!',
           'hit a {points} CIPRO jackpot, now rank #{rank}!',
           'scored massive {points} CIPRO, climbing to #{rank}!',
-          'earned epic {points} CIPRO, reaching rank #{rank}!'
+          'earned epic {points} CIPRO, reaching rank #{rank}!',
+          'bagged {points} CIPRO in one session, rank #{rank}!'
         ]
       },
       {
@@ -379,12 +389,12 @@ function LeaderboardPage({ user }) {
       const randomTemplate = randomType.templates[Math.floor(Math.random() * randomType.templates.length)];
       
       let message = randomTemplate
-        .replace('{points}', (Math.floor(Math.random() * 8000) + 1000).toLocaleString())
+        .replace('{points}', (Math.floor(Math.random() * 200000) + 50000).toLocaleString()) // 50K to 250K CIPRO gains
         .replace('{rank}', Math.floor(Math.random() * 100) + 1)
         .replace('{positions}', Math.floor(Math.random() * 15) + 2)
         .replace('{days}', Math.floor(Math.random() * 45) + 7)
         .replace('{level}', Math.floor(Math.random() * 5) + 1)
-        .replace('{amount}', (Math.floor(Math.random() * 2000) + 100).toLocaleString())
+        .replace('{amount}', (Math.floor(Math.random() * 20000) + 5000).toLocaleString()) // 5K to 25K conversion amounts
         .replace('{games}', Math.floor(Math.random() * 10) + 3)
         .replace('{achievement}', achievements[Math.floor(Math.random() * achievements.length)]);
 
@@ -454,14 +464,14 @@ function LeaderboardPage({ user }) {
     <div className="leaderboard-page">
       <SEOHead 
         title="🏆 Crypto Gaming Leaderboard - Top Earners | Cipro"
-        description="🏆 Check the top crypto earners! See who's leading in points, earnings, and streaks. Compete with 100+ active players and climb the cryptocurrency gaming leaderboard!"
+        description="🏆 Check the top crypto earners! See who's leading with 800K+ CIPRO, massive earnings, and epic streaks. Compete with 100+ high-stakes players and climb the cryptocurrency gaming leaderboard!"
         keywords="crypto gaming leaderboard, top crypto earners, cryptocurrency rankings, gaming competition, crypto rewards leaderboard, top players, gaming stats"
         url="https://www.ciprohub.site/leaderboard"
       />
       
       <div className="page-header">
         <h1 className="page-title">🏆 Leaderboard</h1>
-        <p className="page-subtitle">Live rankings and player achievements</p>
+        <p className="page-subtitle">High-stakes rankings and elite player achievements</p>
       </div>
 
       <div className="user-rank-card">
