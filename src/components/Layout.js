@@ -46,16 +46,19 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="header-logo">
               {!logoError ? (
                 <img 
-                  src={`${process.env.PUBLIC_URL}/ciprohub.png`}
+                  src="/ciprohub.png"
                   alt="CIPRO" 
                   className="logo-image"
                   onError={(e) => {
-                    console.log('PNG logo failed, trying SVG backup');
-                    if (!e.target.src.includes('.svg')) {
+                    console.log('Direct path failed, trying with PUBLIC_URL');
+                    if (!e.target.src.includes('PUBLIC_URL')) {
+                      e.target.src = `${process.env.PUBLIC_URL}/ciprohub.png`;
+                    } else if (!e.target.src.includes('.svg')) {
                       e.target.src = `${process.env.PUBLIC_URL}/cipro-logo.svg`;
                     } else if (!e.target.src.includes('backup')) {
                       e.target.src = `${process.env.PUBLIC_URL}/cipro-logo-backup.svg`;
                     } else {
+                      console.log('All logo attempts failed, using text fallback');
                       setLogoError(true);
                     }
                   }}
