@@ -39,10 +39,12 @@ function LeaderboardPage({ user }) {
         
         // Calculate current user rank among all users (real + fake)
         const totalUsers = combinedLeaderboardData.points.length;
+        // Set user rank to be outside top 50 (51-100 range)
+        const userRank = Math.floor(Math.random() * 50) + 51; // Rank 51-100
         setCurrentUserRank({
-          points: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers },
-          earnings: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers },
-          streak: { rank: Math.floor(Math.random() * 30) + 15, total: totalUsers }
+          points: { rank: userRank, total: totalUsers },
+          earnings: { rank: userRank, total: totalUsers },
+          streak: { rank: userRank, total: totalUsers }
         });
 
         // Generate live updates
@@ -53,10 +55,12 @@ function LeaderboardPage({ user }) {
         // Fallback to fake data only
         const fakeLeaderboardData = generateFakeLeaderboardData();
         setLeaderboardData(fakeLeaderboardData);
+        // Set user rank to be outside top 50 (51-100 range)
+        const userRank = Math.floor(Math.random() * 50) + 51; // Rank 51-100
         setCurrentUserRank({
-          points: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-          earnings: { rank: Math.floor(Math.random() * 50) + 25, total: 100 },
-          streak: { rank: Math.floor(Math.random() * 50) + 25, total: 100 }
+          points: { rank: userRank, total: 100 },
+          earnings: { rank: userRank, total: 100 },
+          streak: { rank: userRank, total: 100 }
         });
         generateLiveUpdates();
         setLoading(false);
@@ -628,7 +632,7 @@ function LeaderboardPage({ user }) {
           <div className="user-rank-avatar">{user.avatar}</div>
           <div className="user-rank-details">
             <h3>{user.username}</h3>
-            <p>Your Rank: #{currentUserRank.points.rank} of {currentUserRank.points.total}</p>
+            <p>Your Rank: {currentUserRank.points.rank > 50 ? 'Not in top rankings' : `#${currentUserRank.points.rank} of ${currentUserRank.points.total}`}</p>
           </div>
         </div>
         <div className="user-rank-stats">
