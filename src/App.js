@@ -91,6 +91,15 @@ function App() {
         const parsedAuthUser = JSON.parse(savedAuthUser);
         setIsAuthenticated(true);
         
+        // Update user state with the logged-in user's data
+        setUser(prevUser => ({
+          ...prevUser,
+          userId: parsedAuthUser.userId,
+          username: parsedAuthUser.username,
+          email: parsedAuthUser.email || '',
+          avatar: parsedAuthUser.avatar || '👤'
+        }));
+        
         // Load user data from Supabase
         loadUserFromDatabase(parsedAuthUser.userId).catch(err => {
           console.error('Failed to load user from database:', err);
@@ -107,7 +116,13 @@ function App() {
     try {
       const userData = await db.getUser(userId);
       if (userData) {
-        setUser(userData);
+        setUser(prevUser => ({
+          ...prevUser,
+          ...userData,
+          userId: userId // Ensure userId is properly set
+        }));
+      } else {
+        console.log('User not found in database, will be created on next login');
       }
     } catch (error) {
       console.error('Error loading user from database:', error);
@@ -144,7 +159,11 @@ function App() {
       
       if (dbUser) {
         // Existing user - load their data and preserve admin status
-        const userWithAdminStatus = { ...dbUser, isAdmin: isAdmin || dbUser.isAdmin };
+        const userWithAdminStatus = { 
+          ...dbUser, 
+          isAdmin: isAdmin || dbUser.isAdmin,
+          userId: userData.userId // Ensure userId is properly set
+        };
         setUser(userWithAdminStatus);
         addNotification(`Welcome back, ${userData.username}!`, 'success');
         
@@ -169,7 +188,11 @@ function App() {
           avatar: userData.avatar,
           is_admin: isAdmin
         });
-        const userWithAdminStatus = { ...newUser, isAdmin: isAdmin || newUser.isAdmin };
+        const userWithAdminStatus = { 
+          ...newUser, 
+          isAdmin: isAdmin || newUser.isAdmin,
+          userId: userData.userId // Ensure userId is properly set
+        };
         setUser(userWithAdminStatus);
         addNotification(`Welcome to Cipro, ${userData.username}!`, 'success');
       }
