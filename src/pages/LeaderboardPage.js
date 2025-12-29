@@ -234,14 +234,14 @@ function LeaderboardPage({ user }) {
       const randomFactor = Math.pow(Math.random(), 0.4); // Less extreme distribution
       const points = Math.floor(basePoints + (maxAdditionalPoints * randomFactor));
       
-      // More realistic VIP distribution (weighted towards lower levels)
+      // VIP distribution with VIP 6 as the lowest tier (weighted towards higher levels)
       const vipRandom = Math.random();
       let vipLevel;
-      if (vipRandom < 0.4) vipLevel = 1;
-      else if (vipRandom < 0.7) vipLevel = 2;
-      else if (vipRandom < 0.85) vipLevel = 3;
-      else if (vipRandom < 0.95) vipLevel = 4;
-      else vipLevel = 5;
+      if (vipRandom < 0.4) vipLevel = 6; // 40% are VIP 6 (lowest)
+      else if (vipRandom < 0.7) vipLevel = 7; // 30% are VIP 7
+      else if (vipRandom < 0.85) vipLevel = 8; // 15% are VIP 8
+      else if (vipRandom < 0.95) vipLevel = 9; // 10% are VIP 9
+      else vipLevel = 10; // 5% are VIP 10 (highest)
       
       // More realistic streak distribution
       const streakRandom = Math.random();
@@ -542,7 +542,7 @@ function LeaderboardPage({ user }) {
         .replace('{rank}', Math.floor(Math.random() * 100) + 1)
         .replace('{positions}', Math.floor(Math.random() * 15) + 2)
         .replace('{days}', Math.floor(Math.random() * 45) + 7)
-        .replace('{level}', Math.floor(Math.random() * 5) + 1)
+        .replace('{level}', Math.floor(Math.random() * 5) + 6) // VIP 6-10
         .replace('{amount}', (Math.floor(Math.random() * 20000) + 5000).toLocaleString()) // 5K to 25K conversion amounts
         .replace('{games}', Math.floor(Math.random() * 10) + 3)
         .replace('{achievement}', achievements[Math.floor(Math.random() * achievements.length)]);
