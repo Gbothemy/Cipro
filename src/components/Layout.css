@@ -84,24 +84,43 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.header-logo:hover {
+  transform: translateY(-1px);
 }
 
 .logo-image {
-  height: 45px;
+  height: 50px;
   width: auto;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3)) brightness(1.1) contrast(1.1);
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  background: transparent;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.4)) brightness(1.15) contrast(1.15);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.3);
+  }
 }
 
 .logo-image:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.6)) brightness(1.2) contrast(1.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.08);
+  filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.7)) brightness(1.25) contrast(1.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  animation: none;
 }
 
 .logo-text {
@@ -119,34 +138,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .logo-text-container .logo-text {
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 900;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
   padding: 0;
   background: none;
   border-radius: 0;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   margin: 0;
 }
 
 .logo-subtitle {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  margin-top: 2px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 3px;
   text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .theme-toggle,
@@ -280,26 +299,30 @@
   }
   
   .logo-image {
-    height: 38px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.25);
+    height: 42px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    border-width: 2px;
   }
   
   .logo-text-container {
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    border-width: 2px;
   }
   
   .logo-text-container .logo-text {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: 900;
   }
   
   .logo-subtitle {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
+    font-weight: 700;
   }
   
   .user-details {
@@ -1160,11 +1183,12 @@ body.dark-mode .theme-toggle:hover {
   }
   
   .logo-image {
-    height: 32px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.2);
+    height: 36px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+    border-width: 2px;
   }
   
   .menu-btn,
