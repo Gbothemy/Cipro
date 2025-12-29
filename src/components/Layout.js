@@ -191,12 +191,85 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             style={{ maxWidth: '100%' }}
           />
           
-          <footer className="footer desktop-only">
-            <p>&copy; 2024 Cipro. All rights reserved.</p>
-            <div className="footer-links">
-              <Link to="/privacy">Privacy Policy</Link>
-              <Link to="/terms">Terms of Service</Link>
-              <Link to="/support">Support</Link>
+          <footer className="app-footer">
+            <div className="footer-content">
+              <div className="footer-brand">
+                <div className="footer-logo">
+                  <img 
+                    src={`${process.env.PUBLIC_URL}/ciprohub.png`}
+                    alt="Cipro"
+                    className="footer-logo-image"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="footer-logo-text" style={{ display: 'none' }}>
+                    <span className="footer-logo-name">CIPRO</span>
+                    <span className="footer-logo-tagline">CRYPTO GAMING</span>
+                  </div>
+                </div>
+                <p className="footer-description">
+                  Play games and earn real cryptocurrency rewards including SOL, ETH, USDT, and USDC. 
+                  Join thousands of players earning daily!
+                </p>
+                <div className="footer-social">
+                  <a href="https://twitter.com/CiproGaming" target="_blank" rel="noopener noreferrer" title="Twitter">
+                    🐦
+                  </a>
+                  <a href="https://discord.gg/cipro" target="_blank" rel="noopener noreferrer" title="Discord">
+                    💬
+                  </a>
+                  <a href="https://t.me/CiproGaming" target="_blank" rel="noopener noreferrer" title="Telegram">
+                    📱
+                  </a>
+                </div>
+              </div>
+              
+              <div className="footer-links-section">
+                <div className="footer-column">
+                  <h4>Platform</h4>
+                  <Link to="/">Mining Games</Link>
+                  <Link to="/tasks">Daily Tasks</Link>
+                  <Link to="/leaderboard">Leaderboard</Link>
+                  <Link to="/achievements">Achievements</Link>
+                </div>
+                
+                <div className="footer-column">
+                  <h4>Earn</h4>
+                  <Link to="/referral">Referral Program</Link>
+                  <Link to="/airdrop">Airdrops</Link>
+                  <Link to="/vip-tiers">VIP Tiers</Link>
+                  <Link to="/conversion">Withdraw</Link>
+                </div>
+                
+                <div className="footer-column">
+                  <h4>Support</h4>
+                  <Link to="/faq">FAQ</Link>
+                  <Link to="/support">Help Center</Link>
+                  <Link to="/about">About Us</Link>
+                  <a href="mailto:support@ciprohub.site">Contact</a>
+                </div>
+                
+                <div className="footer-column">
+                  <h4>Legal</h4>
+                  <Link to="/privacy">Privacy Policy</Link>
+                  <Link to="/terms">Terms of Service</Link>
+                  <Link to="/legal">Legal</Link>
+                  <a href="/sitemap.xml" target="_blank">Sitemap</a>
+                </div>
+              </div>
+            </div>
+            
+            <div className="footer-bottom">
+              <div className="footer-bottom-content">
+                <p>&copy; 2024 Cipro. All rights reserved.</p>
+                <div className="footer-badges">
+                  <span className="footer-badge">🔒 Secure</span>
+                  <span className="footer-badge">⚡ Fast</span>
+                  <span className="footer-badge">🎮 Fun</span>
+                </div>
+              </div>
             </div>
           </footer>
         </main>
