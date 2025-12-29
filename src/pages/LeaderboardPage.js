@@ -255,8 +255,23 @@ function LeaderboardPage({ user }) {
       else if (streakRandom < 0.85) streak = Math.floor(Math.random() * 60) + 31; // 31-90 days (25%)
       else streak = Math.floor(Math.random() * 275) + 91; // 91-365 days (15%)
       
-      // More realistic crypto balances based on points
+      // More realistic crypto balances based on points (much more conservative)
       const pointsRatio = points / 3000000; // Normalize to 0-1
+      
+      // Realistic SOL balance (0.01 to 2 SOL max)
+      const solBalance = Math.random() * 1.5 * pointsRatio + 0.01;
+      
+      // Realistic ETH balance (0.001 to 0.5 ETH max) 
+      const ethBalance = Math.random() * 0.4 * pointsRatio + 0.001;
+      
+      // Realistic USDT balance (10 to 1000 USDT max)
+      const usdtBalance = Math.random() * 800 * pointsRatio + 10;
+      
+      // Realistic USDC balance (10 to 1000 USDC max)
+      const usdcBalance = Math.random() * 800 * pointsRatio + 10;
+      
+      // Total earnings should be reasonable (50 to 2500 max)
+      const totalEarnings = Math.random() * 2000 * pointsRatio + 50;
       
       users.push({
         username,
@@ -264,11 +279,11 @@ function LeaderboardPage({ user }) {
         points: points,
         vipLevel: vipLevel,
         streak: streak,
-        sol: Math.random() * 20 * pointsRatio + 0.1, // 0.1-20 SOL based on points
-        eth: Math.random() * 10 * pointsRatio + 0.05, // 0.05-10 ETH based on points
-        usdt: Math.random() * 25000 * pointsRatio + 100, // 100-25K USDT based on points
-        usdc: Math.random() * 25000 * pointsRatio + 100, // 100-25K USDC based on points
-        earnings: Math.random() * 50000 * pointsRatio + 500 // 500-50K earnings based on points
+        sol: solBalance,
+        eth: ethBalance,
+        usdt: usdtBalance,
+        usdc: usdcBalance,
+        earnings: totalEarnings
       });
     }
 
@@ -326,17 +341,20 @@ function LeaderboardPage({ user }) {
       const randomFactor = Math.pow(Math.random(), 0.3); // Exponential distribution favoring higher values
       const points = Math.floor(basePoints + (maxAdditionalPoints * randomFactor));
       
+      // More realistic crypto balances for fallback data
+      const pointsRatio = points / 5000000; // Normalize to 0-1 for higher range
+      
       users.push({
         username,
         avatar,
         points: points,
         vipLevel: Math.floor(Math.random() * 5) + 1, // VIP 1-5
         streak: Math.floor(Math.random() * 100) + 1, // 1-100 day streak
-        sol: Math.random() * 50, // 0-50 SOL (increased for high-value players)
-        eth: Math.random() * 25, // 0-25 ETH (increased for high-value players)
-        usdt: Math.random() * 50000, // 0-50K USDT (increased for high-value players)
-        usdc: Math.random() * 50000, // 0-50K USDC (increased for high-value players)
-        earnings: Math.random() * 100000 // 0-100K total earnings (increased for high-value players)
+        sol: Math.random() * 2 * pointsRatio + 0.01, // 0.01-2 SOL based on points
+        eth: Math.random() * 0.5 * pointsRatio + 0.001, // 0.001-0.5 ETH based on points
+        usdt: Math.random() * 1000 * pointsRatio + 10, // 10-1000 USDT based on points
+        usdc: Math.random() * 1000 * pointsRatio + 10, // 10-1000 USDC based on points
+        earnings: Math.random() * 2500 * pointsRatio + 50 // 50-2500 total earnings based on points
       });
     }
 
@@ -547,7 +565,7 @@ function LeaderboardPage({ user }) {
         .replace('{positions}', Math.floor(Math.random() * 15) + 2)
         .replace('{days}', Math.floor(Math.random() * 45) + 7)
         .replace('{level}', Math.floor(Math.random() * 5) + 6) // VIP 6-10
-        .replace('{amount}', (Math.floor(Math.random() * 20000) + 5000).toLocaleString()) // 5K to 25K conversion amounts
+        .replace('{amount}', (Math.floor(Math.random() * 800) + 50).toLocaleString()) // $50 to $850 conversion amounts
         .replace('{games}', Math.floor(Math.random() * 10) + 3)
         .replace('{achievement}', achievements[Math.floor(Math.random() * achievements.length)]);
 
