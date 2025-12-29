@@ -194,23 +194,8 @@ export const trackCryptoEvents = {
 
 // Custom Analytics Endpoint
 const sendToCustomAnalytics = async (eventName, parameters) => {
-  try {
-    await fetch('/api/analytics', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        event: eventName,
-        timestamp: new Date().toISOString(),
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        ...parameters
-      })
-    });
-  } catch (error) {
-    console.warn('Failed to send custom analytics:', error);
-  }
+  // Disabled for now - no backend API endpoint
+  console.log('Custom analytics:', eventName, parameters);
 };
 
 // Performance Monitoring

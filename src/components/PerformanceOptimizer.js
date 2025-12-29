@@ -59,20 +59,8 @@ function PerformanceOptimizer() {
 
     // Service Worker registration for caching
     const registerServiceWorker = () => {
-      if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
-              trackEvent('service_worker_registered', {
-                category: 'performance'
-              });
-            })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
+      // Disabled for now due to MIME type issues on Vercel
+      console.log('Service Worker registration disabled');
     };
 
     // Critical CSS inlining

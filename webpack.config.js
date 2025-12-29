@@ -33,8 +33,14 @@ module.exports = {
       template: './public/index.html'
     }),
     new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
       'process.env.REACT_APP_SUPABASE_URL': JSON.stringify(process.env.REACT_APP_SUPABASE_URL),
-      'process.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY)
+      'process.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY),
+      'process.env.REACT_APP_GA4_MEASUREMENT_ID': JSON.stringify(process.env.REACT_APP_GA4_MEASUREMENT_ID),
+      'process.env.REACT_APP_FACEBOOK_PIXEL_ID': JSON.stringify(process.env.REACT_APP_FACEBOOK_PIXEL_ID)
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser'
     })
   ],
   devServer: {

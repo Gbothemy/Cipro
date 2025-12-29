@@ -233,29 +233,17 @@ export const generateRichSnippets = (type, data) => {
 
 // SEO performance monitoring
 export const monitorSEOPerformance = () => {
-  // Core Web Vitals monitoring
-  if (typeof window !== 'undefined' && 'web-vital' in window) {
-    // Dynamic import for web-vitals to avoid build issues
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(console.log);
-      getFID(console.log);
-      getFCP(console.log);
-      getLCP(console.log);
-      getTTFB(console.log);
-    }).catch(error => {
-      console.warn('Web Vitals not available:', error);
-    });
-  }
-
   // Page load performance
   if (typeof window !== 'undefined') {
     window.addEventListener('load', () => {
       const perfData = performance.getEntriesByType('navigation')[0];
-      trackSEOEvent('page_load_performance', {
-        load_time: perfData.loadEventEnd - perfData.loadEventStart,
-        dom_content_loaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
-        first_paint: performance.getEntriesByType('paint')[0]?.startTime || 0
-      });
+      if (perfData) {
+        trackSEOEvent('page_load_performance', {
+          load_time: perfData.loadEventEnd - perfData.loadEventStart,
+          dom_content_loaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+          first_paint: performance.getEntriesByType('paint')[0]?.startTime || 0
+        });
+      }
     });
   }
 };
