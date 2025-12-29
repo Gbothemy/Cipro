@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { VIP_LEVELS, getSubscriptionPrice, getYearlySavings, getSavingsPercentage } from '../utils/vipConfig';
 import DepositModal from '../components/DepositModal';
+import SEOHead from '../components/SEOHead';
 import './VIPTiersPage.css';
 
 function VIPTiersPage({ user, addNotification }) {
@@ -110,6 +111,12 @@ function VIPTiersPage({ user, addNotification }) {
 
   return (
     <div className="vip-tiers-page">
+      <SEOHead 
+        title="💎 VIP Membership Tiers - Enhanced Crypto Rewards | Cipro"
+        description="💎 Upgrade to VIP and earn more cryptocurrency! Choose from Silver, Gold, Platinum & Diamond tiers. Get higher rewards, more games, lower fees & exclusive benefits. Subscribe now!"
+        keywords="VIP membership, crypto VIP, enhanced rewards, premium crypto gaming, VIP tiers, cryptocurrency subscription, higher crypto rewards, premium gaming benefits, VIP crypto platform"
+        url="https://www.ciprohub.site/vip-tiers"
+      />
       <div className="page-header">
         <h1 className="page-title">💎 VIP Tiers</h1>
         <p className="page-subtitle">Unlock exclusive benefits as you level up</p>

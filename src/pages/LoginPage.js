@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './LoginPage.css';
 
 function LoginPage({ onLogin }) {
@@ -208,6 +209,12 @@ function LoginPage({ onLogin }) {
 
   return (
     <div className="login-page">
+      <SEOHead 
+        title="🚀 Join Cipro - Start Earning Cryptocurrency Today | Free Registration"
+        description="🚀 Join 15,000+ players earning real cryptocurrency! Sign up for free and start earning SOL, ETH, USDT & USDC by playing games. No investment required. Join now!"
+        keywords="join cipro, crypto gaming signup, free crypto registration, start earning cryptocurrency, crypto gaming platform, play to earn signup, free crypto account"
+        url="https://www.ciprohub.site/login"
+      />
       <div className="login-container">
         <div className="login-header">
           <div className="login-logo">🎮</div>

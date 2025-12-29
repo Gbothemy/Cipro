@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './TasksPage.css';
 
 function TasksPage({ user, updateUser, addNotification }) {
@@ -156,6 +157,12 @@ function TasksPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="tasks-page">
+      <SEOHead 
+        title="📋 Daily Tasks & Challenges - Earn Extra Crypto | Cipro"
+        description="📋 Complete tasks and earn cryptocurrency! Daily, weekly & monthly challenges with crypto rewards. Boost your earnings with bonus tasks. Start completing now!"
+        keywords="crypto tasks, daily challenges, earn crypto tasks, cryptocurrency challenges, bonus crypto rewards, gaming tasks, crypto missions, daily crypto tasks"
+        url="https://www.ciprohub.site/tasks"
+      />
       <div className="page-header">
         <h1 className="page-title">📋 Tasks & Missions</h1>
         <p className="page-subtitle">Complete tasks to earn bonus rewards</p>

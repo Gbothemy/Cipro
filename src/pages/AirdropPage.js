@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './AirdropPage.css';
 
 function AirdropPage({ user, updateUser, addNotification }) {
@@ -92,6 +93,12 @@ function AirdropPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="airdrop-page">
+      <SEOHead 
+        title="🎁 Daily Crypto Airdrop - Free SOL, ETH, USDT, USDC | Cipro"
+        description="🎁 Claim your daily cryptocurrency airdrops! Get free SOL, ETH, USDT & USDC rewards every day. Build your streak for bigger rewards. Claim your free crypto now!"
+        keywords="daily crypto airdrop, free cryptocurrency, free SOL, free ETH, free USDT, free USDC, crypto rewards, daily rewards, cryptocurrency giveaway, free crypto daily"
+        url="https://www.ciprohub.site/airdrop"
+      />
       <div className="page-header">
         <h1 className="page-title">Airdrop Rewards</h1>
         <p className="page-subtitle">Claim your daily rewards and check your balance</p>

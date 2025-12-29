@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './ConversionPage.css';
 
 function ConversionPage({ user, updateUser, addNotification }) {
@@ -368,6 +369,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="conversion-page">
+      <SEOHead 
+        title="💱 Convert Points to Cryptocurrency - Withdraw SOL, ETH, USDT, USDC | Cipro"
+        description="💱 Convert your points to real cryptocurrency! Exchange Cipro points for SOL, ETH, USDT & USDC. Secure withdrawals to your wallet. Convert and withdraw now!"
+        keywords="convert points to crypto, cryptocurrency withdrawal, convert to SOL, convert to ETH, convert to USDT, convert to USDC, crypto cashout, withdraw cryptocurrency"
+        url="https://www.ciprohub.site/convert"
+      />
       <div className="page-header">
         <h1 className="page-title">💰 Convert & Withdraw</h1>
         <p className="page-subtitle">Convert Cipro to crypto and withdraw to your wallet</p>

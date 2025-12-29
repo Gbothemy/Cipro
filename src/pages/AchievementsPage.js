@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './AchievementsPage.css';
 
 function AchievementsPage({ user, updateUser, addNotification }) {
@@ -98,6 +99,12 @@ function AchievementsPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="achievements-page">
+      <SEOHead 
+        title="🏆 Gaming Achievements & Crypto Rewards | Cipro"
+        description="🏆 Unlock achievements and earn crypto rewards! Complete gaming milestones for bonus cryptocurrency. Track your progress and earn more. View achievements now!"
+        keywords="gaming achievements, crypto achievements, gaming milestones, achievement rewards, cryptocurrency badges, gaming progress, unlock rewards, achievement system"
+        url="https://www.ciprohub.site/achievements"
+      />
       <div className="page-header">
         <h1 className="page-title">🏆 Achievements</h1>
         <p className="page-subtitle">Unlock achievements and earn rewards</p>

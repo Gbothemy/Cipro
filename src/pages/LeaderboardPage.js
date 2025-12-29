@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import ActivityFeed from '../components/ActivityFeed';
+import SEOHead from '../components/SEOHead';
 import './LeaderboardPage.css';
 
 function LeaderboardPage({ user }) {
@@ -101,6 +102,12 @@ function LeaderboardPage({ user }) {
 
   return (
     <div className="leaderboard-page">
+      <SEOHead 
+        title="🏆 Crypto Gaming Leaderboard - Top Earners | Cipro"
+        description="🏆 Check the top crypto earners! See who's leading in points, earnings, and streaks. Compete with 15,000+ players and climb the cryptocurrency gaming leaderboard!"
+        keywords="crypto gaming leaderboard, top crypto earners, cryptocurrency rankings, gaming competition, crypto rewards leaderboard, top players, gaming stats"
+        url="https://www.ciprohub.site/leaderboard"
+      />
       <div className="page-header">
         <h1 className="page-title">🏆 Leaderboard</h1>
         <p className="page-subtitle">Compete with players worldwide</p>

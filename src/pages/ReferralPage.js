@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import SkeletonLoader from '../components/SkeletonLoader';
+import SEOHead from '../components/SEOHead';
 import './ReferralPage.css';
 
 function ReferralPage({ user, updateUser, addNotification }) {
@@ -90,6 +91,12 @@ function ReferralPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="referral-page">
+      <SEOHead 
+        title="👥 Crypto Referral Program - Earn 10% Forever | Cipro"
+        description="👥 Earn crypto by referring friends! Get 10% of your referrals' earnings forever. Share your link and build passive cryptocurrency income. Start referring now!"
+        keywords="crypto referral program, earn crypto referring, passive crypto income, referral rewards, cryptocurrency affiliate, earn 10% commission, crypto MLM, referral earnings"
+        url="https://www.ciprohub.site/referral"
+      />
       <div className="page-header">
         <h1 className="page-title">Referral Program</h1>
         <p className="page-subtitle">Invite friends and earn 10% commission</p>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import SEOHead from '../components/SEOHead';
 import './DailyRewardsPage.css';
 
 function DailyRewardsPage({ user, updateUser, addNotification }) {
@@ -141,6 +142,12 @@ function DailyRewardsPage({ user, updateUser, addNotification }) {
 
   return (
     <div className="daily-rewards-page">
+      <SEOHead 
+        title="🎁 Daily Crypto Rewards & Streak Bonuses | Cipro"
+        description="🎁 Claim daily cryptocurrency rewards and build your streak! Get bigger bonuses for consecutive days. Earn SOL, ETH, USDT & USDC daily. Start your streak now!"
+        keywords="daily crypto rewards, daily cryptocurrency, streak bonuses, daily login rewards, crypto streak, daily crypto bonus, consecutive day rewards, daily crypto earnings"
+        url="https://www.ciprohub.site/daily-rewards"
+      />
       <div className="rewards-header">
         <h1>🎁 Daily Rewards</h1>
         <p>Login every day to build your streak and earn bigger rewards!</p>
