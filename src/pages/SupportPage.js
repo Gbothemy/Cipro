@@ -129,6 +129,12 @@ function SupportPage() {
 
   return (
     <div className="support-page">
+      <SEOHead 
+        title="🆘 Support Center - Get Help with Cipro | Customer Support"
+        description="Get help with your Cipro account, games, and cryptocurrency rewards. Find answers to common questions or contact our support team. We're here to help 24/7!"
+        keywords="cipro support, crypto gaming help, customer support, FAQ, technical support, account help, withdrawal support, VIP support"
+        url="https://www.ciprohub.site/support"
+      />
       <div className="support-container">
         <div className="support-header">
           <h1>🆘 Support Center</h1>

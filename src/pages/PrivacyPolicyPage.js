@@ -1,9 +1,17 @@
 import React from 'react';
+import SEOHead from '../components/SEOHead';
 import './LegalPage.css';
 
 function PrivacyPolicyPage() {
   return (
     <div className="legal-page">
+      <SEOHead 
+        title="🔒 Privacy Policy - Cipro Data Protection | User Privacy"
+        description="Learn how Cipro protects your privacy and handles your data. Our privacy policy covers information collection, cryptocurrency transactions, data security, and user rights."
+        keywords="cipro privacy policy, data protection, user privacy, cryptocurrency privacy, gaming platform privacy, data security"
+        url="https://www.ciprohub.site/privacy"
+        noindex={true}
+      />
       <div className="legal-container">
         <div className="legal-header">
           <h1>🔒 Privacy Policy</h1>

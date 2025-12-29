@@ -5,7 +5,7 @@ import Layout from './components/Layout';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { db } from './db/supabase';
 import trafficTracker from './utils/trafficTracker';
-import { initializeAnalytics, trackCryptoEvents } from './utils/analytics';
+import { initializeAnalytics } from './utils/analytics';
 import { initializeSEO } from './utils/seoOptimization';
 import './App.css';
 
@@ -46,7 +46,6 @@ function RouteTracker() {
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authUser, setAuthUser] = useState(null);
   const [user, setUser] = useState({
     username: 'Player123',
     userId: 'USR-98765',
@@ -90,7 +89,6 @@ function App() {
     if (savedAuthUser) {
       try {
         const parsedAuthUser = JSON.parse(savedAuthUser);
-        setAuthUser(parsedAuthUser);
         setIsAuthenticated(true);
         
         // Load user data from Supabase
@@ -132,7 +130,6 @@ function App() {
   };
 
   const handleLogin = async (userData, navigate) => {
-    setAuthUser(userData);
     setIsAuthenticated(true);
     
     // Check if user is admin - fix the admin detection logic
@@ -193,7 +190,6 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('authUser');
-    setAuthUser(null);
     setIsAuthenticated(false);
     addNotification('Logged out successfully', 'info');
   };

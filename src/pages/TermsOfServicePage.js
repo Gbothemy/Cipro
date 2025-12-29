@@ -1,9 +1,17 @@
 import React from 'react';
+import SEOHead from '../components/SEOHead';
 import './LegalPage.css';
 
 function TermsOfServicePage() {
   return (
     <div className="legal-page">
+      <SEOHead 
+        title="📋 Terms of Service - Cipro Legal | User Agreement"
+        description="Read Cipro's Terms of Service covering user accounts, cryptocurrency rewards, VIP subscriptions, fair play policy, and platform rules. Updated December 2024."
+        keywords="cipro terms of service, user agreement, legal terms, cryptocurrency gaming terms, VIP subscription terms, platform rules"
+        url="https://www.ciprohub.site/terms"
+        noindex={true}
+      />
       <div className="legal-container">
         <div className="legal-header">
           <h1>📋 Terms of Service</h1>
