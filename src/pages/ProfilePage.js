@@ -79,16 +79,20 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
+  const handleSaveProfile = async () => {
+    console.log('Save profile clicked');
+    console.log('Form data:', editForm);
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      console.log('Validation failed');
+      return;
+    }
 
+    console.log('Validation passed, starting save...');
     setLoading(true);
 
     try {
-      // Update user in database
-      await db.updateUser(user.userId, {
+      const updateData = {
         username: editForm.username,
         email: editForm.email,
         avatar: editForm.avatar,
@@ -98,7 +102,14 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
         completedTasks: user.completedTasks,
         dayStreak: user.dayStreak,
         lastClaim: user.lastClaim
-      });
+      };
+      
+      console.log('Updating user with data:', updateData);
+      
+      // Update user in database
+      await db.updateUser(user.userId, updateData);
+      
+      console.log('Database update successful');
 
       // Update local state
       updateUser({
@@ -114,6 +125,7 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
       authUser.avatar = editForm.avatar;
       localStorage.setItem('authUser', JSON.stringify(authUser));
 
+      console.log('Profile update completed successfully');
       addNotification('Profile updated successfully!', 'success');
       setIsEditing(false);
     } catch (error) {
@@ -122,6 +134,15 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditSubmit = async (e) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    
+    // Call the save handler
+    await handleSaveProfile();
   };
 
   const handleCancelEdit = () => {
@@ -226,7 +247,16 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
             </button>
           ) : (
             <div className="edit-actions">
-              <button className="save-profile-btn" onClick={handleEditSubmit} disabled={loading}>
+              <button 
+                className="save-profile-btn" 
+                onClick={(e) => {
+                  console.log('Save button clicked');
+                  e.preventDefault();
+                  handleSaveProfile();
+                }} 
+                disabled={loading}
+                type="button"
+              >
                 {loading ? '⏳ Saving...' : '✅ Save'}
               </button>
               <button className="cancel-profile-btn" onClick={handleCancelEdit} disabled={loading}>
