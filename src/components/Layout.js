@@ -9,6 +9,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   const [menuOpen, setMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [isDarkMode, setIsDarkMode] = useState(themeManager.isDark());
+  const [logoError, setLogoError] = useState(false);
   const location = useLocation();
 
   const toggleSound = () => {
@@ -43,7 +44,19 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
           <div className="header-left">
             <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
             <div className="header-logo">
-              <img src="/cipro-logo.png" alt="CIPRO" className="logo-image" />
+              {!logoError ? (
+                <img 
+                  src="/cipro-logo.png" 
+                  alt="CIPRO" 
+                  className="logo-image"
+                  onError={() => {
+                    console.log('Logo failed to load');
+                    setLogoError(true);
+                  }}
+                />
+              ) : (
+                <span className="logo-text">CIPRO</span>
+              )}
             </div>
           </div>
           <div className="header-right">
