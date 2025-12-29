@@ -34,6 +34,22 @@
   color: #333;
 }
 
+.logo-image-nav {
+  height: 40px;
+  width: auto;
+  transition: all 0.3s ease;
+}
+
+.logo-image-nav:hover {
+  transform: scale(1.05);
+}
+
+.logo-text-fallback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .logo-icon {
   font-size: 32px;
   animation: pulse 2s ease-in-out infinite;
@@ -491,6 +507,12 @@
   font-size: 20px;
   font-weight: 800;
   margin-bottom: 16px;
+}
+
+.logo-image-footer {
+  height: 35px;
+  width: auto;
+  filter: brightness(1.2);
 }
 
 .footer-column h4 {

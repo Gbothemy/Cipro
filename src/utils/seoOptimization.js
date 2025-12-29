@@ -85,7 +85,7 @@ export const generateStructuredData = (type, data = {}) => {
         "name": "Cipro",
         "description": "Leading cryptocurrency gaming platform",
         "url": "https://www.ciprohub.site",
-        "logo": "https://www.ciprohub.site/logo512.png",
+        "logo": "https://www.ciprohub.site/ciprohub.png",
         "sameAs": [
           "https://twitter.com/CiproGaming",
           "https://facebook.com/CiproGaming",

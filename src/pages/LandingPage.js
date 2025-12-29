@@ -102,8 +102,20 @@ function LandingPage() {
       <nav className="landing-nav">
         <div className="nav-container">
           <div className="nav-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <span className="logo-icon">💎</span>
-            <span className="logo-text">Cipro</span>
+            <img 
+              src="/ciprohub.png" 
+              alt="Cipro" 
+              className="logo-image-nav"
+              onError={(e) => {
+                // Fallback to text logo if image fails
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="logo-text-fallback" style={{ display: 'none' }}>
+              <span className="logo-icon">💎</span>
+              <span className="logo-text">Cipro</span>
+            </div>
           </div>
           <div className="nav-buttons">
             <button onClick={() => navigate('/login')} className="nav-btn login-btn">
@@ -243,8 +255,20 @@ function LandingPage() {
           <div className="footer-content">
             <div className="footer-brand">
               <div className="footer-logo">
-                <span className="logo-icon">💎</span>
-                <span className="logo-text">Cipro</span>
+                <img 
+                  src="/ciprohub.png" 
+                  alt="Cipro" 
+                  className="logo-image-footer"
+                  onError={(e) => {
+                    // Fallback to text logo if image fails
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="logo-text-fallback" style={{ display: 'none' }}>
+                  <span className="logo-icon">💎</span>
+                  <span className="logo-text">Cipro</span>
+                </div>
               </div>
               <p>Play games and earn cryptocurrency rewards</p>
             </div>

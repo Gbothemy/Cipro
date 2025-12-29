@@ -5,7 +5,7 @@ function SEOHead({
   title = "🎮 Cipro - Play Games, Earn Cryptocurrency | Free SOL, ETH, USDT, USDC Rewards",
   description = "🚀 Join 15,000+ players earning real cryptocurrency daily! Play fun games, complete tasks & earn SOL, ETH, USDT, USDC. Free to start, VIP tiers available. Start earning crypto now!",
   keywords = "earn cryptocurrency, play to earn games, free crypto, SOL rewards, ETH rewards, USDT rewards, USDC rewards, blockchain games, crypto gaming",
-  image = "https://www.ciprohub.site/logo512.png",
+  image = "https://www.ciprohub.site/ciprohub.png",
   url = "https://www.ciprohub.site",
   type = "website",
   noindex = false,

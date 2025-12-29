@@ -217,7 +217,19 @@ function LoginPage({ onLogin }) {
       />
       <div className="login-container">
         <div className="login-header">
-          <div className="login-logo">🎮</div>
+          <div className="login-logo">
+            <img 
+              src="/ciprohub.png" 
+              alt="Cipro" 
+              className="logo-image-login"
+              onError={(e) => {
+                // Fallback to emoji if image fails
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'block';
+              }}
+            />
+            <div className="logo-emoji-fallback" style={{ display: 'none' }}>🎮</div>
+          </div>
           <h1>Cipro Dashboard</h1>
           <p>Play games and earn cryptocurrency rewards</p>
         </div>

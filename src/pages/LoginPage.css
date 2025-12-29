@@ -37,6 +37,20 @@
   font-size: 64px;
   margin-bottom: 16px;
   animation: pulse 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-image-login {
+  height: 80px;
+  width: auto;
+  margin-bottom: 16px;
+}
+
+.logo-emoji-fallback {
+  font-size: 64px;
+  margin-bottom: 16px;
 }
 
 .login-header h1 {

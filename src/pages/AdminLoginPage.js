@@ -135,7 +135,19 @@ function AdminLoginPage({ onLogin }) {
     <div className="admin-login-page">
       <div className="admin-login-container">
         <div className="admin-login-header">
-          <div className="admin-logo">🛡️</div>
+          <div className="admin-logo">
+            <img 
+              src="/ciprohub.png" 
+              alt="Cipro Admin" 
+              className="logo-image-admin"
+              onError={(e) => {
+                // Fallback to shield emoji if image fails
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'block';
+              }}
+            />
+            <div className="logo-emoji-fallback" style={{ display: 'none' }}>🛡️</div>
+          </div>
           <h1>Admin Portal</h1>
           <p>Secure access for administrators only</p>
         </div>

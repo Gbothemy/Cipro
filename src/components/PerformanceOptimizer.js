@@ -8,8 +8,7 @@ function PerformanceOptimizer() {
     const preloadCriticalResources = () => {
       // Preload important images
       const criticalImages = [
-        '/logo192.png',
-        '/logo512.png',
+        '/ciprohub.png',
         '/favicon.ico'
       ];
 

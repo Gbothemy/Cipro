@@ -59,6 +59,20 @@
   font-size: 64px;
   margin-bottom: 20px;
   animation: pulse 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-image-admin {
+  height: 80px;
+  width: auto;
+  margin-bottom: 20px;
+}
+
+.logo-emoji-fallback {
+  font-size: 64px;
+  margin-bottom: 20px;
 }
 
 @keyframes pulse {
