@@ -46,12 +46,14 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <div className="header-logo">
               {!logoError ? (
                 <img 
-                  src={`${process.env.PUBLIC_URL}/cipro-logo.svg`}
+                  src={`${process.env.PUBLIC_URL}/ciprohub.png`}
                   alt="CIPRO" 
                   className="logo-image"
                   onError={(e) => {
-                    console.log('SVG logo failed, using backup');
-                    if (!e.target.src.includes('backup')) {
+                    console.log('PNG logo failed, trying SVG backup');
+                    if (!e.target.src.includes('.svg')) {
+                      e.target.src = `${process.env.PUBLIC_URL}/cipro-logo.svg`;
+                    } else if (!e.target.src.includes('backup')) {
                       e.target.src = `${process.env.PUBLIC_URL}/cipro-logo-backup.svg`;
                     } else {
                       setLogoError(true);

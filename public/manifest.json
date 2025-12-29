@@ -18,15 +18,15 @@
       "type": "image/x-icon"
     },
     {
-      "src": "/cipro-logo.svg",
+      "src": "/ciprohub.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/cipro-logo-backup.svg",
+      "src": "/ciprohub.png",
       "sizes": "512x512", 
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
