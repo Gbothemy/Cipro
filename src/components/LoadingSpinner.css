@@ -54,3 +54,234 @@ body.dark-mode .spinner {
 body.dark-mode .loading-message {
   color: #999;
 }
+/* Logo Loading Animation */
+.loading-logo {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-spinner {
+  display: block;
+  animation: logoFloat 2s ease-in-out infinite, logoRotate 4s linear infinite;
+  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+  z-index: 2;
+  position: relative;
+}
+
+.loading-logo-small .logo-spinner {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-logo-medium .logo-spinner {
+  width: 60px;
+  height: 60px;
+}
+
+.loading-logo-large .logo-spinner {
+  width: 80px;
+  height: 80px;
+}
+
+/* Pulse rings around the logo */
+.logo-pulse-ring,
+.logo-pulse-ring-2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(102, 126, 234, 0.4);
+  border-radius: 50%;
+  animation: logoPulse 2s ease-out infinite;
+}
+
+.logo-pulse-ring-2 {
+  border-color: rgba(102, 126, 234, 0.2);
+  animation-delay: 1s;
+}
+
+.loading-logo-small .logo-pulse-ring,
+.loading-logo-small .logo-pulse-ring-2 {
+  width: 60px;
+  height: 60px;
+}
+
+.loading-logo-medium .logo-pulse-ring,
+.loading-logo-medium .logo-pulse-ring-2 {
+  width: 90px;
+  height: 90px;
+}
+
+.loading-logo-large .logo-pulse-ring,
+.loading-logo-large .logo-pulse-ring-2 {
+  width: 120px;
+  height: 120px;
+}
+
+/* Logo animations */
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes logoRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Alternative bounce animation */
+.loading-logo.bounce .logo-spinner {
+  animation: logoBounce 1.5s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes logoBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-15px) scale(1.1);
+  }
+  60% {
+    transform: translateY(-7px) scale(1.05);
+  }
+}
+
+@keyframes logoGlow {
+  0% {
+    filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+  }
+  100% {
+    filter: drop-shadow(0 6px 20px rgba(102, 126, 234, 0.6));
+  }
+}
+
+/* Shimmer effect */
+.loading-logo.shimmer .logo-spinner {
+  animation: logoShimmer 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-logo.shimmer .logo-spinner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmerMove 2s ease-in-out infinite;
+}
+
+@keyframes logoShimmer {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmerMove {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Dark mode adjustments */
+body.dark-mode .logo-pulse-ring,
+body.dark-mode .logo-pulse-ring-2 {
+  border-color: rgba(102, 126, 234, 0.6);
+}
+
+body.dark-mode .logo-spinner {
+  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.5));
+}
+
+/* Loading states for different contexts */
+.loading-logo.gaming {
+  animation: gameLoadingPulse 1s ease-in-out infinite;
+}
+
+@keyframes gameLoadingPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.loading-logo.mining .logo-spinner {
+  animation: miningRotate 3s linear infinite, miningFloat 2s ease-in-out infinite;
+}
+
+@keyframes miningRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes miningFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loading-logo-medium .logo-spinner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .loading-logo-medium .logo-pulse-ring,
+  .loading-logo-medium .logo-pulse-ring-2 {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .loading-logo-large .logo-spinner {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .loading-logo-large .logo-pulse-ring,
+  .loading-logo-large .logo-pulse-ring-2 {
+    width: 95px;
+    height: 95px;
+  }
+}

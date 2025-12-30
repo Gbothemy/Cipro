@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import DailyMining from '../components/DailyMining';
 import ActivityFeed from '../components/ActivityFeed';
+import CiproLoader from '../components/CiproLoader';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
@@ -334,7 +335,13 @@ function GamePage({ user, updateUser, addNotification }) {
               )}
             </div>
           );
-        }) : <div style={{padding: '40px', textAlign: 'center', color: '#999'}}>Loading mining modes...</div>}
+        }) : (
+          <CiproLoader 
+            context="gaming"
+            size="medium" 
+            message="Loading mining modes..." 
+          />
+        )}
       </div>
 
       {/* Daily Mining Section */}

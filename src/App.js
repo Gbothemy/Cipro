@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
+import CiproLoader from './components/CiproLoader';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { db } from './db/supabase';
 import trafficTracker from './utils/trafficTracker';
@@ -222,7 +223,14 @@ function App() {
       <PerformanceOptimizer />
       <Router>
         <RouteTracker />
-      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '1.5rem' }}>Loading...</div>}>
+      <Suspense fallback={
+        <CiproLoader 
+          context="default"
+          size="large" 
+          message="Loading Cipro Hub..." 
+          fullScreen={true}
+        />
+      }>
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<LandingPage />} />
