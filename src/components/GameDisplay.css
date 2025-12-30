@@ -1132,3 +1132,190 @@ ed Daily Limit Reached Interface */
     font-size: 0.75rem;
   }
 }
+
+/* Enhanced Navigation Button Interactions */
+.upgrade-btn.primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.upgrade-btn.primary:hover::before {
+  left: 100%;
+}
+
+.upgrade-btn.primary:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.learn-more-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.learn-more-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.learn-more-btn:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Activity Card Interactions */
+.activity-card {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+}
+
+.activity-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+  z-index: 1;
+}
+
+.activity-card:hover::before {
+  left: 100%;
+}
+
+.activity-card:active {
+  transform: translateY(-3px) scale(0.98);
+}
+
+.activity-card.diamond::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* Loading state for buttons */
+.upgrade-btn.primary.loading,
+.learn-more-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.upgrade-btn.primary.loading::after,
+.learn-more-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: buttonSpin 1s linear infinite;
+}
+
+@keyframes buttonSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Activity card hover effects */
+.activity-card:hover .activity-icon {
+  transform: scale(1.2);
+  transition: transform 0.3s ease;
+}
+
+.activity-card:hover .activity-name {
+  color: #667eea;
+  transition: color 0.3s ease;
+}
+
+.activity-card.diamond:hover .activity-name {
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+/* Ripple effect for clicks */
+.activity-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.activity-card:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+.activity-card.diamond::after {
+  background: rgba(44, 62, 80, 0.2);
+}
+
+/* Improved focus states for accessibility */
+.upgrade-btn.primary:focus,
+.learn-more-btn:focus,
+.activity-card:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.activity-card.diamond:focus {
+  outline-color: #2c3e50;
+}
+
+/* Smooth transitions for all interactive elements */
+.upgrade-btn.primary,
+.learn-more-btn,
+.activity-card,
+.activity-icon,
+.activity-name {
+  transition: all 0.3s ease;
+}
+
+/* Enhanced mobile interactions */
+@media (max-width: 768px) {
+  .activity-card:hover {
+    transform: translateY(-3px);
+  }
+  
+  .activity-card:active {
+    transform: translateY(-1px) scale(0.95);
+  }
+  
+  .upgrade-btn.primary:active,
+  .learn-more-btn:active {
+    transform: scale(0.95);
+  }
+}

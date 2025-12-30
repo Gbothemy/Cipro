@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
 import MemoryGame from '../games/MemoryGame';
@@ -16,6 +17,7 @@ const GameDisplay = ({
   maxGames = null,
   embedded = false // If true, games play inline instead of modal
 }) => {
+  const navigate = useNavigate();
   const [activeGame, setActiveGame] = useState(null);
   const [gameAttempts, setGameAttempts] = useState({
     canPlay: true,
@@ -26,6 +28,12 @@ const GameDisplay = ({
     resetTime: null,
     timeUntilReset: 'Loading...'
   });
+
+  // Handle navigation with user feedback
+  const handleNavigation = (path, activityName) => {
+    addNotification(`Navigating to ${activityName}...`, 'info');
+    navigate(path);
+  };
 
   const allGames = [
     {
@@ -405,11 +413,17 @@ const GameDisplay = ({
             </div>
 
             <div className="upgrade-actions">
-              <button className="upgrade-btn primary" onClick={() => window.location.href = '/vip'}>
+              <button className="upgrade-btn primary" onClick={() => {
+                addNotification('Redirecting to VIP Tiers...', 'info');
+                navigate('/vip-tiers');
+              }}>
                 <span className="btn-icon">💎</span>
                 Upgrade Now
               </button>
-              <button className="learn-more-btn" onClick={() => window.location.href = '/vip'}>
+              <button className="learn-more-btn" onClick={() => {
+                addNotification('Loading VIP information...', 'info');
+                navigate('/vip-tiers');
+              }}>
                 Learn More About VIP
               </button>
             </div>
@@ -418,22 +432,22 @@ const GameDisplay = ({
           <div className="alternative-activities">
             <h4>🎯 While You Wait, Try These:</h4>
             <div className="activity-grid">
-              <div className="activity-card" onClick={() => window.location.href = '/mining'}>
+              <div className="activity-card" onClick={() => handleNavigation('/game', 'Daily Mining')}>
                 <span className="activity-icon">⛏️</span>
                 <span className="activity-name">Daily Mining</span>
                 <span className="activity-desc">Earn passive rewards</span>
               </div>
-              <div className="activity-card" onClick={() => window.location.href = '/referral'}>
+              <div className="activity-card" onClick={() => handleNavigation('/referral', 'Referral Program')}>
                 <span className="activity-icon">👥</span>
                 <span className="activity-name">Invite Friends</span>
                 <span className="activity-desc">Get referral bonuses</span>
               </div>
-              <div className="activity-card" onClick={() => window.location.href = '/tasks'}>
+              <div className="activity-card" onClick={() => handleNavigation('/tasks', 'Tasks')}>
                 <span className="activity-icon">📋</span>
                 <span className="activity-name">Complete Tasks</span>
                 <span className="activity-desc">Earn extra points</span>
               </div>
-              <div className="activity-card" onClick={() => window.location.href = '/leaderboard'}>
+              <div className="activity-card" onClick={() => handleNavigation('/leaderboard', 'Leaderboard')}>
                 <span className="activity-icon">🏆</span>
                 <span className="activity-name">Leaderboard</span>
                 <span className="activity-desc">Check your ranking</span>
@@ -479,22 +493,22 @@ const GameDisplay = ({
           <div className="diamond-activities">
             <h4>🌟 Exclusive Diamond Activities:</h4>
             <div className="activity-grid diamond">
-              <div className="activity-card diamond" onClick={() => window.location.href = '/mining'}>
+              <div className="activity-card diamond" onClick={() => handleNavigation('/game', 'Premium Mining')}>
                 <span className="activity-icon">⛏️</span>
                 <span className="activity-name">Premium Mining</span>
                 <span className="activity-desc">2.5x rewards</span>
               </div>
-              <div className="activity-card diamond" onClick={() => window.location.href = '/referral'}>
+              <div className="activity-card diamond" onClick={() => handleNavigation('/referral', 'VIP Referrals')}>
                 <span className="activity-icon">👥</span>
                 <span className="activity-name">VIP Referrals</span>
                 <span className="activity-desc">Higher commissions</span>
               </div>
-              <div className="activity-card diamond" onClick={() => window.location.href = '/profile'}>
+              <div className="activity-card diamond" onClick={() => handleNavigation('/profile', 'Analytics')}>
                 <span className="activity-icon">📊</span>
                 <span className="activity-name">Analytics</span>
                 <span className="activity-desc">Detailed stats</span>
               </div>
-              <div className="activity-card diamond" onClick={() => window.location.href = '/support'}>
+              <div className="activity-card diamond" onClick={() => handleNavigation('/support', 'Priority Support')}>
                 <span className="activity-icon">🎧</span>
                 <span className="activity-name">Priority Support</span>
                 <span className="activity-desc">24/7 assistance</span>
