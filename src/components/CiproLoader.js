@@ -13,15 +13,15 @@ const CiproLoader = ({
   const contextConfig = {
     default: {
       message: message || 'Loading...',
-      className: 'default'
+      className: 'default forward-progress'
     },
     gaming: {
       message: message || 'Preparing your games...',
-      className: 'gaming bounce'
+      className: 'gaming speed-lines'
     },
     mining: {
       message: message || 'Initializing mining...',
-      className: 'mining'
+      className: 'mining jet-propulsion'
     },
     profile: {
       message: message || 'Loading profile...',
@@ -29,7 +29,7 @@ const CiproLoader = ({
     },
     leaderboard: {
       message: message || 'Fetching rankings...',
-      className: 'default'
+      className: 'default forward-progress'
     },
     vip: {
       message: message || 'Loading VIP benefits...',
@@ -37,11 +37,11 @@ const CiproLoader = ({
     },
     conversion: {
       message: message || 'Processing conversion...',
-      className: 'gaming'
+      className: 'gaming speed-lines'
     },
     withdrawal: {
       message: message || 'Processing withdrawal...',
-      className: 'mining'
+      className: 'mining jet-propulsion'
     }
   };
 

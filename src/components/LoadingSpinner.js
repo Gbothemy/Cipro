@@ -7,16 +7,13 @@ const LoadingSpinner = ({ size = 'medium', message = '', type = 'spinner' }) => 
       <div className="loading-spinner-container">
         <div className={`loading-logo loading-logo-${size}`}>
           <img 
-            src="/cipro-logo.svg" 
+            src="/ciprohub.png" 
             alt="Cipro Loading" 
             className="logo-spinner"
-            onError={(e) => {
-              // Fallback to PNG if SVG fails
-              e.target.src = "/ciprohub.png";
-            }}
           />
           <div className="logo-pulse-ring"></div>
           <div className="logo-pulse-ring-2"></div>
+          <div className="forward-motion-trail"></div>
         </div>
         {message && <p className="loading-message">{message}</p>}
       </div>
