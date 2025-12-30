@@ -11,9 +11,11 @@ const LoadingSpinner = ({ size = 'medium', message = '', type = 'spinner' }) => 
             alt="Cipro Loading" 
             className="logo-spinner"
           />
-          <div className="logo-pulse-ring"></div>
-          <div className="logo-pulse-ring-2"></div>
-          <div className="forward-motion-trail"></div>
+          <div className="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
         {message && <p className="loading-message">{message}</p>}
       </div>

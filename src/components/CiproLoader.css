@@ -59,6 +59,30 @@
   border: 2px solid rgba(52, 152, 219, 0.2);
 }
 
+.cipro-loader.profile {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(26, 188, 156, 0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(46, 204, 113, 0.2);
+}
+
+.cipro-loader.vip {
+  background: linear-gradient(135deg, rgba(241, 196, 15, 0.1), rgba(230, 126, 34, 0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(241, 196, 15, 0.2);
+}
+
+.cipro-loader.conversion {
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(142, 68, 173, 0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(155, 89, 182, 0.2);
+}
+
+.cipro-loader.withdrawal {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(231, 76, 60, 0.2);
+}
+
 /* Gaming hints */
 .gaming-hints {
   margin-top: 20px;
@@ -129,16 +153,6 @@
   font-weight: 600;
   color: #2c3e50;
   margin-top: 20px;
-  animation: messageGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes messageGlow {
-  0% {
-    text-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-  }
-  100% {
-    text-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
-  }
 }
 
 /* Dark mode support */
