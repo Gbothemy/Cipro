@@ -119,10 +119,10 @@ function AdminPage({ user, addNotification }) {
         totalTasks,
         avgLevel,
         activeToday,
-        totalSOL: totalSOL.toFixed(4),
-        totalETH: totalETH.toFixed(4),
-        totalUSDT: totalUSDT.toFixed(2),
-        totalUSDC: totalUSDC.toFixed(2),
+        totalSOL: totalSOL,
+        totalETH: totalETH,
+        totalUSDT: totalUSDT,
+        totalUSDC: totalUSDC,
         topPlayer: allUsers.length > 0 ? allUsers.sort((a, b) => (b.points || 0) - (a.points || 0))[0] : null,
         lastUpdate: new Date().toLocaleTimeString()
       });
@@ -637,9 +637,9 @@ function AdminPage({ user, addNotification }) {
                       <td>
                         {getVIPConfig(u.vipLevel || 1).icon} Level {u.vipLevel || 1} - {getVIPConfig(u.vipLevel || 1).name}
                       </td>
-                      <td>{(u.balance?.sol || 0).toFixed(4)}</td>
-                      <td>{(u.balance?.eth || 0).toFixed(4)}</td>
-                      <td>{(u.balance?.usdt || 0).toFixed(2)}</td>
+                      <td>{u.balance?.sol || 0}</td>
+                      <td>{u.balance?.eth || 0}</td>
+                      <td>{u.balance?.usdt || 0}</td>
                       <td>{u.completedTasks || 0}</td>
                       <td className="actions-cell">
                         <button onClick={() => handleEditUser(u)} className="edit-btn" title="Edit">✏️</button>

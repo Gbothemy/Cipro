@@ -74,7 +74,7 @@ function RevenueDashboard({ user, addNotification }) {
   };
 
   const formatCrypto = (amount, symbol) => {
-    return `${parseFloat(amount).toFixed(6)} ${symbol.toUpperCase()}`;
+    return `${parseFloat(amount)} ${symbol.toUpperCase()}`;
   };
 
   const getRevenueByType = (type) => {

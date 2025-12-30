@@ -174,7 +174,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
       // Log activity
       await db.logActivity(user.userId, {
         type: 'conversion',
-        description: `Converted ${points.toLocaleString()} Cipro to ${cryptoAmount.toFixed(4)} ${selectedCurrency.toUpperCase()}`,
+        description: `Converted ${points.toLocaleString()} Cipro to ${cryptoAmount} ${selectedCurrency.toUpperCase()}`,
         pointsChange: -points
       });
       
@@ -187,7 +187,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
         }
       });
       
-      addNotification(`Successfully converted ${points.toLocaleString()} Cipro to ${userReceivesCrypto.toFixed(6)} ${selectedCurrency.toUpperCase()} (10% platform fee applied)`, 'success');
+      addNotification(`Successfully converted ${points.toLocaleString()} Cipro to ${userReceivesCrypto} ${selectedCurrency.toUpperCase()} (10% platform fee applied)`, 'success');
       setConvertAmount('');
       
       // Reload transaction history
@@ -329,7 +329,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
   };
 
   const calculateCrypto = (points) => {
-    return points ? (points / CONVERSION_RATES[selectedCurrency]).toFixed(6) : '0';
+    return points ? (points / CONVERSION_RATES[selectedCurrency]) : 0;
   };
 
   const calculatePoints = (crypto) => {
@@ -393,28 +393,28 @@ function ConversionPage({ user, updateUser, addNotification }) {
           <div className="balance-icon">◎</div>
           <div className="balance-info">
             <span className="balance-label">SOL Balance</span>
-            <span className="balance-value">{user.balance.sol.toFixed(6)}</span>
+            <span className="balance-value">{user.balance.sol}</span>
           </div>
         </div>
         <div className="balance-card-conv eth">
           <div className="balance-icon">Ξ</div>
           <div className="balance-info">
             <span className="balance-label">ETH Balance</span>
-            <span className="balance-value">{user.balance.eth.toFixed(6)}</span>
+            <span className="balance-value">{user.balance.eth}</span>
           </div>
         </div>
         <div className="balance-card-conv usdt">
           <div className="balance-icon">💵</div>
           <div className="balance-info">
             <span className="balance-label">USDT Balance</span>
-            <span className="balance-value">{user.balance.usdt.toFixed(6)}</span>
+            <span className="balance-value">{user.balance.usdt}</span>
           </div>
         </div>
         <div className="balance-card-conv usdc">
           <div className="balance-icon">💵</div>
           <div className="balance-info">
             <span className="balance-label">USDC Balance</span>
-            <span className="balance-value">{user.balance.usdc.toFixed(6)}</span>
+            <span className="balance-value">{user.balance.usdc}</span>
           </div>
         </div>
       </div>
@@ -532,7 +532,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
                 <option value="usdt">💵 USDT (Tether) - Main</option>
                 <option value="usdc">💵 USDC (USD Coin)</option>
               </select>
-              <span className="form-hint">Available: {user.balance[selectedCurrency].toFixed(6)} {selectedCurrency.toUpperCase()}</span>
+              <span className="form-hint">Available: {user.balance[selectedCurrency]} {selectedCurrency.toUpperCase()}</span>
             </div>
 
             <div className="form-group">
@@ -554,9 +554,9 @@ function ConversionPage({ user, updateUser, addNotification }) {
 
             <div className="quick-amounts">
               <button type="button" onClick={() => setWithdrawAmount(MIN_WITHDRAW[selectedCurrency].toString())} disabled={loading}>Min</button>
-              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.25).toFixed(6))} disabled={loading}>25%</button>
-              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.5).toFixed(6))} disabled={loading}>50%</button>
-              <button type="button" onClick={() => setWithdrawAmount(user.balance[selectedCurrency].toFixed(6))} disabled={loading}>Max</button>
+              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.25).toString())} disabled={loading}>25%</button>
+              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.5).toString())} disabled={loading}>50%</button>
+              <button type="button" onClick={() => setWithdrawAmount(user.balance[selectedCurrency].toString())} disabled={loading}>Max</button>
             </div>
 
             <div className="form-group">
@@ -618,11 +618,11 @@ function ConversionPage({ user, updateUser, addNotification }) {
                 </div>
                 <div className="summary-row">
                   <span>Platform Fee (5%):</span>
-                  <span>-{(parseFloat(withdrawAmount) * 0.05).toFixed(6)} {selectedCurrency.toUpperCase()}</span>
+                  <span>-{parseFloat(withdrawAmount) * 0.05} {selectedCurrency.toUpperCase()}</span>
                 </div>
                 <div className="summary-row total">
                   <span>You will receive:</span>
-                  <span>{(parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0) - (parseFloat(withdrawAmount) * 0.05)).toFixed(6)} {selectedCurrency.toUpperCase()}</span>
+                  <span>{parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0) - (parseFloat(withdrawAmount) * 0.05)} {selectedCurrency.toUpperCase()}</span>
                 </div>
               </div>
             )}
@@ -662,12 +662,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
                         Points Conversion
                       </div>
                       <div className="history-info">
-                        {tx.points_converted.toLocaleString()} Cipro → {tx.amount_received.toFixed(6)} {tx.currency}
+                        {tx.points_converted.toLocaleString()} Cipro → {tx.amount_received} {tx.currency}
                       </div>
                       <div className="history-date">{formatDate(tx.created_at)}</div>
                     </div>
                     <div className="history-amount success">
-                      +{tx.amount_received.toFixed(6)} {tx.currency}
+                      +{tx.amount_received} {tx.currency}
                     </div>
                   </div>
                 ))}
