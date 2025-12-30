@@ -498,3 +498,170 @@
 .game-card:nth-child(4) {
   animation-delay: 0.3s;
 }
+/* V
+IP Upgrade Prompt */
+.vip-upgrade-prompt {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+  text-align: center;
+}
+
+.upgrade-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.upgrade-content p {
+  margin: 0 0 15px 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.upgrade-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.upgrade-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+.tier-icon {
+  font-size: 2rem;
+}
+
+.tier-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.tier-benefit {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.upgrade-btn {
+  background: white;
+  color: #ff6b6b;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+  background: #f8f9fa;
+}
+
+/* Mobile responsive for upgrade prompt */
+@media (max-width: 768px) {
+  .vip-upgrade-prompt {
+    padding: 15px;
+  }
+
+  .upgrade-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .upgrade-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .upgrade-option {
+    min-width: 100px;
+    padding: 12px 15px;
+  }
+
+  .tier-icon {
+    font-size: 1.5rem;
+  }
+
+  .tier-name {
+    font-size: 1rem;
+  }
+
+  .tier-benefit {
+    font-size: 0.8rem;
+  }
+
+  .upgrade-btn {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Diamond Limit Message */
+.diamond-limit-message {
+  background: linear-gradient(135deg, #b9f2ff 0%, #667eea 100%);
+  color: #2c3e50;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 25px rgba(185, 242, 255, 0.3);
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.limit-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.limit-content p {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #34495e;
+}
+
+.limit-content p:last-child {
+  margin-bottom: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Mobile responsive for diamond message */
+@media (max-width: 768px) {
+  .diamond-limit-message {
+    padding: 15px;
+  }
+
+  .limit-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .limit-content p {
+    font-size: 0.9rem;
+  }
+
+  .limit-content p:last-child {
+    font-size: 1rem;
+  }
+}

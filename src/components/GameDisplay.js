@@ -104,10 +104,29 @@ const GameDisplay = ({
 
   const handleGameStart = (gameId) => {
     if (!gameAttempts.canPlay && user?.userId) {
-      addNotification(`Daily limit reached! Reset in ${gameAttempts.timeUntilReset}`, 'error');
+      // Show upgrade option for non-Diamond users
+      if (gameAttempts.vipTier !== 'Diamond') {
+        const nextTier = getNextTierInfo(gameAttempts.vipTier);
+        addNotification(
+          `Daily limit reached! Upgrade to ${nextTier.name} for ${nextTier.dailyLimit} games per day. Reset in ${gameAttempts.timeUntilReset}`, 
+          'warning'
+        );
+      } else {
+        addNotification(`Daily limit reached! Reset in ${gameAttempts.timeUntilReset}`, 'error');
+      }
       return;
     }
     setActiveGame(gameId);
+  };
+
+  const getNextTierInfo = (currentTier) => {
+    const tierMap = {
+      'Bronze': { name: 'Silver', dailyLimit: 10 },
+      'Silver': { name: 'Gold', dailyLimit: 15 },
+      'Gold': { name: 'Platinum', dailyLimit: 25 },
+      'Platinum': { name: 'Diamond', dailyLimit: 50 }
+    };
+    return tierMap[currentTier] || { name: 'Diamond', dailyLimit: 50 };
   };
 
   const handleGameComplete = async (won, points) => {
@@ -201,7 +220,12 @@ const GameDisplay = ({
         onClick={() => handleGameStart(game.id)}
         disabled={!gameAttempts.canPlay && user?.userId}
       >
-        {!gameAttempts.canPlay && user?.userId ? 'Limit Reached' : 'Play Now'}
+        {!gameAttempts.canPlay && user?.userId 
+          ? (gameAttempts.vipTier === 'Diamond' 
+              ? 'Limit Reached' 
+              : `Upgrade for More`)
+          : 'Play Now'
+        }
       </button>
     </div>
   );
@@ -236,7 +260,12 @@ const GameDisplay = ({
             onClick={() => handleGameStart(game.id)}
             disabled={!gameAttempts.canPlay && user?.userId}
           >
-            Play
+            {!gameAttempts.canPlay && user?.userId 
+              ? (gameAttempts.vipTier === 'Diamond' 
+                  ? 'Limit' 
+                  : 'Upgrade')
+              : 'Play'
+            }
           </button>
         </div>
       ))}
@@ -293,6 +322,63 @@ const GameDisplay = ({
             <span className="stat-text">
               VIP {gameAttempts.vipTier}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* VIP Upgrade Prompt */}
+      {showStats && user?.userId && !gameAttempts.canPlay && gameAttempts.vipTier !== 'Diamond' && (
+        <div className="vip-upgrade-prompt">
+          <div className="upgrade-content">
+            <h3>🚀 Daily Limit Reached!</h3>
+            <p>You've used all {gameAttempts.dailyLimit} daily games as a {gameAttempts.vipTier} member.</p>
+            <p>Games reset in: <strong>{gameAttempts.timeUntilReset}</strong></p>
+            <p>Upgrade your VIP tier to play more games daily:</p>
+            <div className="upgrade-options">
+              {gameAttempts.vipTier === 'Bronze' && (
+                <div className="upgrade-option">
+                  <span className="tier-icon">🥈</span>
+                  <span className="tier-name">Silver</span>
+                  <span className="tier-benefit">10 games/day</span>
+                </div>
+              )}
+              {gameAttempts.vipTier === 'Silver' && (
+                <div className="upgrade-option">
+                  <span className="tier-icon">🥇</span>
+                  <span className="tier-name">Gold</span>
+                  <span className="tier-benefit">15 games/day</span>
+                </div>
+              )}
+              {gameAttempts.vipTier === 'Gold' && (
+                <div className="upgrade-option">
+                  <span className="tier-icon">💎</span>
+                  <span className="tier-name">Platinum</span>
+                  <span className="tier-benefit">25 games/day</span>
+                </div>
+              )}
+              {gameAttempts.vipTier === 'Platinum' && (
+                <div className="upgrade-option">
+                  <span className="tier-icon">💠</span>
+                  <span className="tier-name">Diamond</span>
+                  <span className="tier-benefit">50 games/day</span>
+                </div>
+              )}
+            </div>
+            <button className="upgrade-btn" onClick={() => window.location.href = '/vip'}>
+              Upgrade Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Diamond User Limit Message */}
+      {showStats && user?.userId && !gameAttempts.canPlay && gameAttempts.vipTier === 'Diamond' && (
+        <div className="diamond-limit-message">
+          <div className="limit-content">
+            <h3>💠 Diamond Daily Limit Reached!</h3>
+            <p>You've completed all {gameAttempts.dailyLimit} daily games as our highest tier member.</p>
+            <p>Games reset in: <strong>{gameAttempts.timeUntilReset}</strong></p>
+            <p>Thank you for being a Diamond member! 🎉</p>
           </div>
         </div>
       )}
