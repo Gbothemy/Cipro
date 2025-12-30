@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_claim TIMESTAMP,
   last_login TIMESTAMP,
   last_mine_time TIMESTAMP,
+  last_game_reset TIMESTAMP,
   total_mined INTEGER DEFAULT 0,
   mining_sessions INTEGER DEFAULT 0,
   referred_by TEXT,
@@ -763,3 +764,13 @@ BEGIN
   RAISE NOTICE '🎯 Ready for Production!';
   RAISE NOTICE '========================================';
 END $$;
+
+-- ============================================
+-- SCHEMA UPDATES FOR GAME RESET SYSTEM
+-- ============================================
+
+-- Add last_game_reset field to users table (for existing databases)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_game_reset TIMESTAMP;
+
+-- Update existing users to have a reset time (optional, for migration)
+-- UPDATE users SET last_game_reset = NOW() WHERE last_game_reset IS NULL;

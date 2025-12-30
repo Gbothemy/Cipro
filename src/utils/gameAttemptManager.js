@@ -14,13 +14,26 @@ export const getVIPTierName = (vipLevel) => {
   return config.name;
 };
 
+// Get the next daily reset time (always 24 hours from now)
+const getNextDailyReset = () => {
+  const now = new Date();
+  const resetTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Always 24 hours from now
+  return resetTime.toISOString();
+};
+
+// Get today's date string for consistent daily tracking
+const getTodayDateString = () => {
+  const now = new Date();
+  return now.toISOString().split('T')[0]; // YYYY-MM-DD format
+};
+
 // Check if user can play (has attempts remaining)
 export const canPlayGame = async (userId, gameType = 'puzzle') => {
   try {
     // Get user's VIP level
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('vip_level')
+      .select('vip_level, last_game_reset')
       .eq('user_id', userId)
       .single();
 
@@ -28,16 +41,39 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
 
     const vipLevel = userData?.vip_level || 1;
     const dailyLimit = getDailyAttemptLimit(vipLevel);
-
-    // Get ALL game attempts from last 24 hours (not filtered by game type)
-    // Daily limit applies to all games combined
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const lastReset = userData?.last_game_reset;
     
+    // Check if we need to reset the user's daily attempts
+    const now = new Date();
+    const shouldReset = !lastReset || (now - new Date(lastReset)) >= (24 * 60 * 60 * 1000);
+    
+    if (shouldReset) {
+      // Reset the user's game attempts by updating their last_game_reset time
+      const newResetTime = now.toISOString();
+      await supabase
+        .from('users')
+        .update({ last_game_reset: newResetTime })
+        .eq('user_id', userId);
+      
+      // User has full attempts available after reset
+      const nextResetTime = getNextDailyReset();
+      return {
+        canPlay: true,
+        attemptsUsed: 0,
+        attemptsRemaining: dailyLimit,
+        dailyLimit,
+        vipTier: getVIPTierName(vipLevel),
+        resetTime: nextResetTime,
+        lastResetTime: newResetTime
+      };
+    }
+
+    // Get game attempts since the last reset
     const { data: attempts, error: attemptsError } = await supabase
       .from('game_attempts')
       .select('*')
       .eq('user_id', userId)
-      .gte('created_at', twentyFourHoursAgo)
+      .gte('created_at', lastReset)
       .order('created_at', { ascending: true });
 
     if (attemptsError) throw attemptsError;
@@ -45,11 +81,8 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
     const attemptsUsed = attempts?.length || 0;
     const attemptsRemaining = dailyLimit - attemptsUsed;
 
-    // Get the oldest attempt time for reset calculation
-    const oldestAttempt = attempts && attempts.length > 0 ? attempts[0].created_at : null;
-    const resetTime = oldestAttempt 
-      ? new Date(new Date(oldestAttempt).getTime() + 24 * 60 * 60 * 1000).toISOString()
-      : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    // Calculate next reset time (24 hours from last reset)
+    const nextResetTime = new Date(new Date(lastReset).getTime() + 24 * 60 * 60 * 1000).toISOString();
 
     return {
       canPlay: attemptsRemaining > 0,
@@ -57,19 +90,20 @@ export const canPlayGame = async (userId, gameType = 'puzzle') => {
       attemptsRemaining,
       dailyLimit,
       vipTier: getVIPTierName(vipLevel),
-      resetTime,
-      oldestAttemptTime: oldestAttempt
+      resetTime: nextResetTime,
+      lastResetTime: lastReset
     };
   } catch (error) {
     console.error('Error checking game attempts:', error);
     // Allow play on error (fail open)
+    const nextResetTime = getNextDailyReset();
     return {
       canPlay: true,
       attemptsUsed: 0,
       attemptsRemaining: 5,
       dailyLimit: 5,
       vipTier: 'Bronze',
-      resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      resetTime: nextResetTime
     };
   }
 };

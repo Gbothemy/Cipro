@@ -102,6 +102,9 @@ export const db = {
       if (updates.total_mined !== undefined) updateData.total_mined = updates.total_mined;
       if (updates.mining_sessions !== undefined) updateData.mining_sessions = updates.mining_sessions;
 
+      // Add game reset field if provided
+      if (updates.last_game_reset !== undefined) updateData.last_game_reset = updates.last_game_reset;
+
       const { data, error } = await supabase
         .from("users")
         .update(updateData)
@@ -1092,6 +1095,7 @@ export const db = {
       dayStreak: dbUser.day_streak || 0,
       lastClaim: dbUser.last_claim,
       last_mine_time: dbUser.last_mine_time,
+      last_game_reset: dbUser.last_game_reset,
       total_mined: dbUser.total_mined || 0,
       mining_sessions: dbUser.mining_sessions || 0,
       balance: {
