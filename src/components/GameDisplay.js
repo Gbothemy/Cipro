@@ -326,59 +326,187 @@ const GameDisplay = ({
         </div>
       )}
 
-      {/* VIP Upgrade Prompt */}
+      {/* Enhanced VIP Upgrade Prompt */}
       {showStats && user?.userId && !gameAttempts.canPlay && gameAttempts.vipTier !== 'Diamond' && (
-        <div className="vip-upgrade-prompt">
-          <div className="upgrade-content">
-            <h3>🚀 Daily Limit Reached!</h3>
-            <p>You've used all {gameAttempts.dailyLimit} daily games as a {gameAttempts.vipTier} member.</p>
-            <p>Games reset in: <strong>{gameAttempts.timeUntilReset}</strong></p>
-            <p>Upgrade your VIP tier to play more games daily:</p>
-            <div className="upgrade-options">
-              {gameAttempts.vipTier === 'Bronze' && (
-                <div className="upgrade-option">
-                  <span className="tier-icon">🥈</span>
-                  <span className="tier-name">Silver</span>
-                  <span className="tier-benefit">10 games/day</span>
-                </div>
-              )}
-              {gameAttempts.vipTier === 'Silver' && (
-                <div className="upgrade-option">
-                  <span className="tier-icon">🥇</span>
-                  <span className="tier-name">Gold</span>
-                  <span className="tier-benefit">15 games/day</span>
-                </div>
-              )}
-              {gameAttempts.vipTier === 'Gold' && (
-                <div className="upgrade-option">
-                  <span className="tier-icon">💎</span>
-                  <span className="tier-name">Platinum</span>
-                  <span className="tier-benefit">25 games/day</span>
-                </div>
-              )}
-              {gameAttempts.vipTier === 'Platinum' && (
-                <div className="upgrade-option">
-                  <span className="tier-icon">💠</span>
-                  <span className="tier-name">Diamond</span>
-                  <span className="tier-benefit">50 games/day</span>
-                </div>
-              )}
+        <div className="enhanced-limit-reached">
+          <div className="limit-reached-header">
+            <div className="limit-icon">🎮</div>
+            <h2>Daily Game Limit Reached!</h2>
+            <div className="current-tier-badge">
+              <span className="tier-icon">
+                {gameAttempts.vipTier === 'Bronze' && '🥉'}
+                {gameAttempts.vipTier === 'Silver' && '🥈'}
+                {gameAttempts.vipTier === 'Gold' && '🥇'}
+                {gameAttempts.vipTier === 'Platinum' && '💎'}
+              </span>
+              <span className="tier-text">{gameAttempts.vipTier} Member</span>
             </div>
-            <button className="upgrade-btn" onClick={() => window.location.href = '/vip'}>
-              Upgrade Now
-            </button>
+          </div>
+
+          <div className="limit-stats">
+            <div className="stat-card">
+              <div className="stat-number">{gameAttempts.dailyLimit}</div>
+              <div className="stat-label">Games Played Today</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number countdown-timer">{gameAttempts.timeUntilReset}</div>
+              <div className="stat-label">Until Reset</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">0</div>
+              <div className="stat-label">Games Remaining</div>
+            </div>
+          </div>
+
+          <div className="upgrade-section">
+            <h3>🚀 Want to Play More?</h3>
+            <p>Upgrade your VIP tier to unlock more daily games and exclusive benefits!</p>
+            
+            <div className="tier-comparison">
+              <div className="current-tier">
+                <div className="tier-header">
+                  <span className="tier-icon">
+                    {gameAttempts.vipTier === 'Bronze' && '🥉'}
+                    {gameAttempts.vipTier === 'Silver' && '🥈'}
+                    {gameAttempts.vipTier === 'Gold' && '🥇'}
+                    {gameAttempts.vipTier === 'Platinum' && '💎'}
+                  </span>
+                  <div>
+                    <div className="tier-name">Current: {gameAttempts.vipTier}</div>
+                    <div className="tier-games">{gameAttempts.dailyLimit} games/day</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="upgrade-arrow">→</div>
+
+              <div className="next-tier">
+                <div className="tier-header">
+                  <span className="tier-icon">
+                    {gameAttempts.vipTier === 'Bronze' && '🥈'}
+                    {gameAttempts.vipTier === 'Silver' && '🥇'}
+                    {gameAttempts.vipTier === 'Gold' && '💎'}
+                    {gameAttempts.vipTier === 'Platinum' && '💠'}
+                  </span>
+                  <div>
+                    <div className="tier-name">
+                      Upgrade to: {getNextTierInfo(gameAttempts.vipTier).name}
+                    </div>
+                    <div className="tier-games">{getNextTierInfo(gameAttempts.vipTier).dailyLimit} games/day</div>
+                  </div>
+                </div>
+                <div className="tier-benefits">
+                  <div className="benefit">✅ {getNextTierInfo(gameAttempts.vipTier).dailyLimit - gameAttempts.dailyLimit} more daily games</div>
+                  <div className="benefit">✅ Higher mining rewards</div>
+                  <div className="benefit">✅ Lower withdrawal fees</div>
+                  <div className="benefit">✅ Priority support</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="upgrade-actions">
+              <button className="upgrade-btn primary" onClick={() => window.location.href = '/vip'}>
+                <span className="btn-icon">💎</span>
+                Upgrade Now
+              </button>
+              <button className="learn-more-btn" onClick={() => window.location.href = '/vip'}>
+                Learn More About VIP
+              </button>
+            </div>
+          </div>
+
+          <div className="alternative-activities">
+            <h4>🎯 While You Wait, Try These:</h4>
+            <div className="activity-grid">
+              <div className="activity-card" onClick={() => window.location.href = '/mining'}>
+                <span className="activity-icon">⛏️</span>
+                <span className="activity-name">Daily Mining</span>
+                <span className="activity-desc">Earn passive rewards</span>
+              </div>
+              <div className="activity-card" onClick={() => window.location.href = '/referral'}>
+                <span className="activity-icon">👥</span>
+                <span className="activity-name">Invite Friends</span>
+                <span className="activity-desc">Get referral bonuses</span>
+              </div>
+              <div className="activity-card" onClick={() => window.location.href = '/tasks'}>
+                <span className="activity-icon">📋</span>
+                <span className="activity-name">Complete Tasks</span>
+                <span className="activity-desc">Earn extra points</span>
+              </div>
+              <div className="activity-card" onClick={() => window.location.href = '/leaderboard'}>
+                <span className="activity-icon">🏆</span>
+                <span className="activity-name">Leaderboard</span>
+                <span className="activity-desc">Check your ranking</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Diamond User Limit Message */}
+      {/* Enhanced Diamond User Limit Message */}
       {showStats && user?.userId && !gameAttempts.canPlay && gameAttempts.vipTier === 'Diamond' && (
-        <div className="diamond-limit-message">
-          <div className="limit-content">
-            <h3>💠 Diamond Daily Limit Reached!</h3>
-            <p>You've completed all {gameAttempts.dailyLimit} daily games as our highest tier member.</p>
-            <p>Games reset in: <strong>{gameAttempts.timeUntilReset}</strong></p>
-            <p>Thank you for being a Diamond member! 🎉</p>
+        <div className="enhanced-diamond-limit">
+          <div className="diamond-header">
+            <div className="diamond-crown">👑</div>
+            <h2>Diamond Daily Limit Reached!</h2>
+            <div className="diamond-badge">
+              <span className="tier-icon">💠</span>
+              <span className="tier-text">Diamond Member</span>
+            </div>
+          </div>
+
+          <div className="diamond-stats">
+            <div className="stat-card diamond">
+              <div className="stat-number">{gameAttempts.dailyLimit}</div>
+              <div className="stat-label">Games Completed</div>
+            </div>
+            <div className="stat-card diamond">
+              <div className="stat-number countdown-timer">{gameAttempts.timeUntilReset}</div>
+              <div className="stat-label">Until Reset</div>
+            </div>
+            <div className="stat-card diamond">
+              <div className="stat-number">MAX</div>
+              <div className="stat-label">Tier Level</div>
+            </div>
+          </div>
+
+          <div className="diamond-message">
+            <h3>🎉 Congratulations, Diamond Member!</h3>
+            <p>You've maximized your daily gaming potential with our highest tier membership.</p>
+            <p>Your dedication to Cipro is truly appreciated! 💎</p>
+          </div>
+
+          <div className="diamond-activities">
+            <h4>🌟 Exclusive Diamond Activities:</h4>
+            <div className="activity-grid diamond">
+              <div className="activity-card diamond" onClick={() => window.location.href = '/mining'}>
+                <span className="activity-icon">⛏️</span>
+                <span className="activity-name">Premium Mining</span>
+                <span className="activity-desc">2.5x rewards</span>
+              </div>
+              <div className="activity-card diamond" onClick={() => window.location.href = '/referral'}>
+                <span className="activity-icon">👥</span>
+                <span className="activity-name">VIP Referrals</span>
+                <span className="activity-desc">Higher commissions</span>
+              </div>
+              <div className="activity-card diamond" onClick={() => window.location.href = '/profile'}>
+                <span className="activity-icon">📊</span>
+                <span className="activity-name">Analytics</span>
+                <span className="activity-desc">Detailed stats</span>
+              </div>
+              <div className="activity-card diamond" onClick={() => window.location.href = '/support'}>
+                <span className="activity-icon">🎧</span>
+                <span className="activity-name">Priority Support</span>
+                <span className="activity-desc">24/7 assistance</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="diamond-appreciation">
+            <div className="appreciation-message">
+              <span className="appreciation-icon">🙏</span>
+              <p>Thank you for being a valued Diamond member of the Cipro community!</p>
+            </div>
           </div>
         </div>
       )}
