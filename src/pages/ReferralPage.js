@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import SkeletonLoader from '../components/SkeletonLoader';
 import SEOHead from '../components/SEOHead';
+import { formatBalance } from '../utils/formatBalance';
 import './ReferralPage.css';
 
 function ReferralPage({ user, updateUser, addNotification }) {
@@ -136,19 +137,19 @@ function ReferralPage({ user, updateUser, addNotification }) {
         <div className="earnings-grid">
           <div className="earning-item">
             <span className="earning-label">SOL</span>
-            <span className="earning-value">{totalEarnings.sol}</span>
+            <span className="earning-value">{formatBalance(totalEarnings.sol)}</span>
           </div>
           <div className="earning-item">
             <span className="earning-label">ETH</span>
-            <span className="earning-value">{totalEarnings.eth}</span>
+            <span className="earning-value">{formatBalance(totalEarnings.eth)}</span>
           </div>
           <div className="earning-item">
             <span className="earning-label">USDT</span>
-            <span className="earning-value">{totalEarnings.usdt}</span>
+            <span className="earning-value">{formatBalance(totalEarnings.usdt)}</span>
           </div>
           <div className="earning-item">
             <span className="earning-label">USDC</span>
-            <span className="earning-value">{totalEarnings.usdc}</span>
+            <span className="earning-value">{formatBalance(totalEarnings.usdc)}</span>
           </div>
         </div>
       </div>
@@ -213,10 +214,10 @@ function ReferralPage({ user, updateUser, addNotification }) {
                 </div>
                 <p className="joined-date">Joined: {new Date(ref.joined).toLocaleDateString()}</p>
                 <div className="referral-earnings">
-                  <span>◎ {ref.sol || 0}</span>
-                  <span>Ξ {ref.eth || 0}</span>
-                  <span>💵 {ref.usdt || 0}</span>
-                  <span>💵 {ref.usdc || 0}</span>
+                  <span>◎ {formatBalance(ref.sol || 0)}</span>
+                  <span>Ξ {formatBalance(ref.eth || 0)}</span>
+                  <span>💵 {formatBalance(ref.usdt || 0)}</span>
+                  <span>💵 {formatBalance(ref.usdc || 0)}</span>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import SEOHead from '../components/SEOHead';
+import { formatBalance } from '../utils/formatBalance';
 import './ConversionPage.css';
 
 function ConversionPage({ user, updateUser, addNotification }) {
@@ -329,7 +330,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
   };
 
   const calculateCrypto = (points) => {
-    return points ? (points / CONVERSION_RATES[selectedCurrency]) : 0;
+    return points ? formatBalance(points / CONVERSION_RATES[selectedCurrency]) : '0';
   };
 
   const calculatePoints = (crypto) => {
@@ -393,28 +394,28 @@ function ConversionPage({ user, updateUser, addNotification }) {
           <div className="balance-icon">◎</div>
           <div className="balance-info">
             <span className="balance-label">SOL Balance</span>
-            <span className="balance-value">{user.balance.sol}</span>
+            <span className="balance-value">{formatBalance(user.balance.sol)}</span>
           </div>
         </div>
         <div className="balance-card-conv eth">
           <div className="balance-icon">Ξ</div>
           <div className="balance-info">
             <span className="balance-label">ETH Balance</span>
-            <span className="balance-value">{user.balance.eth}</span>
+            <span className="balance-value">{formatBalance(user.balance.eth)}</span>
           </div>
         </div>
         <div className="balance-card-conv usdt">
           <div className="balance-icon">💵</div>
           <div className="balance-info">
             <span className="balance-label">USDT Balance</span>
-            <span className="balance-value">{user.balance.usdt}</span>
+            <span className="balance-value">{formatBalance(user.balance.usdt)}</span>
           </div>
         </div>
         <div className="balance-card-conv usdc">
           <div className="balance-icon">💵</div>
           <div className="balance-info">
             <span className="balance-label">USDC Balance</span>
-            <span className="balance-value">{user.balance.usdc}</span>
+            <span className="balance-value">{formatBalance(user.balance.usdc)}</span>
           </div>
         </div>
       </div>
@@ -532,7 +533,7 @@ function ConversionPage({ user, updateUser, addNotification }) {
                 <option value="usdt">💵 USDT (Tether) - Main</option>
                 <option value="usdc">💵 USDC (USD Coin)</option>
               </select>
-              <span className="form-hint">Available: {user.balance[selectedCurrency]} {selectedCurrency.toUpperCase()}</span>
+              <span className="form-hint">Available: {formatBalance(user.balance[selectedCurrency])} {selectedCurrency.toUpperCase()}</span>
             </div>
 
             <div className="form-group">
@@ -554,9 +555,9 @@ function ConversionPage({ user, updateUser, addNotification }) {
 
             <div className="quick-amounts">
               <button type="button" onClick={() => setWithdrawAmount(MIN_WITHDRAW[selectedCurrency].toString())} disabled={loading}>Min</button>
-              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.25).toString())} disabled={loading}>25%</button>
-              <button type="button" onClick={() => setWithdrawAmount((user.balance[selectedCurrency] * 0.5).toString())} disabled={loading}>50%</button>
-              <button type="button" onClick={() => setWithdrawAmount(user.balance[selectedCurrency].toString())} disabled={loading}>Max</button>
+              <button type="button" onClick={() => setWithdrawAmount(formatBalance(user.balance[selectedCurrency] * 0.25))} disabled={loading}>25%</button>
+              <button type="button" onClick={() => setWithdrawAmount(formatBalance(user.balance[selectedCurrency] * 0.5))} disabled={loading}>50%</button>
+              <button type="button" onClick={() => setWithdrawAmount(formatBalance(user.balance[selectedCurrency]))} disabled={loading}>Max</button>
             </div>
 
             <div className="form-group">
@@ -618,11 +619,11 @@ function ConversionPage({ user, updateUser, addNotification }) {
                 </div>
                 <div className="summary-row">
                   <span>Platform Fee (5%):</span>
-                  <span>-{parseFloat(withdrawAmount) * 0.05} {selectedCurrency.toUpperCase()}</span>
+                  <span>-{formatBalance(parseFloat(withdrawAmount) * 0.05)} {selectedCurrency.toUpperCase()}</span>
                 </div>
                 <div className="summary-row total">
                   <span>You will receive:</span>
-                  <span>{parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0) - (parseFloat(withdrawAmount) * 0.05)} {selectedCurrency.toUpperCase()}</span>
+                  <span>{formatBalance(parseFloat(withdrawAmount) - (NETWORK_FEES[withdrawNetwork] || 0) - (parseFloat(withdrawAmount) * 0.05))} {selectedCurrency.toUpperCase()}</span>
                 </div>
               </div>
             )}
@@ -662,12 +663,12 @@ function ConversionPage({ user, updateUser, addNotification }) {
                         Points Conversion
                       </div>
                       <div className="history-info">
-                        {tx.points_converted.toLocaleString()} Cipro → {tx.amount_received} {tx.currency}
+                        {tx.points_converted.toLocaleString()} Cipro → {formatBalance(tx.amount_received)} {tx.currency}
                       </div>
                       <div className="history-date">{formatDate(tx.created_at)}</div>
                     </div>
                     <div className="history-amount success">
-                      +{tx.amount_received} {tx.currency}
+                      +{formatBalance(tx.amount_received)} {tx.currency}
                     </div>
                   </div>
                 ))}

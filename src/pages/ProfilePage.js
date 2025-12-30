@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../db/supabase';
+import { formatBalance } from '../utils/formatBalance';
 import './ProfilePage.css';
 
 function ProfilePage({ user, updateUser, addNotification, onLogout }) {
@@ -202,10 +203,10 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
     { label: 'VIP Level', value: user.vipLevel, icon: '⭐', color: '#f59e0b' },
     { label: 'Games Played', value: user.completedTasks, icon: '🎮', color: '#10b981' },
     { label: 'Day Streak', value: user.dayStreak, icon: '🔥', color: '#ef4444' },
-    { label: 'SOL Balance', value: user.balance?.sol || 0, icon: '◎', color: '#14F195' },
-    { label: 'ETH Balance', value: user.balance?.eth || 0, icon: 'Ξ', color: '#627EEA' },
-    { label: 'USDT Balance', value: user.balance?.usdt || 0, icon: '💵', color: '#26a17b' },
-    { label: 'USDC Balance', value: user.balance?.usdc || 0, icon: '💵', color: '#2775CA' },
+    { label: 'SOL Balance', value: formatBalance(user.balance?.sol || 0), icon: '◎', color: '#14F195' },
+    { label: 'ETH Balance', value: formatBalance(user.balance?.eth || 0), icon: 'Ξ', color: '#627EEA' },
+    { label: 'USDT Balance', value: formatBalance(user.balance?.usdt || 0), icon: '💵', color: '#26a17b' },
+    { label: 'USDC Balance', value: formatBalance(user.balance?.usdc || 0), icon: '💵', color: '#2775CA' },
     { label: 'Gift Cipro', value: user.giftPoints || 0, icon: '🎁', color: '#f97316' }
   ];
 
@@ -640,21 +641,21 @@ function ProfilePage({ user, updateUser, addNotification, onLogout }) {
                 <div className="earning-card">
                   <div className="earning-icon">◎</div>
                   <div className="earning-info">
-                    <div className="earning-value">{user.balance?.sol || 0} SOL</div>
+                    <div className="earning-value">{formatBalance(user.balance?.sol || 0)} SOL</div>
                     <div className="earning-label">Total SOL Earned</div>
                   </div>
                 </div>
                 <div className="earning-card">
                   <div className="earning-icon">Ξ</div>
                   <div className="earning-info">
-                    <div className="earning-value">{user.balance?.eth || 0} ETH</div>
+                    <div className="earning-value">{formatBalance(user.balance?.eth || 0)} ETH</div>
                     <div className="earning-label">Total ETH Earned</div>
                   </div>
                 </div>
                 <div className="earning-card">
                   <div className="earning-icon">💵</div>
                   <div className="earning-info">
-                    <div className="earning-value">{user.balance?.usdt || 0} USDT</div>
+                    <div className="earning-value">{formatBalance(user.balance?.usdt || 0)} USDT</div>
                     <div className="earning-label">Total USDT Earned</div>
                   </div>
                 </div>

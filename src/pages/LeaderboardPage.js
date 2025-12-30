@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import ActivityFeed from '../components/ActivityFeed';
 import SEOHead from '../components/SEOHead';
+import { formatBalance } from '../utils/formatBalance';
 import '../components/ActivityFeed.css';
 import './LeaderboardPage.css';
 
@@ -794,10 +795,10 @@ function LeaderboardPage({ user }) {
                 )}
                 {activeTab === 'earnings' && (
                   <p>
-                    ◎ {player.sol || 0} SOL • 
-                    Ξ {player.eth || 0} ETH • 
-                    💵 {player.usdt || 0} USDT •
-                    💵 {player.usdc || 0} USDC
+                    ◎ {formatBalance(player.sol || 0)} SOL • 
+                    Ξ {formatBalance(player.eth || 0)} ETH • 
+                    💵 {formatBalance(player.usdt || 0)} USDT •
+                    💵 {formatBalance(player.usdc || 0)} USDC
                   </p>
                 )}
                 {activeTab === 'streak' && (

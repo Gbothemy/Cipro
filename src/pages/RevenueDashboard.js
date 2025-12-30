@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
+import { formatBalance } from '../utils/formatBalance';
 import './RevenueDashboard.css';
 
 function RevenueDashboard({ user, addNotification }) {
@@ -74,7 +75,7 @@ function RevenueDashboard({ user, addNotification }) {
   };
 
   const formatCrypto = (amount, symbol) => {
-    return `${parseFloat(amount)} ${symbol.toUpperCase()}`;
+    return `${formatBalance(parseFloat(amount))} ${symbol.toUpperCase()}`;
   };
 
   const getRevenueByType = (type) => {

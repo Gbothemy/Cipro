@@ -4,6 +4,7 @@ import { db } from '../db/supabase';
 import { getVIPConfig } from '../utils/vipConfig';
 import { COMPANY_WALLETS } from '../config/walletConfig';
 import RevenueDashboard from './RevenueDashboard';
+import { formatBalance } from '../utils/formatBalance';
 import './AdminPage.css';
 
 function AdminPage({ user, addNotification }) {
@@ -119,10 +120,10 @@ function AdminPage({ user, addNotification }) {
         totalTasks,
         avgLevel,
         activeToday,
-        totalSOL: totalSOL,
-        totalETH: totalETH,
-        totalUSDT: totalUSDT,
-        totalUSDC: totalUSDC,
+        totalSOL: formatBalance(totalSOL),
+        totalETH: formatBalance(totalETH),
+        totalUSDT: formatBalance(totalUSDT),
+        totalUSDC: formatBalance(totalUSDC),
         topPlayer: allUsers.length > 0 ? allUsers.sort((a, b) => (b.points || 0) - (a.points || 0))[0] : null,
         lastUpdate: new Date().toLocaleTimeString()
       });
@@ -637,9 +638,9 @@ function AdminPage({ user, addNotification }) {
                       <td>
                         {getVIPConfig(u.vipLevel || 1).icon} Level {u.vipLevel || 1} - {getVIPConfig(u.vipLevel || 1).name}
                       </td>
-                      <td>{u.balance?.sol || 0}</td>
-                      <td>{u.balance?.eth || 0}</td>
-                      <td>{u.balance?.usdt || 0}</td>
+                      <td>{formatBalance(u.balance?.sol || 0)}</td>
+                      <td>{formatBalance(u.balance?.eth || 0)}</td>
+                      <td>{formatBalance(u.balance?.usdt || 0)}</td>
                       <td>{u.completedTasks || 0}</td>
                       <td className="actions-cell">
                         <button onClick={() => handleEditUser(u)} className="edit-btn" title="Edit">✏️</button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/supabase';
 import SEOHead from '../components/SEOHead';
+import { formatBalance } from '../utils/formatBalance';
 import './AirdropPage.css';
 
 function AirdropPage({ user, updateUser, addNotification }) {
@@ -81,7 +82,7 @@ function AirdropPage({ user, updateUser, addNotification }) {
         dayStreak: user.dayStreak + 1
       });
 
-      addNotification(`🎁 Claimed: ${rewards.sol} SOL, ${rewards.eth} ETH, ${rewards.usdt} USDT, ${rewards.usdc} USDC, ${rewards.points} Cipro!`, 'success');
+      addNotification(`🎁 Claimed: ${formatBalance(rewards.sol)} SOL, ${formatBalance(rewards.eth)} ETH, ${formatBalance(rewards.usdt)} USDT, ${formatBalance(rewards.usdc)} USDC, ${rewards.points} Cipro!`, 'success');
       setClaimed(false);
       setCanClaim(false);
     } catch (error) {
@@ -111,21 +112,21 @@ function AirdropPage({ user, updateUser, addNotification }) {
             <div className="currency-icon">◎</div>
             <div className="currency-info">
               <span className="currency-name">SOL</span>
-              <span className="currency-amount">{user.balance.sol}</span>
+              <span className="currency-amount">{formatBalance(user.balance.sol)}</span>
             </div>
           </div>
           <div className="balance-item">
             <div className="currency-icon">Ξ</div>
             <div className="currency-info">
               <span className="currency-name">ETH</span>
-              <span className="currency-amount">{user.balance.eth}</span>
+              <span className="currency-amount">{formatBalance(user.balance.eth)}</span>
             </div>
           </div>
           <div className="balance-item">
             <div className="currency-icon">💵</div>
             <div className="currency-info">
               <span className="currency-name">USDT</span>
-              <span className="currency-amount">{user.balance.usdt}</span>
+              <span className="currency-amount">{formatBalance(user.balance.usdt)}</span>
             </div>
           </div>
         </div>
