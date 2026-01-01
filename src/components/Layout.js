@@ -160,6 +160,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                     <div className="menu-section-title">💰 Earn More</div>
                     <Link to="/airdrop" onClick={() => setMenuOpen(false)}>🎁 Airdrop</Link>
                     <Link to="/referral" onClick={() => setMenuOpen(false)}>👥 Referral</Link>
+                    <Link to="/lucky-draw" onClick={() => setMenuOpen(false)}>🎰 Lucky Draw</Link>
                     
                     <div className="nav-divider"></div>
                     

@@ -17,6 +17,7 @@ const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const GamePage = lazy(() => import('./pages/GamePage'));
 const AirdropPage = lazy(() => import('./pages/AirdropPage'));
 const ReferralPage = lazy(() => import('./pages/ReferralPage'));
+const LuckyDrawPage = lazy(() => import('./pages/LuckyDrawPage'));
 // Benefits page removed as per requirements
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
 const ConversionPage = lazy(() => import('./pages/ConversionPage'));
@@ -263,6 +264,7 @@ function App() {
               <Route path="/game" element={<GamePage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               <Route path="/airdrop" element={<AirdropPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               <Route path="/referral" element={<ReferralPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
+              <Route path="/lucky-draw" element={<LuckyDrawPage user={user} updateUser={updateUser} addNotification={addNotification} />} />
               {/* Benefits page removed */}
               <Route path="/leaderboard" element={<LeaderboardPage user={user} />} />
               <Route path="/conversion" element={<ConversionPage user={user} updateUser={updateUser} addNotification={addNotification} />} />

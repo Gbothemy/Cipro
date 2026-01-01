@@ -542,6 +542,69 @@ export const db = {
     }
   },
 
+  // Task progress tracking functions
+  async getGamesPlayedToday(user_id) {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from("game_attempts")
+        .select("id")
+        .eq("user_id", user_id)
+        .gte("created_at", today + "T00:00:00")
+        .lt("created_at", today + "T23:59:59");
+
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
+      console.error("Error getting games played today:", error);
+      return 0;
+    }
+  },
+
+  async getMiningSessionsToday(user_id) {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      // Check if user has mined today by looking at last_mine_time
+      const { data: userData, error } = await supabase
+        .from("users")
+        .select("last_mine_time")
+        .eq("user_id", user_id)
+        .single();
+
+      if (error) throw error;
+      
+      if (!userData?.last_mine_time) return 0;
+      
+      const lastMineDate = new Date(userData.last_mine_time).toISOString().split('T')[0];
+      return lastMineDate === today ? 1 : 0;
+    } catch (error) {
+      console.error("Error getting mining sessions today:", error);
+      return 0;
+    }
+  },
+
+  async getPointsEarnedThisMonth(user_id) {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      
+      // Get points from activities this month
+      const { data, error } = await supabase
+        .from("activities")
+        .select("points_change")
+        .eq("user_id", user_id)
+        .gte("created_at", startOfMonth)
+        .gt("points_change", 0); // Only positive point changes
+
+      if (error) throw error;
+      
+      return data?.reduce((sum, activity) => sum + (activity.points_change || 0), 0) || 0;
+    } catch (error) {
+      console.error("Error getting points earned this month:", error);
+      return 0;
+    }
+  },
+
   // ==================== NOTIFICATION OPERATIONS ====================
 
   async createNotification(user_id, notificationData) {
@@ -1625,6 +1688,309 @@ export const db = {
         winRate: 0,
         averageScore: 0
       };
+    }
+  },
+
+  // ==================== LUCKY DRAW OPERATIONS ====================
+
+  async getUserLuckyDrawTickets(user_id) {
+    try {
+      const { data, error } = await supabase
+        .from("lucky_draw_tickets")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("is_used", false);
+
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
+      console.error("Error getting user lucky draw tickets:", error);
+      return 0;
+    }
+  },
+
+  async buyLuckyDrawTickets(user_id, quantity, totalCost) {
+    try {
+      // Deduct points from user
+      const { data: user } = await supabase
+        .from("users")
+        .select("points")
+        .eq("user_id", user_id)
+        .single();
+
+      if (!user || user.points < totalCost) {
+        throw new Error("Insufficient points");
+      }
+
+      // Update user points
+      await supabase
+        .from("users")
+        .update({ points: user.points - totalCost })
+        .eq("user_id", user_id);
+
+      // Create tickets
+      const tickets = Array.from({ length: quantity }, () => ({
+        user_id,
+        ticket_number: Math.random().toString(36).substr(2, 9).toUpperCase(),
+        purchase_date: new Date().toISOString(),
+        cost: totalCost / quantity,
+        is_used: false
+      }));
+
+      const { data, error } = await supabase
+        .from("lucky_draw_tickets")
+        .insert(tickets)
+        .select();
+
+      if (error) throw error;
+
+      // Update prize pool
+      await this.updatePrizePool(totalCost * 0.8); // 80% goes to prize pool
+
+      // Log activity
+      await this.logActivity(user_id, {
+        type: 'lucky_draw_ticket_purchase',
+        description: `Bought ${quantity} Lucky Draw ticket${quantity > 1 ? 's' : ''} for ${totalCost} Cipro`,
+        pointsChange: -totalCost
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Error buying lucky draw tickets:", error);
+      throw error;
+    }
+  },
+
+  async getCurrentPrizePool() {
+    try {
+      const { data, error } = await supabase
+        .from("lucky_draw_prize_pool")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error;
+
+      if (!data) {
+        // Create initial prize pool
+        const initialPool = {
+          sol: 0.001,
+          eth: 0.0005,
+          usdt: 10,
+          usdc: 10,
+          points: 5000,
+          totalTickets: 0
+        };
+
+        const { data: newPool, error: createError } = await supabase
+          .from("lucky_draw_prize_pool")
+          .insert([initialPool])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return newPool;
+      }
+
+      // Get total tickets sold
+      const { data: tickets } = await supabase
+        .from("lucky_draw_tickets")
+        .select("id")
+        .eq("is_used", false);
+
+      return {
+        ...data,
+        totalTickets: tickets?.length || 0
+      };
+    } catch (error) {
+      console.error("Error getting current prize pool:", error);
+      return {
+        sol: 0,
+        eth: 0,
+        usdt: 0,
+        usdc: 0,
+        points: 0,
+        totalTickets: 0
+      };
+    }
+  },
+
+  async updatePrizePool(pointsContribution) {
+    try {
+      const currentPool = await this.getCurrentPrizePool();
+      
+      // Convert points to crypto (simplified conversion)
+      const solIncrease = pointsContribution * 0.0000001; // Very small amount
+      const ethIncrease = pointsContribution * 0.00000005;
+      const usdtIncrease = pointsContribution * 0.0001;
+      const usdcIncrease = pointsContribution * 0.0001;
+      const pointsIncrease = pointsContribution * 0.1;
+
+      const { data, error } = await supabase
+        .from("lucky_draw_prize_pool")
+        .update({
+          sol: currentPool.sol + solIncrease,
+          eth: currentPool.eth + ethIncrease,
+          usdt: currentPool.usdt + usdtIncrease,
+          usdc: currentPool.usdc + usdcIncrease,
+          points: currentPool.points + pointsIncrease
+        })
+        .eq("id", currentPool.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error updating prize pool:", error);
+      throw error;
+    }
+  },
+
+  async participateInLuckyDraw(user_id) {
+    try {
+      // Get user tickets
+      const { data: tickets } = await supabase
+        .from("lucky_draw_tickets")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("is_used", false);
+
+      if (!tickets || tickets.length === 0) {
+        throw new Error("No tickets available");
+      }
+
+      // Get total tickets
+      const { data: allTickets } = await supabase
+        .from("lucky_draw_tickets")
+        .select("id")
+        .eq("is_used", false);
+
+      const totalTickets = allTickets?.length || 0;
+      const userTickets = tickets.length;
+      
+      // Calculate win probability (user tickets / total tickets)
+      const winProbability = userTickets / totalTickets;
+      const randomValue = Math.random();
+      
+      const won = randomValue < winProbability;
+      
+      if (won) {
+        // User wins! Get prize pool
+        const prizePool = await this.getCurrentPrizePool();
+        
+        // Calculate winnings (user gets percentage based on their ticket ratio)
+        const winPercentage = Math.min(winProbability * 2, 0.5); // Max 50% of pool
+        
+        const winnings = {
+          sol: prizePool.sol * winPercentage,
+          eth: prizePool.eth * winPercentage,
+          usdt: prizePool.usdt * winPercentage,
+          usdc: prizePool.usdc * winPercentage,
+          points: Math.floor(prizePool.points * winPercentage)
+        };
+
+        // Update user balances
+        await this.updateBalance(user_id, 'sol', winnings.sol);
+        await this.updateBalance(user_id, 'eth', winnings.eth);
+        await this.updateBalance(user_id, 'usdt', winnings.usdt);
+        await this.updateBalance(user_id, 'usdc', winnings.usdc);
+        
+        // Add points
+        await this.addPoints(user_id, winnings.points);
+
+        // Record the win
+        await supabase
+          .from("lucky_draw_winners")
+          .insert([{
+            user_id,
+            draw_date: new Date().toISOString().split('T')[0],
+            sol_won: winnings.sol,
+            eth_won: winnings.eth,
+            usdt_won: winnings.usdt,
+            usdc_won: winnings.usdc,
+            points_won: winnings.points,
+            tickets_used: userTickets,
+            total_tickets: totalTickets
+          }]);
+
+        // Reset prize pool (reduce by winnings)
+        await supabase
+          .from("lucky_draw_prize_pool")
+          .update({
+            sol: prizePool.sol - winnings.sol,
+            eth: prizePool.eth - winnings.eth,
+            usdt: prizePool.usdt - winnings.usdt,
+            usdc: prizePool.usdc - winnings.usdc,
+            points: prizePool.points - winnings.points
+          })
+          .eq("id", prizePool.id);
+
+        // Mark tickets as used
+        await supabase
+          .from("lucky_draw_tickets")
+          .update({ is_used: true })
+          .eq("user_id", user_id)
+          .eq("is_used", false);
+
+        // Log activity
+        await this.logActivity(user_id, {
+          type: 'lucky_draw_win',
+          description: `Won Lucky Draw with ${userTickets} tickets!`,
+          pointsChange: winnings.points
+        });
+
+        return { won: true, winnings };
+      } else {
+        // User doesn't win, mark tickets as used
+        await supabase
+          .from("lucky_draw_tickets")
+          .update({ is_used: true })
+          .eq("user_id", user_id)
+          .eq("is_used", false);
+
+        // Log activity
+        await this.logActivity(user_id, {
+          type: 'lucky_draw_participate',
+          description: `Participated in Lucky Draw with ${userTickets} tickets`,
+          pointsChange: 0
+        });
+
+        return { won: false, winnings: null };
+      }
+    } catch (error) {
+      console.error("Error participating in lucky draw:", error);
+      throw error;
+    }
+  },
+
+  async getRecentLuckyDrawWinners(limit = 10) {
+    try {
+      const { data, error } = await supabase
+        .from("lucky_draw_winners")
+        .select(`
+          *,
+          users (username, avatar)
+        `)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+
+      return (data || []).map(winner => ({
+        username: winner.users?.username || 'Anonymous',
+        avatar: winner.users?.avatar || '👤',
+        draw_date: winner.draw_date,
+        sol: winner.sol_won || 0,
+        eth: winner.eth_won || 0,
+        usdt: winner.usdt_won || 0,
+        usdc: winner.usdc_won || 0,
+        points: winner.points_won || 0
+      }));
+    } catch (error) {
+      console.error("Error getting recent lucky draw winners:", error);
+      return [];
     }
   }
 };

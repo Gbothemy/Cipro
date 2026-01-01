@@ -7,9 +7,18 @@ function TasksPage({ user, updateUser, addNotification }) {
   const [tasks, setTasks] = useState({ daily: [], weekly: [], monthly: [] });
   const [userTasks, setUserTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState({
+    gamesPlayedToday: 0,
+    loginStreak: 0,
+    totalPointsThisMonth: 0,
+    miningSessionsToday: 0,
+    lastLoginDate: null
+  });
 
   useEffect(() => {
     loadTasks();
+    loadUserStats();
+    updateTaskProgress();
   }, [user.userId]);
 
   const loadTasks = async () => {
@@ -35,6 +44,85 @@ function TasksPage({ user, updateUser, addNotification }) {
       addNotification('Failed to load tasks', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserStats = async () => {
+    try {
+      // Get user's actual activity data
+      const today = new Date().toISOString().split('T')[0];
+      const thisMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+      
+      // Get games played today
+      const gamesPlayedToday = await db.getGamesPlayedToday(user.userId);
+      
+      // Get mining sessions today (if available)
+      const miningSessionsToday = await db.getMiningSessionsToday(user.userId);
+      
+      // Get total points earned this month
+      const totalPointsThisMonth = await db.getPointsEarnedThisMonth(user.userId);
+      
+      setUserStats({
+        gamesPlayedToday: gamesPlayedToday || 0,
+        loginStreak: user.dayStreak || 0,
+        totalPointsThisMonth: totalPointsThisMonth || 0,
+        miningSessionsToday: miningSessionsToday || 0,
+        lastLoginDate: user.lastLogin
+      });
+    } catch (error) {
+      console.error('Error loading user stats:', error);
+    }
+  };
+
+  const updateTaskProgress = async () => {
+    try {
+      // Auto-update task progress based on user actions
+      const tasks = await db.getTasks();
+      
+      for (const task of tasks) {
+        let currentProgress = 0;
+        
+        switch (task.task_name) {
+          case 'Daily Login':
+            // Check if user logged in today
+            const today = new Date().toDateString();
+            const lastLogin = user.lastLogin ? new Date(user.lastLogin).toDateString() : null;
+            currentProgress = (lastLogin === today) ? 1 : 0;
+            break;
+            
+          case 'Play 3 Games':
+            currentProgress = Math.min(userStats.gamesPlayedToday, 3);
+            break;
+            
+          case 'Mining Session':
+            currentProgress = Math.min(userStats.miningSessionsToday, 1);
+            break;
+            
+          case 'Weekly Streak':
+            currentProgress = Math.min(userStats.loginStreak, 7);
+            break;
+            
+          case 'Monthly Champion':
+            currentProgress = Math.min(userStats.totalPointsThisMonth, 10000);
+            break;
+            
+          default:
+            // For custom tasks, keep existing progress
+            const existingTask = userTasks.find(ut => ut.task_id === task.id);
+            currentProgress = existingTask?.progress || 0;
+        }
+        
+        // Update progress if it's different
+        const existingTask = userTasks.find(ut => ut.task_id === task.id);
+        if (!existingTask || existingTask.progress !== currentProgress) {
+          await db.updateTaskProgress(user.userId, task.id, currentProgress);
+        }
+      }
+      
+      // Reload tasks after updating progress
+      await loadTasks();
+    } catch (error) {
+      console.error('Error updating task progress:', error);
     }
   };
 
@@ -144,6 +232,42 @@ function TasksPage({ user, updateUser, addNotification }) {
       }, 0);
   };
 
+  const getTaskGuidance = (task) => {
+    switch (task.task_name) {
+      case 'Daily Login':
+        return userStats.lastLoginDate && 
+               new Date(userStats.lastLoginDate).toDateString() === new Date().toDateString()
+               ? "✅ You've already logged in today!"
+               : "🔑 Simply being here counts as logging in!";
+      
+      case 'Play 3 Games':
+        const remaining = Math.max(0, 3 - userStats.gamesPlayedToday);
+        return remaining > 0 
+               ? `🎮 Play ${remaining} more game${remaining > 1 ? 's' : ''} to complete this task`
+               : "✅ You've played enough games today!";
+      
+      case 'Mining Session':
+        return userStats.miningSessionsToday > 0
+               ? "✅ You've completed your mining session today!"
+               : "⛏️ Visit the mining page to complete a session";
+      
+      case 'Weekly Streak':
+        const streakNeeded = Math.max(0, 7 - userStats.loginStreak);
+        return streakNeeded > 0
+               ? `🔥 Keep logging in daily! ${streakNeeded} more day${streakNeeded > 1 ? 's' : ''} needed`
+               : "✅ Amazing! You've maintained a 7-day streak!";
+      
+      case 'Monthly Champion':
+        const pointsNeeded = Math.max(0, 10000 - userStats.totalPointsThisMonth);
+        return pointsNeeded > 0
+               ? `💎 Earn ${pointsNeeded.toLocaleString()} more Cipro this month`
+               : "✅ You're a true champion this month!";
+      
+      default:
+        return "Complete the required actions to unlock this reward";
+    }
+  };
+
   if (loading) {
     return (
       <div className="tasks-page">
@@ -193,6 +317,54 @@ function TasksPage({ user, updateUser, addNotification }) {
             <div className="overview-label">Completed</div>
           </div>
         </div>
+        <div className="overview-card">
+          <div className="overview-icon">🎮</div>
+          <div className="overview-info">
+            <div className="overview-value">{userStats.gamesPlayedToday}</div>
+            <div className="overview-label">Games Today</div>
+          </div>
+        </div>
+      </div>
+
+      {/* User Activity Summary */}
+      <div className="activity-summary">
+        <h2 className="section-title">📈 Your Activity Today</h2>
+        <div className="activity-grid">
+          <div className="activity-item">
+            <div className="activity-icon">🔑</div>
+            <div className="activity-info">
+              <div className="activity-label">Daily Login</div>
+              <div className="activity-status">
+                {userStats.lastLoginDate && 
+                 new Date(userStats.lastLoginDate).toDateString() === new Date().toDateString() 
+                 ? '✅ Completed' : '❌ Not completed'}
+              </div>
+            </div>
+          </div>
+          <div className="activity-item">
+            <div className="activity-icon">🎮</div>
+            <div className="activity-info">
+              <div className="activity-label">Games Played</div>
+              <div className="activity-status">{userStats.gamesPlayedToday}/3 games</div>
+            </div>
+          </div>
+          <div className="activity-item">
+            <div className="activity-icon">⛏️</div>
+            <div className="activity-info">
+              <div className="activity-label">Mining Session</div>
+              <div className="activity-status">
+                {userStats.miningSessionsToday > 0 ? '✅ Completed' : '❌ Not completed'}
+              </div>
+            </div>
+          </div>
+          <div className="activity-item">
+            <div className="activity-icon">🔥</div>
+            <div className="activity-info">
+              <div className="activity-label">Login Streak</div>
+              <div className="activity-status">{userStats.loginStreak} days</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Daily Tasks */}
@@ -217,6 +389,14 @@ function TasksPage({ user, updateUser, addNotification }) {
                 <div className="task-content">
                   <h3>{task.task_name}</h3>
                   <p>{task.description}</p>
+                  
+                  {/* Task-specific guidance */}
+                  {!completed && (
+                    <div className="task-guidance">
+                      {getTaskGuidance(task)}
+                    </div>
+                  )}
+                  
                   <div className="task-progress">
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: `${progress}%` }}></div>
@@ -265,6 +445,14 @@ function TasksPage({ user, updateUser, addNotification }) {
                 <div className="task-content">
                   <h3>{task.task_name}</h3>
                   <p>{task.description}</p>
+                  
+                  {/* Task-specific guidance */}
+                  {!completed && (
+                    <div className="task-guidance">
+                      {getTaskGuidance(task)}
+                    </div>
+                  )}
+                  
                   <div className="task-progress">
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: `${progress}%` }}></div>
@@ -313,6 +501,14 @@ function TasksPage({ user, updateUser, addNotification }) {
                 <div className="task-content">
                   <h3>{task.task_name}</h3>
                   <p>{task.description}</p>
+                  
+                  {/* Task-specific guidance */}
+                  {!completed && (
+                    <div className="task-guidance">
+                      {getTaskGuidance(task)}
+                    </div>
+                  )}
+                  
                   <div className="task-progress">
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: `${progress}%` }}></div>
