@@ -28,6 +28,13 @@ function AdminPage({ user, addNotification }) {
     maxDailyPlays: 2,
     pointsMultiplier: 1
   });
+  const [luckyDrawStats, setLuckyDrawStats] = useState({
+    totalTicketsSold: 0,
+    totalRevenue: 0,
+    activeParticipants: 0,
+    recentWinners: [],
+    currentPrizePool: { cipro: 50000, usdt: 20, vipUpgrade: true }
+  });
 
   // Copy to clipboard function
   const copyToClipboard = (text, label = 'Text') => {
@@ -51,6 +58,7 @@ function AdminPage({ user, addNotification }) {
     loadDepositRequests();
     loadLeaderboard();
     loadSystemSettings();
+    loadLuckyDrawStats();
 
     // Auto-refresh data every 30 seconds for live updates (only when tab is visible)
     const interval = setInterval(() => {
@@ -295,6 +303,29 @@ function AdminPage({ user, addNotification }) {
     // System settings loaded from state
   };
 
+  const loadLuckyDrawStats = async () => {
+    try {
+      // Get Lucky Draw statistics
+      const tickets = await db.getLuckyDrawTickets();
+      const winners = await db.getRecentLuckyDrawWinners(10);
+      const prizePool = await db.getCurrentPrizePool();
+      
+      const totalTicketsSold = tickets?.length || 0;
+      const totalRevenue = totalTicketsSold * 2; // $2 per ticket
+      const activeParticipants = new Set(tickets?.map(t => t.user_id)).size || 0;
+      
+      setLuckyDrawStats({
+        totalTicketsSold,
+        totalRevenue,
+        activeParticipants,
+        recentWinners: winners || [],
+        currentPrizePool: prizePool || { cipro: 50000, usdt: 20, vipUpgrade: true }
+      });
+    } catch (error) {
+      console.error('Error loading Lucky Draw stats:', error);
+    }
+  };
+
   const saveSystemSettings = async () => {
     try {
       // Save system settings to database
@@ -498,6 +529,9 @@ function AdminPage({ user, addNotification }) {
         </button>
         <button className={activeTab === 'leaderboard' ? 'active' : ''} onClick={() => setActiveTab('leaderboard')}>
           🏆 Leaderboard
+        </button>
+        <button className={activeTab === 'luckydraw' ? 'active' : ''} onClick={() => setActiveTab('luckydraw')}>
+          🎰 Lucky Draw
         </button>
         <button className={activeTab === 'withdrawals' ? 'active' : ''} onClick={() => setActiveTab('withdrawals')}>
           💸 Withdrawals ({withdrawalRequests.filter(r => r.status === 'pending').length})
@@ -721,6 +755,140 @@ function AdminPage({ user, addNotification }) {
                       </div>
                     ))
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'luckydraw' && (
+        <div className="admin-content">
+          <div className="luckydraw-section">
+            <h2>🎰 Lucky Draw Management</h2>
+            
+            {/* Lucky Draw Stats */}
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">🎫</div>
+                <div className="stat-info">
+                  <div className="stat-value">{luckyDrawStats.totalTicketsSold}</div>
+                  <div className="stat-label">Total Tickets Sold</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">💰</div>
+                <div className="stat-info">
+                  <div className="stat-value">${luckyDrawStats.totalRevenue.toFixed(2)}</div>
+                  <div className="stat-label">Total Revenue (USDT)</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">👥</div>
+                <div className="stat-info">
+                  <div className="stat-value">{luckyDrawStats.activeParticipants}</div>
+                  <div className="stat-label">Active Participants</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">🏆</div>
+                <div className="stat-info">
+                  <div className="stat-value">{luckyDrawStats.recentWinners.length}</div>
+                  <div className="stat-label">Recent Winners</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Prize Pool */}
+            <div className="prize-pool-admin">
+              <h3>💎 Current Prize Pool</h3>
+              <div className="prize-grid">
+                <div className="prize-item">
+                  <span className="prize-label">Cipro Points</span>
+                  <span className="prize-value">{luckyDrawStats.currentPrizePool.cipro?.toLocaleString() || '50,000'}</span>
+                </div>
+                <div className="prize-item">
+                  <span className="prize-label">USDT Reward</span>
+                  <span className="prize-value">${luckyDrawStats.currentPrizePool.usdt?.toFixed(2) || '20.00'}</span>
+                </div>
+                <div className="prize-item">
+                  <span className="prize-label">VIP Upgrade</span>
+                  <span className="prize-value">{luckyDrawStats.currentPrizePool.vipUpgrade ? 'Enabled' : 'Disabled'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lucky Draw Settings */}
+            <div className="luckydraw-settings">
+              <h3>⚙️ Lucky Draw Settings</h3>
+              <div className="settings-grid">
+                <div className="setting-item">
+                  <label>Ticket Price (USDT)</label>
+                  <input type="number" value="2.00" readOnly className="readonly-input" />
+                  <small>Fixed at $2.00 USDT per ticket</small>
+                </div>
+                <div className="setting-item">
+                  <label>Win Rate</label>
+                  <input type="text" value="0.1%" readOnly className="readonly-input" />
+                  <small>Ultra-exclusive 0.1% chance (1 in 1,000)</small>
+                </div>
+                <div className="setting-item">
+                  <label>Draw Schedule</label>
+                  <input type="text" value="Friday - Sunday" readOnly className="readonly-input" />
+                  <small>Active every weekend</small>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Winners */}
+            {luckyDrawStats.recentWinners.length > 0 && (
+              <div className="recent-winners-admin">
+                <h3>🏆 Recent Winners</h3>
+                <div className="winners-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Winner</th>
+                        <th>Cipro Won</th>
+                        <th>USDT Won</th>
+                        <th>VIP Upgrade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {luckyDrawStats.recentWinners.map((winner, index) => (
+                        <tr key={index}>
+                          <td>{new Date(winner.draw_date).toLocaleDateString()}</td>
+                          <td>{winner.username || `Player ${winner.user_id?.slice(-4)}`}</td>
+                          <td>{winner.cipro_won?.toLocaleString() || '50,000'}</td>
+                          <td>${winner.usdt_won?.toFixed(2) || '20.00'}</td>
+                          <td>{winner.vip_upgrade_won ? '✅ Yes' : '❌ No'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Revenue Analysis */}
+            <div className="revenue-analysis">
+              <h3>📊 Revenue Analysis</h3>
+              <div className="analysis-grid">
+                <div className="analysis-item">
+                  <span className="analysis-label">Expected Daily Revenue</span>
+                  <span className="analysis-value">${(luckyDrawStats.totalTicketsSold * 2 / 7).toFixed(2)}</span>
+                  <small>Based on current participation</small>
+                </div>
+                <div className="analysis-item">
+                  <span className="analysis-label">House Edge</span>
+                  <span className="analysis-value">99.9%</span>
+                  <small>Only 0.1% of revenue goes to winners</small>
+                </div>
+                <div className="analysis-item">
+                  <span className="analysis-label">Profit Margin</span>
+                  <span className="analysis-value">${(luckyDrawStats.totalRevenue * 0.999).toFixed(2)}</span>
+                  <small>Revenue after prize payouts</small>
                 </div>
               </div>
             </div>

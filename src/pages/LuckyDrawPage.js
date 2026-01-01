@@ -291,8 +291,8 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
                 <span className="stat-label">Total Tickets</span>
               </div>
               <div className="stat-item">
-                <span className="stat-value">{getWinChance()}%</span>
-                <span className="stat-label">Win Chance</span>
+                <span className="stat-value">{totalTickets > 0 ? 'Active' : 'Waiting'}</span>
+                <span className="stat-label">Draw Status</span>
               </div>
               <div className="stat-item">
                 <span className="stat-value">${user.balance.usdt.toFixed(2)}</span>
@@ -344,7 +344,7 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
                   <div className="draw-participation">
                     <h3>🎲 Ready to Draw?</h3>
                     <p>You have {userTickets} ticket{userTickets > 1 ? 's' : ''}</p>
-                    <p>Win chance: {getWinChance()}%</p>
+                    <p>Good luck! 🍀</p>
                     
                     {!showResults ? (
                       <button 

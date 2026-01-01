@@ -27,171 +27,360 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
     document.body.classList.toggle('dark-mode', newTheme === 'dark');
   };
 
+  const navigationItems = [
+    { path: '/', icon: '🎮', label: 'Mining', section: 'main' },
+    { path: '/tasks', icon: '📋', label: 'Tasks', section: 'main' },
+    { path: '/daily-rewards', icon: '🎁', label: 'Rewards', section: 'main' },
+    { path: '/lucky-draw', icon: '🎰', label: 'Lucky Draw', section: 'earn' },
+    { path: '/airdrop', icon: '🪂', label: 'Airdrop', section: 'earn' },
+    { path: '/referral', icon: '👥', label: 'Referral', section: 'earn' },
+    { path: '/conversion', icon: '💳', label: 'Wallet', section: 'wallet' },
+    { path: '/leaderboard', icon: '🏆', label: 'Leaderboard', section: 'community' },
+    { path: '/achievements', icon: '🎖️', label: 'Achievements', section: 'community' },
+    { path: '/vip-tiers', icon: '💎', label: 'VIP', section: 'community' },
+    { path: '/profile', icon: '👤', label: 'Profile', section: 'account' },
+    { path: '/notifications', icon: '🔔', label: 'Notifications', section: 'account' },
+    { path: '/faq', icon: '❓', label: 'FAQ', section: 'account' }
+  ];
+
+  const getActiveSection = () => {
+    const currentItem = navigationItems.find(item => item.path === location.pathname);
+    return currentItem?.section || 'main';
+  };
+
   return (
     <div className="app-container">
-      {/* Notifications */}
+      {/* Enhanced Notifications */}
       <div className="notifications-container">
         {notifications.map(notif => (
-          <div key={notif.id} className={`notification ${notif.type}`}>
-            {notif.type === 'success' && '✓ '}
-            {notif.type === 'error' && '✗ '}
-            {notif.type === 'info' && 'ℹ '}
-            {notif.message}
+          <div key={notif.id} className={`notification notification-${notif.type}`}>
+            <div className="notification-icon">
+              {notif.type === 'success' && '✅'}
+              {notif.type === 'error' && '❌'}
+              {notif.type === 'info' && 'ℹ️'}
+              {notif.type === 'warning' && '⚠️'}
+            </div>
+            <div className="notification-content">
+              <div className="notification-message">{notif.message}</div>
+            </div>
           </div>
         ))}
       </div>
-      <header className="header">
-        <div className="header-content">
+
+      {/* Modern Header */}
+      <header className="modern-header">
+        <div className="header-container">
+          {/* Left Section */}
           <div className="header-left">
-            <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-            <div className="header-logo">
+            <button 
+              className="menu-toggle"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className={`hamburger ${menuOpen ? 'active' : ''}`}>
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </button>
+            
+            <Link to="/" className="brand-logo">
               {!logoError ? (
                 <img 
                   src={`/ciprohub.png?v=${logoRetryCount}`}
-                  alt="CIPRO Logo" 
-                  className="logo-image"
-                  loading="eager"
-                  onError={(e) => {
-                    console.log('Logo loading error:', e.target.src);
-                    const currentSrc = e.target.src;
-                    
-                    if (currentSrc.includes('/ciprohub.png') && !currentSrc.includes('PUBLIC_URL')) {
-                      console.log('Trying with PUBLIC_URL prefix');
-                      e.target.src = `${process.env.PUBLIC_URL}/ciprohub.png?v=${logoRetryCount}`;
-                    } else if (currentSrc.includes('ciprohub.png')) {
-                      console.log('Trying SVG fallback');
-                      e.target.src = `${process.env.PUBLIC_URL}/cipro-logo.svg`;
-                    } else if (currentSrc.includes('cipro-logo.svg')) {
-                      console.log('Trying backup SVG');
-                      e.target.src = `${process.env.PUBLIC_URL}/cipro-logo-backup.svg`;
-                    } else {
-                      console.log('All logo attempts failed, using text fallback');
-                      setLogoError(true);
-                    }
-                  }}
-                  onLoad={(e) => {
-                    console.log('Logo loaded successfully:', e.target.src);
-                    setLogoError(false);
-                  }}
+                  alt="CIPRO" 
+                  className="logo-img"
+                  onError={() => setLogoError(true)}
+                  onLoad={() => setLogoError(false)}
                 />
               ) : (
-                <div className="logo-text-container">
+                <div className="logo-fallback">
                   <span className="logo-text">CIPRO</span>
-                  <span className="logo-subtitle">CRYPTO GAMING</span>
-                  <button 
-                    className="logo-retry-btn"
-                    onClick={() => {
-                      console.log('Retrying logo load, attempt:', logoRetryCount + 1);
-                      setLogoRetryCount(prev => prev + 1);
-                      setLogoError(false);
-                    }}
-                    title="Retry loading logo"
-                  >
-                    🔄
-                  </button>
+                  <span className="logo-tagline">Gaming</span>
                 </div>
               )}
-            </div>
+            </Link>
           </div>
-          <div className="header-right">
-            <button onClick={toggleTheme} className="theme-toggle" title={isDarkMode ? 'Light Mode' : 'Dark Mode'}>
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
-            <button onClick={toggleSound} className="sound-toggle" title={soundEnabled ? 'Sound On' : 'Sound Off'}>
-              {soundEnabled ? '🔊' : '🔇'}
-            </button>
-            <div className="user-info">
-              <div className="user-details">
-                <span className="user-name">{user.username}</span>
-                <span className="user-points">{user.points.toLocaleString()} CIPRO</span>
+
+          {/* Center Section - Desktop Navigation */}
+          <nav className="desktop-nav">
+            <div className="nav-sections">
+              <div className="nav-section">
+                <Link 
+                  to="/" 
+                  className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">🎮</span>
+                  <span className="nav-text">Mining</span>
+                </Link>
+                <Link 
+                  to="/tasks" 
+                  className={`nav-link ${location.pathname === '/tasks' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">📋</span>
+                  <span className="nav-text">Tasks</span>
+                </Link>
+                <Link 
+                  to="/lucky-draw" 
+                  className={`nav-link ${location.pathname === '/lucky-draw' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">🎰</span>
+                  <span className="nav-text">Lucky Draw</span>
+                </Link>
+                <Link 
+                  to="/leaderboard" 
+                  className={`nav-link ${location.pathname === '/leaderboard' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">🏆</span>
+                  <span className="nav-text">Leaderboard</span>
+                </Link>
               </div>
+            </div>
+          </nav>
+
+          {/* Right Section */}
+          <div className="header-right">
+            <div className="user-balance">
+              <div className="balance-item">
+                <span className="balance-icon">💎</span>
+                <span className="balance-value">{user.points.toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div className="header-controls">
+              <button 
+                onClick={toggleTheme} 
+                className="control-btn theme-btn"
+                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDarkMode ? '☀️' : '🌙'}
+              </button>
+              
+              <button 
+                onClick={toggleSound} 
+                className="control-btn sound-btn"
+                aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
+              >
+                {soundEnabled ? '🔊' : '🔇'}
+              </button>
+            </div>
+
+            <div className="user-profile">
               <div className="user-avatar">{user.avatar}</div>
+              <div className="user-info">
+                <div className="user-name">{user.username}</div>
+                <div className="user-level">Level {user.vipLevel}</div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       <div className="layout-wrapper">
-
-        {/* Hamburger Menu - All Views */}
-        {menuOpen && (
-          <div className="side-menu">
-            <div className="menu-overlay" onClick={() => setMenuOpen(false)}></div>
-            <div className="menu-content">
-              <div className="menu-header">
-                <div className="menu-logo">
-                  <img 
-                    src={`${process.env.PUBLIC_URL}/ciprohub.png`}
-                    alt="Cipro"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </div>
-                <div className="menu-avatar">{user.avatar}</div>
-                <div className="menu-user-info">
-                  <h3>{user.username}</h3>
-                  <p>{user.userId}</p>
-                  {isAdmin && <span className="admin-badge">🛡️ Admin</span>}
+        {/* Modern Sidebar Menu */}
+        <div className={`modern-sidebar ${menuOpen ? 'open' : ''}`}>
+          <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>
+          <div className="sidebar-content">
+            {/* Sidebar Header */}
+            <div className="sidebar-header">
+              <div className="sidebar-user">
+                <div className="sidebar-avatar">{user.avatar}</div>
+                <div className="sidebar-user-info">
+                  <h3 className="sidebar-username">{user.username}</h3>
+                  <p className="sidebar-user-id">ID: {user.userId.slice(-6)}</p>
+                  <div className="sidebar-user-stats">
+                    <div className="stat-item">
+                      <span className="stat-icon">💎</span>
+                      <span className="stat-value">{user.points.toLocaleString()}</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-icon">⭐</span>
+                      <span className="stat-value">Level {user.vipLevel}</span>
+                    </div>
+                  </div>
+                  {isAdmin && <div className="admin-badge">🛡️ Admin</div>}
                 </div>
               </div>
-              <nav className="menu-nav">
-                {isAdmin ? (
-                  // Admin Menu
-                  <>
-                    <div className="menu-section-title">🛡️ Admin Panel</div>
-                    <Link to="/admin" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-                    <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-logout-btn">
-                      🚪 Logout
-                    </button>
-                  </>
-                ) : (
-                  // User Menu
-                  <>
-                    {/* Main Features */}
-                    <div className="menu-section-title">⭐ Main</div>
-                    <Link to="/" onClick={() => setMenuOpen(false)}>🎮 Mining Games</Link>
-                    <Link to="/tasks" onClick={() => setMenuOpen(false)}>📋 Tasks</Link>
-                    <Link to="/daily-rewards" onClick={() => setMenuOpen(false)}>🎁 Daily Rewards</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Earn More */}
-                    <div className="menu-section-title">💰 Earn More</div>
-                    <Link to="/airdrop" onClick={() => setMenuOpen(false)}>🎁 Airdrop</Link>
-                    <Link to="/referral" onClick={() => setMenuOpen(false)}>👥 Referral</Link>
-                    <Link to="/lucky-draw" onClick={() => setMenuOpen(false)}>🎰 Lucky Draw</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Wallet */}
-                    <div className="menu-section-title">💳 Wallet</div>
-                    <Link to="/conversion" onClick={() => setMenuOpen(false)}>🔄 Convert & Withdraw</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Community & Progress */}
-                    <div className="menu-section-title">🏆 Community</div>
-                    <Link to="/leaderboard" onClick={() => setMenuOpen(false)}>🏆 Leaderboard</Link>
-                    <Link to="/achievements" onClick={() => setMenuOpen(false)}>🎖️ Achievements</Link>
-                    <Link to="/vip-tiers" onClick={() => setMenuOpen(false)}>💎 VIP Tiers</Link>
-                    
-                    <div className="nav-divider"></div>
-                    
-                    {/* Account & Settings */}
-                    <div className="menu-section-title">⚙️ Settings</div>
-                    <Link to="/profile" onClick={() => setMenuOpen(false)}>👤 My Profile</Link>
-                    <Link to="/notifications" onClick={() => setMenuOpen(false)}>🔔 Notifications</Link>
-                    <Link to="/faq" onClick={() => setMenuOpen(false)}>❓ FAQ</Link>
-                    <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-logout-btn">
-                      🚪 Logout
-                    </button>
-                  </>
-                )}
-              </nav>
             </div>
+
+            {/* Navigation Menu */}
+            <nav className="sidebar-nav">
+              {isAdmin ? (
+                // Admin Navigation
+                <>
+                  <div className="nav-section">
+                    <div className="nav-section-title">Admin Panel</div>
+                    <Link 
+                      to="/admin" 
+                      className="nav-item"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🛡️</span>
+                      <span className="nav-item-text">Dashboard</span>
+                    </Link>
+                  </div>
+                  <div className="nav-section">
+                    <button 
+                      onClick={() => { onLogout(); setMenuOpen(false); }} 
+                      className="nav-item logout-item"
+                    >
+                      <span className="nav-item-icon">🚪</span>
+                      <span className="nav-item-text">Logout</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                // User Navigation
+                <>
+                  {/* Main Features */}
+                  <div className="nav-section">
+                    <div className="nav-section-title">Main Features</div>
+                    <Link 
+                      to="/" 
+                      className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🎮</span>
+                      <span className="nav-item-text">Mining Games</span>
+                      <span className="nav-item-badge">Hot</span>
+                    </Link>
+                    <Link 
+                      to="/tasks" 
+                      className={`nav-item ${location.pathname === '/tasks' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">📋</span>
+                      <span className="nav-item-text">Daily Tasks</span>
+                    </Link>
+                    <Link 
+                      to="/daily-rewards" 
+                      className={`nav-item ${location.pathname === '/daily-rewards' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🎁</span>
+                      <span className="nav-item-text">Daily Rewards</span>
+                    </Link>
+                  </div>
+
+                  {/* Earn More */}
+                  <div className="nav-section">
+                    <div className="nav-section-title">Earn More</div>
+                    <Link 
+                      to="/lucky-draw" 
+                      className={`nav-item ${location.pathname === '/lucky-draw' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🎰</span>
+                      <span className="nav-item-text">Lucky Draw</span>
+                      <span className="nav-item-badge new">New</span>
+                    </Link>
+                    <Link 
+                      to="/airdrop" 
+                      className={`nav-item ${location.pathname === '/airdrop' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🪂</span>
+                      <span className="nav-item-text">Airdrop</span>
+                    </Link>
+                    <Link 
+                      to="/referral" 
+                      className={`nav-item ${location.pathname === '/referral' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">👥</span>
+                      <span className="nav-item-text">Referral Program</span>
+                    </Link>
+                  </div>
+
+                  {/* Wallet & Finance */}
+                  <div className="nav-section">
+                    <div className="nav-section-title">Wallet</div>
+                    <Link 
+                      to="/conversion" 
+                      className={`nav-item ${location.pathname === '/conversion' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">💳</span>
+                      <span className="nav-item-text">Convert & Withdraw</span>
+                    </Link>
+                  </div>
+
+                  {/* Community */}
+                  <div className="nav-section">
+                    <div className="nav-section-title">Community</div>
+                    <Link 
+                      to="/leaderboard" 
+                      className={`nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🏆</span>
+                      <span className="nav-item-text">Leaderboard</span>
+                    </Link>
+                    <Link 
+                      to="/achievements" 
+                      className={`nav-item ${location.pathname === '/achievements' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🎖️</span>
+                      <span className="nav-item-text">Achievements</span>
+                    </Link>
+                    <Link 
+                      to="/vip-tiers" 
+                      className={`nav-item ${location.pathname === '/vip-tiers' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">💎</span>
+                      <span className="nav-item-text">VIP Tiers</span>
+                    </Link>
+                  </div>
+
+                  {/* Account & Settings */}
+                  <div className="nav-section">
+                    <div className="nav-section-title">Account</div>
+                    <Link 
+                      to="/profile" 
+                      className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">👤</span>
+                      <span className="nav-item-text">My Profile</span>
+                    </Link>
+                    <Link 
+                      to="/notifications" 
+                      className={`nav-item ${location.pathname === '/notifications' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">🔔</span>
+                      <span className="nav-item-text">Notifications</span>
+                      {notifications.length > 0 && (
+                        <span className="nav-item-count">{notifications.length}</span>
+                      )}
+                    </Link>
+                    <Link 
+                      to="/faq" 
+                      className={`nav-item ${location.pathname === '/faq' ? 'active' : ''}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <span className="nav-item-icon">❓</span>
+                      <span className="nav-item-text">Help & FAQ</span>
+                    </Link>
+                  </div>
+
+                  {/* Logout */}
+                  <div className="nav-section">
+                    <button 
+                      onClick={() => { onLogout(); setMenuOpen(false); }} 
+                      className="nav-item logout-item"
+                    >
+                      <span className="nav-item-icon">🚪</span>
+                      <span className="nav-item-text">Logout</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </nav>
           </div>
-        )}
+        </div>
 
         <main className="main-content">
           {/* Google AdSense - Top Banner */}
@@ -298,28 +487,62 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
         </main>
       </div>
 
-      {/* Bottom Navigation - All Screens */}
+      {/* Modern Bottom Navigation */}
       {!isAdmin && (
-        <nav className="bottom-nav">
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-            <span className="nav-icon">🎮</span>
-            <span className="nav-label">MINING</span>
+        <nav className="modern-bottom-nav">
+          <Link 
+            to="/" 
+            className={`bottom-nav-item ${location.pathname === '/' ? 'active' : ''}`}
+          >
+            <div className="nav-item-content">
+              <span className="nav-item-icon">🎮</span>
+              <span className="nav-item-label">Mining</span>
+            </div>
+            {location.pathname === '/' && <div className="nav-item-indicator"></div>}
           </Link>
-          <Link to="/tasks" className={location.pathname === '/tasks' ? 'active' : ''}>
-            <span className="nav-icon">📋</span>
-            <span className="nav-label">TASKS</span>
+          
+          <Link 
+            to="/tasks" 
+            className={`bottom-nav-item ${location.pathname === '/tasks' ? 'active' : ''}`}
+          >
+            <div className="nav-item-content">
+              <span className="nav-item-icon">📋</span>
+              <span className="nav-item-label">Tasks</span>
+            </div>
+            {location.pathname === '/tasks' && <div className="nav-item-indicator"></div>}
           </Link>
-          <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
-            <span className="nav-icon">🏆</span>
-            <span className="nav-label">RANKS</span>
+          
+          <Link 
+            to="/lucky-draw" 
+            className={`bottom-nav-item ${location.pathname === '/lucky-draw' ? 'active' : ''}`}
+          >
+            <div className="nav-item-content">
+              <span className="nav-item-icon">🎰</span>
+              <span className="nav-item-label">Lucky</span>
+            </div>
+            {location.pathname === '/lucky-draw' && <div className="nav-item-indicator"></div>}
           </Link>
-          <Link to="/notifications" className={location.pathname === '/notifications' ? 'active' : ''}>
-            <span className="nav-icon">🔔</span>
-            <span className="nav-label">ALERTS</span>
+          
+          <Link 
+            to="/leaderboard" 
+            className={`bottom-nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}
+          >
+            <div className="nav-item-content">
+              <span className="nav-item-icon">🏆</span>
+              <span className="nav-item-label">Ranks</span>
+            </div>
+            {location.pathname === '/leaderboard' && <div className="nav-item-indicator"></div>}
           </Link>
-          <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>
-            <span className="nav-icon">👤</span>
-            <span className="nav-label">ACCOUNT</span>
+          
+          <Link 
+            to="/profile" 
+            className={`bottom-nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
+          >
+            <div className="nav-item-content">
+              <span className="nav-item-icon">👤</span>
+              <span className="nav-item-label">Profile</span>
+            </div>
+            {location.pathname === '/profile' && <div className="nav-item-indicator"></div>}
           </Link>
         </nav>
       )}
