@@ -4,11 +4,12 @@ import { db } from '../db/supabase';
 import { getVIPConfig } from '../utils/vipConfig';
 import { COMPANY_WALLETS } from '../config/walletConfig';
 import RevenueDashboard from './RevenueDashboard';
+import LuckyDrawAdmin from '../components/LuckyDrawAdmin';
 import { formatBalance } from '../utils/formatBalance';
 import './AdminPage.css';
 
 function AdminPage({ user, addNotification }) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
@@ -518,11 +519,14 @@ function AdminPage({ user, addNotification }) {
       </div>
 
       <div className="admin-tabs">
+        <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
+          🏠 Dashboard
+        </button>
         <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
           📊 Overview
         </button>
         <button className={activeTab === 'revenue' ? 'active' : ''} onClick={() => setActiveTab('revenue')}>
-          💰 Revenue Dashboard
+          💰 Revenue
         </button>
         <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
           👥 Users ({users.length})
@@ -540,7 +544,7 @@ function AdminPage({ user, addNotification }) {
           💰 Deposits ({depositRequests.filter(r => r.status === 'pending').length})
         </button>
         <button className={activeTab === 'notifications' ? 'active' : ''} onClick={() => setActiveTab('notifications')}>
-          🔔 Notifications ({notifications.length})
+          🔔 Alerts ({notifications.length})
         </button>
         <button className={activeTab === 'system' ? 'active' : ''} onClick={() => setActiveTab('system')}>
           ⚙️ System
@@ -549,6 +553,194 @@ function AdminPage({ user, addNotification }) {
           ⚠️ Danger Zone
         </button>
       </div>
+
+      {activeTab === 'dashboard' && (
+        <div className="admin-content">
+          <div className="dashboard-grid">
+            {/* Quick Stats */}
+            <div className="dashboard-section quick-stats">
+              <h3>📊 Quick Stats</h3>
+              <div className="stats-mini-grid">
+                <div className="mini-stat">
+                  <div className="mini-stat-icon">👥</div>
+                  <div className="mini-stat-value">{stats.totalUsers}</div>
+                  <div className="mini-stat-label">Users</div>
+                </div>
+                <div className="mini-stat">
+                  <div className="mini-stat-icon">🔥</div>
+                  <div className="mini-stat-value">{stats.activeToday}</div>
+                  <div className="mini-stat-label">Active Today</div>
+                </div>
+                <div className="mini-stat">
+                  <div className="mini-stat-icon">💎</div>
+                  <div className="mini-stat-value">{stats.totalPoints?.toLocaleString()}</div>
+                  <div className="mini-stat-label">Total Cipro</div>
+                </div>
+                <div className="mini-stat">
+                  <div className="mini-stat-icon">💰</div>
+                  <div className="mini-stat-value">${stats.totalUSDT}</div>
+                  <div className="mini-stat-label">Total USDT</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pending Actions */}
+            <div className="dashboard-section pending-actions">
+              <h3>⚡ Pending Actions</h3>
+              <div className="pending-list">
+                <div className="pending-item">
+                  <span className="pending-icon">💸</span>
+                  <span className="pending-text">
+                    {withdrawalRequests.filter(r => r.status === 'pending').length} Withdrawal Requests
+                  </span>
+                  <button 
+                    className="pending-btn"
+                    onClick={() => setActiveTab('withdrawals')}
+                  >
+                    Review
+                  </button>
+                </div>
+                <div className="pending-item">
+                  <span className="pending-icon">💰</span>
+                  <span className="pending-text">
+                    {depositRequests.filter(r => r.status === 'pending').length} Deposit Requests
+                  </span>
+                  <button 
+                    className="pending-btn"
+                    onClick={() => setActiveTab('deposits')}
+                  >
+                    Review
+                  </button>
+                </div>
+                <div className="pending-item">
+                  <span className="pending-icon">🎰</span>
+                  <span className="pending-text">
+                    Lucky Draw Management
+                  </span>
+                  <button 
+                    className="pending-btn"
+                    onClick={() => setActiveTab('luckydraw')}
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="dashboard-section recent-activity">
+              <h3>📈 Recent Activity</h3>
+              <div className="activity-list">
+                {withdrawalRequests.slice(0, 5).map((request, index) => (
+                  <div key={index} className="activity-item">
+                    <span className="activity-icon">💸</span>
+                    <div className="activity-content">
+                      <div className="activity-text">
+                        <strong>{request.username}</strong> requested {request.amount} {request.currency.toUpperCase()}
+                      </div>
+                      <div className="activity-time">
+                        {new Date(request.request_date).toLocaleString()}
+                      </div>
+                    </div>
+                    <span className={`activity-status status-${request.status}`}>
+                      {request.status}
+                    </span>
+                  </div>
+                ))}
+                {withdrawalRequests.length === 0 && (
+                  <div className="empty-activity">No recent activity</div>
+                )}
+              </div>
+            </div>
+
+            {/* Top Players */}
+            <div className="dashboard-section top-players">
+              <h3>🏆 Top Players</h3>
+              <div className="top-players-list">
+                {users
+                  .sort((a, b) => (b.points || 0) - (a.points || 0))
+                  .slice(0, 5)
+                  .map((player, index) => (
+                    <div key={player.userId} className="top-player-item">
+                      <span className="player-rank">#{index + 1}</span>
+                      <span className="player-avatar">{player.avatar}</span>
+                      <div className="player-info">
+                        <div className="player-name">{player.username}</div>
+                        <div className="player-points">{(player.points || 0).toLocaleString()} Cipro</div>
+                      </div>
+                      <span className="player-level">Lv.{player.vipLevel || 1}</span>
+                    </div>
+                  ))}
+                {users.length === 0 && (
+                  <div className="empty-players">No players yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* System Status */}
+            <div className="dashboard-section system-status">
+              <h3>🔧 System Status</h3>
+              <div className="status-grid">
+                <div className="status-item">
+                  <span className="status-indicator online"></span>
+                  <span className="status-label">Database</span>
+                  <span className="status-value">Online</span>
+                </div>
+                <div className="status-item">
+                  <span className="status-indicator online"></span>
+                  <span className="status-label">Lucky Draw</span>
+                  <span className="status-value">Active</span>
+                </div>
+                <div className="status-item">
+                  <span className="status-indicator online"></span>
+                  <span className="status-label">Payments</span>
+                  <span className="status-value">Processing</span>
+                </div>
+                <div className="status-item">
+                  <span className="status-indicator warning"></span>
+                  <span className="status-label">Maintenance</span>
+                  <span className="status-value">{systemSettings.maintenanceMode ? 'On' : 'Off'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="dashboard-section quick-actions">
+              <h3>⚡ Quick Actions</h3>
+              <div className="quick-actions-grid">
+                <button 
+                  className="quick-action-btn"
+                  onClick={() => setActiveTab('users')}
+                >
+                  <span className="action-icon">👥</span>
+                  <span className="action-text">Manage Users</span>
+                </button>
+                <button 
+                  className="quick-action-btn"
+                  onClick={() => setActiveTab('system')}
+                >
+                  <span className="action-icon">⚙️</span>
+                  <span className="action-text">System Settings</span>
+                </button>
+                <button 
+                  className="quick-action-btn"
+                  onClick={handleExportData}
+                >
+                  <span className="action-icon">📥</span>
+                  <span className="action-text">Export Data</span>
+                </button>
+                <button 
+                  className="quick-action-btn"
+                  onClick={loadAllData}
+                >
+                  <span className="action-icon">🔄</span>
+                  <span className="action-text">Refresh Data</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab === 'overview' && (
         <div className="admin-content">
@@ -764,135 +956,7 @@ function AdminPage({ user, addNotification }) {
 
       {activeTab === 'luckydraw' && (
         <div className="admin-content">
-          <div className="luckydraw-section">
-            <h2>🎰 Lucky Draw Management</h2>
-            
-            {/* Lucky Draw Stats */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon">🎫</div>
-                <div className="stat-info">
-                  <div className="stat-value">{luckyDrawStats.totalTicketsSold}</div>
-                  <div className="stat-label">Total Tickets Sold</div>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">💰</div>
-                <div className="stat-info">
-                  <div className="stat-value">${luckyDrawStats.totalRevenue.toFixed(2)}</div>
-                  <div className="stat-label">Total Revenue (USDT)</div>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">👥</div>
-                <div className="stat-info">
-                  <div className="stat-value">{luckyDrawStats.activeParticipants}</div>
-                  <div className="stat-label">Active Participants</div>
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">🏆</div>
-                <div className="stat-info">
-                  <div className="stat-value">{luckyDrawStats.recentWinners.length}</div>
-                  <div className="stat-label">Recent Winners</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Current Prize Pool */}
-            <div className="prize-pool-admin">
-              <h3>💎 Current Prize Pool</h3>
-              <div className="prize-grid">
-                <div className="prize-item">
-                  <span className="prize-label">Cipro Points</span>
-                  <span className="prize-value">{luckyDrawStats.currentPrizePool.cipro?.toLocaleString() || '50,000'}</span>
-                </div>
-                <div className="prize-item">
-                  <span className="prize-label">USDT Reward</span>
-                  <span className="prize-value">${luckyDrawStats.currentPrizePool.usdt?.toFixed(2) || '20.00'}</span>
-                </div>
-                <div className="prize-item">
-                  <span className="prize-label">VIP Upgrade</span>
-                  <span className="prize-value">{luckyDrawStats.currentPrizePool.vipUpgrade ? 'Enabled' : 'Disabled'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Lucky Draw Settings */}
-            <div className="luckydraw-settings">
-              <h3>⚙️ Lucky Draw Settings</h3>
-              <div className="settings-grid">
-                <div className="setting-item">
-                  <label>Ticket Price (USDT)</label>
-                  <input type="number" value="2.00" readOnly className="readonly-input" />
-                  <small>Fixed at $2.00 USDT per ticket</small>
-                </div>
-                <div className="setting-item">
-                  <label>Win Rate</label>
-                  <input type="text" value="0.1%" readOnly className="readonly-input" />
-                  <small>Ultra-exclusive 0.1% chance (1 in 1,000)</small>
-                </div>
-                <div className="setting-item">
-                  <label>Draw Schedule</label>
-                  <input type="text" value="Friday - Sunday" readOnly className="readonly-input" />
-                  <small>Active every weekend</small>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Winners */}
-            {luckyDrawStats.recentWinners.length > 0 && (
-              <div className="recent-winners-admin">
-                <h3>🏆 Recent Winners</h3>
-                <div className="winners-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Winner</th>
-                        <th>Cipro Won</th>
-                        <th>USDT Won</th>
-                        <th>VIP Upgrade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {luckyDrawStats.recentWinners.map((winner, index) => (
-                        <tr key={index}>
-                          <td>{new Date(winner.draw_date).toLocaleDateString()}</td>
-                          <td>{winner.username || `Player ${winner.user_id?.slice(-4)}`}</td>
-                          <td>{winner.cipro_won?.toLocaleString() || '50,000'}</td>
-                          <td>${winner.usdt_won?.toFixed(2) || '20.00'}</td>
-                          <td>{winner.vip_upgrade_won ? '✅ Yes' : '❌ No'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Revenue Analysis */}
-            <div className="revenue-analysis">
-              <h3>📊 Revenue Analysis</h3>
-              <div className="analysis-grid">
-                <div className="analysis-item">
-                  <span className="analysis-label">Expected Daily Revenue</span>
-                  <span className="analysis-value">${(luckyDrawStats.totalTicketsSold * 2 / 7).toFixed(2)}</span>
-                  <small>Based on current participation</small>
-                </div>
-                <div className="analysis-item">
-                  <span className="analysis-label">House Edge</span>
-                  <span className="analysis-value">99.9%</span>
-                  <small>Only 0.1% of revenue goes to winners</small>
-                </div>
-                <div className="analysis-item">
-                  <span className="analysis-label">Profit Margin</span>
-                  <span className="analysis-value">${(luckyDrawStats.totalRevenue * 0.999).toFixed(2)}</span>
-                  <small>Revenue after prize payouts</small>
-                </div>
-              </div>
-            </div>
-          </div>
+          <LuckyDrawAdmin addNotification={addNotification} />
         </div>
       )}
 

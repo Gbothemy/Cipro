@@ -2,15 +2,18 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 2000;
-  padding: 20px;
   animation: fadeIn 0.3s ease;
+  
+  /* Use CSS Grid for perfect centering */
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -24,10 +27,12 @@
 
 .share-modal {
   background: white;
-  border-radius: 20px;
-  padding: 30px;
-  max-width: 500px;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 480px;
   width: 100%;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
 }
@@ -166,11 +171,28 @@ body.dark-mode .close-btn:hover {
 }
 
 @media (max-width: 768px) {
-  .share-buttons {
-    grid-template-columns: 1fr;
+  .share-modal-overlay {
+    padding: 12px;
   }
   
   .share-modal {
-    padding: 20px;
+    padding: 16px;
+    max-height: calc(100vh - 24px);
+    border-radius: 12px;
+  }
+  
+  .share-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 500px) {
+  .share-modal-overlay {
+    padding: 8px;
+  }
+  
+  .share-modal {
+    max-height: calc(100vh - 16px);
+    padding: 12px;
   }
 }

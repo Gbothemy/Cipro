@@ -1048,22 +1048,26 @@
   .password-form {
     padding: 16px;
   }
-}/* Mod
-ern Edit Profile Overlay */
+}
+
+/* Modern Edit Profile Overlay */
 .profile-edit-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
   animation: fadeIn 0.3s ease;
+  
+  /* Use CSS Grid for perfect centering */
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -1073,10 +1077,10 @@ ern Edit Profile Overlay */
 
 .profile-edit-modal {
   background: white;
-  border-radius: 24px;
+  border-radius: 20px;
   width: 100%;
-  max-width: 1000px;
-  max-height: 90vh;
+  max-width: 900px;
+  max-height: calc(100vh - 32px);
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.4s ease;
@@ -1571,12 +1575,13 @@ ern Edit Profile Overlay */
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .profile-edit-overlay {
-    padding: 10px;
+    padding: 12px;
   }
   
   .profile-edit-modal {
     max-width: 100%;
-    max-height: 95vh;
+    max-height: calc(100vh - 24px);
+    border-radius: 16px;
   }
   
   .edit-modal-content {
@@ -1644,4 +1649,36 @@ body.dark-mode .edit-preview-section {
 body.dark-mode .edit-modal-footer {
   background: #2d3748;
   border-color: #4a5568;
+}/* Addit
+ional responsive rules for profile modal */
+@media (max-width: 480px) {
+  .profile-edit-overlay {
+    padding: 8px;
+  }
+  
+  .profile-edit-modal {
+    max-height: calc(100vh - 16px);
+    border-radius: 12px;
+  }
+}
+
+@media (max-height: 600px) {
+  .profile-edit-overlay {
+    padding: 8px;
+  }
+  
+  .profile-edit-modal {
+    max-height: calc(100vh - 16px);
+  }
+}
+
+@media (max-height: 400px) {
+  .profile-edit-overlay {
+    padding: 4px;
+  }
+  
+  .profile-edit-modal {
+    max-height: calc(100vh - 8px);
+    border-radius: 8px;
+  }
 }

@@ -531,9 +531,13 @@ const GameDisplay = ({
 
       {/* Game Modal/Embedded Display */}
       {activeGame && (
-        <div className={embedded ? 'embedded-game' : 'game-modal'}>
-          {renderGameComponent()}
-        </div>
+        embedded ? (
+          <div className="embedded-game">
+            {renderGameComponent()}
+          </div>
+        ) : (
+          renderGameComponent()
+        )
       )}
     </div>
   );

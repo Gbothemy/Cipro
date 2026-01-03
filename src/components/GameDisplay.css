@@ -325,22 +325,26 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  
+  /* Use CSS Grid for perfect centering */
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .embedded-game {
   width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
+  max-width: 760px;
+  max-height: calc(100vh - 32px);
+  margin: 0;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
@@ -1317,5 +1321,36 @@ ed Daily Limit Reached Interface */
   .upgrade-btn.primary:active,
   .learn-more-btn:active {
     transform: scale(0.95);
+  }
+}/* Re
+sponsive Design for Game Display Modal */
+@media (max-width: 768px) {
+  .game-modal {
+    padding: 12px;
+  }
+  
+  .embedded-game {
+    max-height: calc(100vh - 24px);
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-modal {
+    padding: 8px;
+  }
+  
+  .embedded-game {
+    max-height: calc(100vh - 16px);
+  }
+}
+
+@media (max-height: 600px) {
+  .game-modal {
+    padding: 8px;
+  }
+  
+  .embedded-game {
+    max-height: calc(100vh - 16px);
   }
 }

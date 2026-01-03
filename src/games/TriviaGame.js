@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { getRandomQuestions, getTotalQuestionCount } from '../data/questionBank';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
+import './GameModal.css';
 import './TriviaGame.css';
 
 const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
@@ -26,8 +27,16 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
 
   useEffect(() => {
     checkAttempts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, []);
+
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
 
   const checkAttempts = async () => {
     if (!user?.id) {
@@ -41,17 +50,12 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   };
 
   const startGame = () => {
-    // If user is logged in and has attempt info, check if can play
     if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
     
-    // Load questions from the comprehensive question bank
     const selectedQuestions = getRandomQuestions(settings.questions, difficulty);
     setQuestions(selectedQuestions);
     setGameStarted(true);
     soundManager.gameStart();
-    
-    // Log total available questions
-    console.log(`Total questions in bank: ${getTotalQuestionCount().toLocaleString()}`);
   };
 
   useEffect(() => {
@@ -71,7 +75,6 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, gameOver, showResult, questions.length]);
 
   const handleTimeout = () => {
@@ -86,15 +89,15 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
 
     soundManager.click();
     setSelectedAnswer(index);
-    const isCorrect = index === questions[currentQuestion].correct;
     
-    if (isCorrect) {
+    const correct = index === questions[currentQuestion].correct;
+    if (correct) {
       setScore(score + settings.pointsPerCorrect);
       soundManager.correct();
     } else {
       soundManager.wrong();
     }
-
+    
     setShowResult(true);
     setTimeout(() => {
       moveToNext();
@@ -102,45 +105,50 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   };
 
   const moveToNext = () => {
-    if (currentQuestion + 1 < questions.length) {
+    if (currentQuestion + 1 >= questions.length) {
+      endGame();
+    } else {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowResult(false);
       setTimeLeft(settings.timePerQuestion);
-    } else {
-      endGame();
     }
   };
 
   const endGame = async () => {
     setGameOver(true);
-    const totalPossible = settings.questions * settings.pointsPerCorrect;
-    const isPerfect = score + settings.pointsPerCorrect >= totalPossible;
-    
-    soundManager.success();
+    soundManager.gameEnd();
 
-    // Record attempt
     if (user?.id) {
-      await recordGameAttempt(user.id, 'trivia', {
-        won: true,
-        score,
-        difficulty
-      });
+      try {
+        await recordGameAttempt(user.id, 'trivia', {
+          score,
+          questionsAnswered: currentQuestion + 1,
+          difficulty
+        });
+      } catch (error) {
+        console.error('Error recording game attempt:', error);
+      }
     }
-    
-    // Call onComplete with won status and score
-    if (onComplete) {
-      setTimeout(() => {
-        onComplete(true, score);
-      }, 2000);
-    }
+
+    setTimeout(() => {
+      onComplete(true, score);
+    }, 2000);
   };
 
   if (loading) {
     return (
       <div className="game-modal">
-        <div className="trivia-game">
-          <div className="trivia-loading">Loading...</div>
+        <div className="game-container">
+          <div className="game-header">
+            <h2>🎯 Trivia Challenge</h2>
+            <button className="close-btn" onClick={handleClose}>✕</button>
+          </div>
+          <div className="game-content">
+            <div className="game-intro">
+              <p>Loading...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -149,20 +157,26 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    // If no user or no attempt info, allow playing without limits
     if (!user?.id || !attemptInfo) {
       return (
-        <div className="game-modal" onClick={onClose}>
-          <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={onClose}>✕</button>
-            <div className="game-intro">
+        <div className="game-modal">
+          <div className="game-container">
+            <div className="game-header">
               <h2>🎯 Trivia Challenge</h2>
-              <p>Answer questions to earn points!</p>
-              <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
-              <p className="question-count">
-                <small>🎯 {getTotalQuestionCount().toLocaleString()}+ questions available</small>
-              </p>
-              <button onClick={startGame} className="start-game-btn">Start Game</button>
+              <button className="close-btn" onClick={handleClose}>✕</button>
+            </div>
+            <div className="game-content">
+              <div className="game-intro">
+                <p>Test your knowledge and earn points!</p>
+                <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
+                <p>Questions: <strong>{settings.questions}</strong> | Time: <strong>{settings.timePerQuestion}s each</strong></p>
+                <p style={{ color: '#667eea', fontWeight: '600' }}>
+                  🎯 {getTotalQuestionCount().toLocaleString()}+ questions available
+                </p>
+                <button onClick={startGame} className="start-game-btn">
+                  Start Game
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -170,28 +184,29 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
     }
     
     return (
-      <div className="game-modal" onClick={onClose}>
-        <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
-          <button className="close-btn" onClick={onClose}>✕</button>
-          <div className="game-intro">
-            {attemptInfo.canPlay ? (
-              <>
-                <h2>🎯 Trivia Challenge</h2>
-                <p>Answer questions to earn points!</p>
-                <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
-                <div className="attempts-info">
-                  <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
-                  <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
-                  <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
-                  <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
-                </div>
-                <p className="question-count">
-                  <small>🎯 {getTotalQuestionCount().toLocaleString()}+ questions available</small>
-                </p>
-                <button onClick={startGame} className="start-game-btn">Start Game</button>
-              </>
-            ) : (
-              <>
+      <div className="game-modal">
+        <div className="game-container">
+          <div className="game-header">
+            <h2>🎯 Trivia Challenge</h2>
+            <button className="close-btn" onClick={handleClose}>✕</button>
+          </div>
+          <div className="game-content">
+            <div className="game-intro">
+              {attemptInfo.canPlay ? (
+                <>
+                  <p>Test your knowledge and earn points!</p>
+                  <p>Difficulty: <strong>{difficulty.toUpperCase()}</strong></p>
+                  <div className="attempts-info">
+                    <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
+                    <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
+                    <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
+                    <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
+                  </div>
+                  <button onClick={startGame} className="start-game-btn">
+                    Start Game
+                  </button>
+                </>
+              ) : (
                 <div className="no-attempts">
                   <h3>❌ No Attempts Remaining</h3>
                   <p>You've used all {attemptInfo.dailyLimit} attempts today.</p>
@@ -209,39 +224,43 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
                       </ul>
                     </div>
                   )}
+                  <button onClick={handleClose} className="start-game-btn">Close</button>
                 </div>
-                <button onClick={onClose} className="close-game-btn">Close</button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (questions.length === 0) {
-    return <div className="trivia-loading">Loading questions...</div>;
-  }
-
   if (gameOver) {
-    const totalPossible = settings.questions * settings.pointsPerCorrect;
-    const percentage = Math.round((score / totalPossible) * 100);
-    
+    const percentage = Math.round((score / (settings.questions * settings.pointsPerCorrect)) * 100);
+    let performance = 'needs-improvement';
+    if (percentage >= 90) performance = 'excellent';
+    else if (percentage >= 70) performance = 'good';
+    else if (percentage >= 50) performance = 'okay';
+
     return (
-      <div className="trivia-game-over">
-        <h2>🎉 Quiz Complete!</h2>
-        <div className="trivia-final-score">
-          <div className="score-value">{score}</div>
-          <div className="score-label">Points Earned</div>
-        </div>
-        <div className="trivia-stats">
-          <div className="stat">
-            <span className="stat-label">Correct Answers:</span>
-            <span className="stat-value">{Math.round(score / settings.pointsPerCorrect)}/{settings.questions}</span>
+      <div className="game-modal">
+        <div className="game-container">
+          <div className="game-header">
+            <h2>🎯 Game Complete!</h2>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="stat">
-            <span className="stat-label">Accuracy:</span>
-            <span className="stat-value">{percentage}%</span>
+          <div className="game-content">
+            <div className="game-result">
+              <div className="result-icon win">🎉</div>
+              <h3>Excellent Work!</h3>
+              <p className="points-earned">You scored {score} points!</p>
+              <p>Accuracy: {percentage}%</p>
+              <div className={`performance-badge ${performance}`}>
+                {performance === 'excellent' && '🏆 Excellent!'}
+                {performance === 'good' && '👍 Good Job!'}
+                {performance === 'okay' && '👌 Not Bad!'}
+                {performance === 'needs-improvement' && '📚 Keep Learning!'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -252,51 +271,60 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="game-modal" onClick={onClose}>
-      <div className="trivia-game" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>✕</button>
-        <div className="trivia-header">
-        <div className="trivia-progress">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+    <div className="game-modal">
+      <div className="game-container">
+        <div className="game-header">
+          <h2>🎯 Trivia Challenge</h2>
+          <div className="timer">⏰ {timeLeft}s</div>
+          <button className="close-btn" onClick={handleClose}>✕</button>
+        </div>
+        
+        <div className="game-content">
+          <div className="trivia-progress">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+            </div>
+            <p>Question {currentQuestion + 1} of {questions.length}</p>
           </div>
-          <span className="progress-text">Question {currentQuestion + 1}/{questions.length}</span>
+
+          <div className="question-section">
+            <div className="question-container">
+              <h3 className="question-text">{question.question}</h3>
+            </div>
+            
+            <div className="answers-section">
+              <div className="answers-grid">
+                {question.answers.map((answer, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswer(index)}
+                    className={`answer-option ${
+                      selectedAnswer !== null
+                        ? index === question.correct
+                          ? 'correct'
+                          : index === selectedAnswer
+                          ? 'incorrect'
+                          : ''
+                        : ''
+                    }`}
+                    disabled={selectedAnswer !== null}
+                  >
+                    <span className="option-letter">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="option-text">{answer}</span>
+                    {selectedAnswer !== null && index === question.correct && (
+                      <span className="correct-indicator">✓</span>
+                    )}
+                    {selectedAnswer !== null && index === selectedAnswer && index !== question.correct && (
+                      <span className="incorrect-indicator">✗</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="trivia-timer">
-          <span className={`timer ${timeLeft <= 5 ? 'warning' : ''}`}>⏱️ {timeLeft}s</span>
-        </div>
-        <div className="trivia-score">Score: {score}</div>
-      </div>
-
-      <div className="trivia-question">
-        <h3>{question.question}</h3>
-      </div>
-
-      <div className="trivia-options">
-        {question.options.map((option, index) => {
-          let className = 'trivia-option';
-          if (showResult) {
-            if (index === question.correct) {
-              className += ' correct';
-            } else if (index === selectedAnswer) {
-              className += ' incorrect';
-            }
-          } else if (selectedAnswer === index) {
-            className += ' selected';
-          }
-
-          return (
-            <button
-              key={index}
-              className={className}
-              onClick={() => handleAnswer(index)}
-              disabled={selectedAnswer !== null}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
       </div>
     </div>
   );

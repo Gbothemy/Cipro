@@ -1,8 +1,7 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
+import './GameModal.css';
 import './MemoryGame.css';
 
 function MemoryGame({ onComplete, onClose, user }) {
@@ -19,7 +18,16 @@ function MemoryGame({ onComplete, onClose, user }) {
 
   useEffect(() => {
     checkAttempts();
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, []);
+
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
 
   const checkAttempts = async () => {
     if (!user?.id) {
@@ -33,14 +41,12 @@ function MemoryGame({ onComplete, onClose, user }) {
   };
 
   const initGame = () => {
-    // If user is logged in and has attempt info, check if can play
     if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
 
-    // Use timestamp for unique shuffle each time
     const seed = Date.now();
     const shuffled = [...emojis, ...emojis]
       .sort(() => Math.random() - 0.5)
-      .sort(() => (seed % 3) - 0.5) // Double shuffle for more randomness
+      .sort(() => (seed % 3) - 0.5)
       .map((emoji, index) => ({ id: index, emoji, flipped: false }));
     setCards(shuffled);
     setFlipped([]);
@@ -51,39 +57,54 @@ function MemoryGame({ onComplete, onClose, user }) {
     soundManager.gameStart();
   };
 
-  useEffect(() => {
-    if (flipped.length === 2) {
-      const [first, second] = flipped;
-      if (cards[first].emoji === cards[second].emoji) {
-        soundManager.match();
-        setMatched([...matched, first, second]);
+  const handleCardClick = (index) => {
+    if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) {
+      return;
+    }
+
+    soundManager.click();
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      setMoves(moves + 1);
+      
+      if (cards[newFlipped[0]].emoji === cards[newFlipped[1]].emoji) {
+        soundManager.correct();
+        setMatched([...matched, ...newFlipped]);
         setFlipped([]);
+        
+        if (matched.length + 2 === cards.length) {
+          setTimeout(() => {
+            endGame();
+          }, 500);
+        }
       } else {
         soundManager.wrong();
-        setTimeout(() => setFlipped([]), 1000);
+        setTimeout(() => {
+          setFlipped([]);
+        }, 1000);
       }
-      setMoves(moves + 1);
     }
-  }, [flipped]);
+  };
 
-  useEffect(() => {
-    if (matched.length === cards.length && cards.length > 0) {
-      handleGameComplete();
-    }
-  }, [matched]);
-
-  const handleGameComplete = async () => {
+  const endGame = async () => {
     setGameComplete(true);
     soundManager.success();
+    
     const points = Math.max(200 - (moves * 5), 50);
-
-    // Record attempt
+    
     if (user?.id) {
-      await recordGameAttempt(user.id, 'memory', {
-        won: true,
-        score: points,
-        difficulty: 'medium'
-      });
+      try {
+        await recordGameAttempt(user.id, 'memory', {
+          won: true,
+          score: points,
+          moves: moves,
+          difficulty: 'easy'
+        });
+      } catch (error) {
+        console.error('Error recording game attempt:', error);
+      }
     }
 
     setTimeout(() => {
@@ -91,24 +112,18 @@ function MemoryGame({ onComplete, onClose, user }) {
     }, 2000);
   };
 
-  const handleCardClick = (index) => {
-    if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) {
-      return;
-    }
-    soundManager.flip();
-    setFlipped([...flipped, index]);
-  };
-
   if (loading) {
     return (
-      <div className="memory-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🧠 Memory Match</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="game-intro">
-            <p>Loading...</p>
+          <div className="game-content">
+            <div className="game-intro">
+              <p>Loading...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -118,21 +133,22 @@ function MemoryGame({ onComplete, onClose, user }) {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    // If no user or no attempt info, allow playing without limits
     if (!user?.id || !attemptInfo) {
       return (
-        <div className="memory-game">
+        <div className="game-modal">
           <div className="game-container">
             <div className="game-header">
               <h2>🧠 Memory Match</h2>
-              <button onClick={onClose} className="close-btn">✕</button>
+              <button className="close-btn" onClick={handleClose}>✕</button>
             </div>
-            <div className="game-intro">
-              <p>Match all pairs to win!</p>
-              <p>Fewer moves = More points!</p>
-              <button onClick={initGame} className="start-game-btn">
-                Start Game
-              </button>
+            <div className="game-content">
+              <div className="game-intro">
+                <p>Match all pairs to win!</p>
+                <p>Fewer moves = More points!</p>
+                <button onClick={initGame} className="start-game-btn">
+                  Start Game
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -140,29 +156,29 @@ function MemoryGame({ onComplete, onClose, user }) {
     }
     
     return (
-      <div className="memory-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🧠 Memory Match</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="game-intro">
-            {attemptInfo.canPlay ? (
-              <>
-                <p>Match all pairs to win!</p>
-                <p>Fewer moves = More points!</p>
-                <div className="attempts-info">
-                  <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
-                  <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
-                  <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
-                  <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
-                </div>
-                <button onClick={initGame} className="start-game-btn">
-                  Start Game
-                </button>
-              </>
-            ) : (
-              <>
+          <div className="game-content">
+            <div className="game-intro">
+              {attemptInfo.canPlay ? (
+                <>
+                  <p>Match all pairs to win!</p>
+                  <p>Fewer moves = More points!</p>
+                  <div className="attempts-info">
+                    <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
+                    <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
+                    <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
+                    <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
+                  </div>
+                  <button onClick={initGame} className="start-game-btn">
+                    Start Game
+                  </button>
+                </>
+              ) : (
                 <div className="no-attempts">
                   <h3>❌ No Attempts Remaining</h3>
                   <p>You've used all {attemptInfo.dailyLimit} attempts today.</p>
@@ -180,10 +196,10 @@ function MemoryGame({ onComplete, onClose, user }) {
                       </ul>
                     </div>
                   )}
+                  <button onClick={handleClose} className="start-game-btn">Close</button>
                 </div>
-                <button onClick={onClose} className="close-game-btn">Close</button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -193,17 +209,19 @@ function MemoryGame({ onComplete, onClose, user }) {
   if (gameComplete) {
     const points = Math.max(200 - (moves * 5), 50);
     return (
-      <div className="memory-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🧠 Game Complete!</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="game-result">
-            <div className="result-icon">🎉</div>
-            <h3>Excellent Memory!</h3>
-            <p>Moves: {moves}</p>
-            <p className="result-points">You earned {points} points!</p>
+          <div className="game-content">
+            <div className="game-result">
+              <div className="result-icon win">🎉</div>
+              <h3>Excellent Memory!</h3>
+              <p>Moves: {moves}</p>
+              <p className="points-earned">You earned {points} points!</p>
+            </div>
           </div>
         </div>
       </div>
@@ -211,29 +229,31 @@ function MemoryGame({ onComplete, onClose, user }) {
   }
 
   return (
-    <div className="memory-game">
-      <div className="game-container">
+    <div className="game-modal">
+      <div className="game-container memory-container">
         <div className="game-header">
           <h2>🧠 Memory Match</h2>
           <div className="moves-counter">Moves: {moves}</div>
-          <button onClick={onClose} className="close-btn">✕</button>
+          <button className="close-btn" onClick={handleClose}>✕</button>
         </div>
         
-        <div className="cards-grid">
-          {cards.map((card, index) => (
-            <div
-              key={card.id}
-              className={`memory-card ${
-                flipped.includes(index) || matched.includes(index) ? 'flipped' : ''
-              } ${matched.includes(index) ? 'matched' : ''}`}
-              onClick={() => handleCardClick(index)}
-            >
-              <div className="card-inner">
-                <div className="card-front">?</div>
-                <div className="card-back">{card.emoji}</div>
+        <div className="game-content">
+          <div className="cards-grid">
+            {cards.map((card, index) => (
+              <div
+                key={card.id}
+                className={`memory-card ${
+                  flipped.includes(index) || matched.includes(index) ? 'flipped' : ''
+                } ${matched.includes(index) ? 'matched' : ''}`}
+                onClick={() => handleCardClick(index)}
+              >
+                <div className="card-inner">
+                  <div className="card-front">?</div>
+                  <div className="card-back">{card.emoji}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

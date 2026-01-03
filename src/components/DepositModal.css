@@ -2,24 +2,29 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  
+  /* Use CSS Grid for perfect centering */
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .deposit-modal {
   background: white;
-  border-radius: 20px;
-  max-width: 600px;
+  border-radius: 16px;
+  max-width: 580px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: calc(100vh - 32px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -58,7 +63,10 @@
 }
 
 .modal-content {
-  padding: 30px;
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .form-group {
@@ -362,17 +370,22 @@ body.dark-mode .address-box code {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .deposit-modal-overlay {
+    padding: 12px;
+  }
+  
   .deposit-modal {
     max-width: 100%;
-    margin: 10px;
+    max-height: calc(100vh - 24px);
+    border-radius: 12px;
   }
 
   .modal-header {
-    padding: 20px;
+    padding: 16px 20px;
   }
 
   .modal-content {
-    padding: 20px;
+    padding: 16px 20px;
   }
 
   .currency-grid {
@@ -382,6 +395,24 @@ body.dark-mode .address-box code {
   .qr-placeholder {
     width: 200px;
     height: 200px;
+  }
+}
+
+@media (max-height: 500px) {
+  .deposit-modal-overlay {
+    padding: 8px;
+  }
+  
+  .deposit-modal {
+    max-height: calc(100vh - 16px);
+  }
+  
+  .modal-header {
+    padding: 12px 16px;
+  }
+  
+  .modal-content {
+    padding: 12px 16px;
   }
 }
 

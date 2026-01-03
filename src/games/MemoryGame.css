@@ -1,25 +1,7 @@
-.memory-game {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
+/* Memory Game Specific Styles */
 
-.memory-game .game-container {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
+.memory-container {
   max-width: 600px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
 }
 
 .moves-counter {
@@ -36,12 +18,15 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   margin-top: 20px;
+  padding: 0 10px;
 }
 
 .memory-card {
   aspect-ratio: 1;
   cursor: pointer;
   perspective: 1000px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .memory-card.matched {
@@ -52,6 +37,7 @@
   position: relative;
   width: 100%;
   height: 100%;
+  text-align: center;
   transition: transform 0.6s;
   transform-style: preserve-3d;
 }
@@ -60,8 +46,7 @@
   transform: rotateY(180deg);
 }
 
-.card-front,
-.card-back {
+.card-front, .card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -69,9 +54,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  font-size: 48px;
+  font-size: 28px;
   font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .card-front {
@@ -80,12 +66,19 @@
 }
 
 .card-back {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: white;
+  color: #333;
   transform: rotateY(180deg);
+  border: 2px solid #e9ecef;
+}
+
+.memory-card:hover:not(.flipped):not(.matched) .card-inner {
+  transform: scale(1.05);
 }
 
 .memory-card.matched .card-back {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border-color: #28a745;
   animation: matchPulse 0.6s ease;
 }
 
@@ -98,115 +91,44 @@
   }
 }
 
-/* Dark mode */
-body.dark-mode .memory-game .game-container {
-  background: #2a2a2a;
+/* Dark Mode */
+body.dark-mode .card-back {
+  background: #3a3a3a;
+  border-color: #4a4a4a;
   color: #e0e0e0;
 }
 
+body.dark-mode .memory-card.matched .card-back {
+  background: linear-gradient(135deg, #2d5a3d 0%, #3e6b4e 100%);
+  border-color: #28a745;
+  color: #a8e6a3;
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .cards-grid {
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
   
-  .card-front,
-  .card-back {
-    font-size: 36px;
+  .card-front, .card-back {
+    font-size: 24px;
   }
 }
 
-
-/* Attempt tracking styles */
-.game-intro {
-  text-align: center;
-  padding: 30px 20px;
-}
-
-.attempts-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 15px;
-  margin: 20px 0;
-}
-
-.attempts-info p {
-  color: white;
-  margin: 8px 0;
-  font-size: 16px;
-}
-
-.vip-tier {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 8px 15px;
-  border-radius: 8px;
-  display: inline-block;
-  margin: 10px 0;
-}
-
-.reset-time {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.no-attempts {
-  background: #fff3cd;
-  border: 2px solid #ffc107;
-  border-radius: 15px;
-  padding: 30px;
-  margin: 20px 0;
-}
-
-.no-attempts h3 {
-  color: #856404;
-  margin-bottom: 15px;
-}
-
-.no-attempts p {
-  color: #856404;
-  margin: 10px 0;
-}
-
-.upgrade-prompt {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 15px;
-  margin-top: 20px;
-}
-
-.upgrade-prompt h4 {
-  margin-top: 0;
-  font-size: 20px;
-}
-
-.vip-benefits {
-  list-style: none;
-  padding: 0;
-  margin: 15px 0;
-  text-align: left;
-}
-
-.vip-benefits li {
-  padding: 8px 0;
-  font-size: 16px;
-}
-
-.close-game-btn {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 15px 40px;
-  font-size: 18px;
-  border-radius: 25px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.3s;
-  font-weight: 700;
-}
-
-.close-game-btn:hover {
-  background: #5a6268;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4);
+@media (max-width: 480px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 5px;
+  }
+  
+  .card-front, .card-back {
+    font-size: 20px;
+  }
+  
+  .moves-counter {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
 }

@@ -2104,12 +2104,13 @@ export const db = {
     }
   },
 
-  async getAllLuckyDrawPayments(status = null) {
+  async getAllLuckyDrawPayments(status = null, limit = 50) {
     try {
       let query = supabase
         .from('lucky_draw_payments')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
       if (status) {
         query = query.eq('status', status);
@@ -2124,126 +2125,18 @@ export const db = {
     }
   },
 
-  async updateLuckyDrawPaymentStatus(paymentId, status, processedBy = null) {
+  async getUserLuckyDrawPayments(user_id) {
     try {
       const { data, error } = await supabase
-        .from('lucky_draw_payments')
-        .update({
-          status,
-          processed_date: new Date().toISOString(),
-          processed_by: processedBy
-        })
-        .eq('id', paymentId)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // If approved, create tickets using the SQL function
-      if (status === 'approved') {
-        const { data: result, error: approveError } = await supabase
-          .rpc('approve_lucky_draw_payment', {
-            p_payment_id: paymentId,
-            p_processed_by: processedBy || 'admin'
-          });
-
-        if (approveError) {
-          console.error('Error approving payment:', approveError);
-          // Still return success for the status update
-        }
-
-        // Create success notification
-        await this.createNotification(data.user_id, {
-          type: 'success',
-          title: '🎉 Payment Approved!',
-          message: `Your payment has been approved! ${data.ticket_quantity} Lucky Draw tickets have been added to your account.`,
-          icon: '🎫'
-        });
-
-        // Log activity
-        await this.logActivity(data.user_id, {
-          type: 'lucky_draw_tickets_received',
-          description: `Received ${data.ticket_quantity} Lucky Draw tickets from approved payment`,
-          pointsChange: 0
-        });
-      } else if (status === 'rejected') {
-        // Create rejection notification
-        await this.createNotification(data.user_id, {
-          type: 'error',
-          title: '❌ Payment Rejected',
-          message: 'Your payment for Lucky Draw tickets has been rejected. Please contact support for details.',
-          icon: '💳'
-        });
-      }
-
-      return { success: true, data };
-    } catch (error) {
-      console.error('Error updating lucky draw payment status:', error);
-      return { success: false, error };
-    }
-  },
-
-  async createLuckyDrawPayment(paymentData) {
-    try {
-      const { data, error } = await supabase
-        .from('lucky_draw_payments')
-        .insert([{
-          id: paymentData.id,
-          user_id: paymentData.user_id,
-          username: paymentData.username,
-          payment_type: paymentData.payment_type,
-          currency: paymentData.currency,
-          amount: paymentData.amount,
-          ticket_quantity: paymentData.ticket_quantity,
-          wallet_address: paymentData.wallet_address,
-          transaction_hash: paymentData.transaction_hash,
-          network: paymentData.network,
-          status: paymentData.status || 'pending',
-          created_at: paymentData.created_at || new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Create notification for user
-      await this.createNotification(paymentData.user_id, {
-        type: 'payment',
-        title: '💳 Payment Submitted',
-        message: `Your payment for ${paymentData.ticket_quantity} Lucky Draw tickets has been submitted for verification.`,
-        icon: '🎫'
-      });
-
-      // Log activity
-      await this.logActivity(paymentData.user_id, {
-        type: 'lucky_draw_payment_submitted',
-        description: `Submitted payment for ${paymentData.ticket_quantity} Lucky Draw tickets`,
-        pointsChange: 0
-      });
-
-      return { success: true, data };
-    } catch (error) {
-      console.error('Error creating lucky draw payment:', error);
-      return { success: false, error };
-    }
-  },
-
-  async getLuckyDrawPayments(status = null) {
-    try {
-      let query = supabase
         .from('lucky_draw_payments')
         .select('*')
+        .eq('user_id', user_id)
         .order('created_at', { ascending: false });
 
-      if (status) {
-        query = query.eq('status', status);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error getting lucky draw payments:', error);
+      console.error('Error getting user lucky draw payments:', error);
       return [];
     }
   },
@@ -2326,44 +2219,52 @@ export const db = {
     }
   },
 
-  async getUserLuckyDrawPayments(user_id) {
+  async createLuckyDrawPayment(paymentData) {
     try {
       const { data, error } = await supabase
         .from('lucky_draw_payments')
-        .select('*')
-        .eq('user_id', user_id)
-        .order('created_at', { ascending: false });
+        .insert([{
+          id: paymentData.id,
+          user_id: paymentData.user_id,
+          username: paymentData.username,
+          payment_type: paymentData.payment_type,
+          currency: paymentData.currency,
+          amount: paymentData.amount,
+          ticket_quantity: paymentData.ticket_quantity,
+          wallet_address: paymentData.wallet_address,
+          transaction_hash: paymentData.transaction_hash,
+          network: paymentData.network,
+          status: paymentData.status || 'pending',
+          created_at: paymentData.created_at || new Date().toISOString()
+        }])
+        .select()
+        .single();
 
       if (error) throw error;
-      return data || [];
+
+      // Create notification for user
+      await this.createNotification(paymentData.user_id, {
+        type: 'payment',
+        title: '💳 Payment Submitted',
+        message: `Your payment for ${paymentData.ticket_quantity} Lucky Draw tickets has been submitted for verification.`,
+        icon: '🎫'
+      });
+
+      // Log activity
+      await this.logActivity(paymentData.user_id, {
+        type: 'lucky_draw_payment_submitted',
+        description: `Submitted payment for ${paymentData.ticket_quantity} Lucky Draw tickets`,
+        pointsChange: 0
+      });
+
+      return { success: true, data };
     } catch (error) {
-      console.error('Error getting user lucky draw payments:', error);
-      return [];
+      console.error('Error creating lucky draw payment:', error);
+      return { success: false, error };
     }
   },
 
-  // ==================== ADMIN LUCKY DRAW OPERATIONS ====================
 
-  async getAllLuckyDrawPayments(status = null, limit = 50) {
-    try {
-      let query = supabase
-        .from('lucky_draw_payments')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (status) {
-        query = query.eq('status', status);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Error getting all lucky draw payments:', error);
-      return [];
-    }
-  },
 
   async getLuckyDrawStats() {
     try {

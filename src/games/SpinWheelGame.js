@@ -1,8 +1,7 @@
-'use client';
-
 import React, { useState, useRef, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
+import './GameModal.css';
 import './SpinWheelGame.css';
 
 function SpinWheelGame({ onComplete, onClose, user }) {
@@ -26,7 +25,16 @@ function SpinWheelGame({ onComplete, onClose, user }) {
 
   useEffect(() => {
     checkAttempts();
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, []);
+
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
 
   const checkAttempts = async () => {
     if (!user?.id) {
@@ -40,41 +48,40 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   };
 
   const startGame = () => {
-    // If user is logged in and has attempt info, check if can play
     if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
     setGameStarted(true);
   };
 
   const spinWheel = async () => {
     if (spinning) return;
-    // If user is logged in and has attempt info, check if can play
+    
     if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
 
-    soundManager.spin();
     setSpinning(true);
+    soundManager.spin();
+
     const randomIndex = Math.floor(Math.random() * prizes.length);
     const prize = prizes[randomIndex];
-    
-    // Calculate rotation (5 full spins + landing position)
-    const segmentAngle = 360 / prizes.length;
-    const targetRotation = 360 * 5 + (360 - (randomIndex * segmentAngle + segmentAngle / 2));
-    
+    const rotation = 360 * 5 + (randomIndex * (360 / prizes.length));
+
     if (wheelRef.current) {
-      wheelRef.current.style.transform = `rotate(${targetRotation}deg)`;
+      wheelRef.current.style.transform = `rotate(${rotation}deg)`;
     }
 
     setTimeout(async () => {
       setSpinning(false);
-      soundManager.coin();
       setResult(prize);
 
-      // Record attempt
       if (user?.id) {
-        await recordGameAttempt(user.id, 'spinwheel', {
-          won: true,
-          score: prize.points,
-          difficulty: 'easy'
-        });
+        try {
+          await recordGameAttempt(user.id, 'spinwheel', {
+            won: true,
+            score: prize.points,
+            difficulty: 'easy'
+          });
+        } catch (error) {
+          console.error('Error recording game attempt:', error);
+        }
       }
 
       setTimeout(() => {
@@ -86,14 +93,16 @@ function SpinWheelGame({ onComplete, onClose, user }) {
 
   if (loading) {
     return (
-      <div className="spin-wheel-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🎰 Spin the Wheel</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="game-intro">
-            <p>Loading...</p>
+          <div className="game-content">
+            <div className="game-intro">
+              <p>Loading...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -103,21 +112,22 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    // If no user or no attempt info, allow playing without limits
     if (!user?.id || !attemptInfo) {
       return (
-        <div className="spin-wheel-game">
+        <div className="game-modal">
           <div className="game-container">
             <div className="game-header">
               <h2>🎰 Spin the Wheel</h2>
-              <button onClick={onClose} className="close-btn">✕</button>
+              <button className="close-btn" onClick={handleClose}>✕</button>
             </div>
-            <div className="game-intro">
-              <p>Spin to win points!</p>
-              <p>Prizes range from 5 to 200 points!</p>
-              <button onClick={startGame} className="start-game-btn">
-                Start Game
-              </button>
+            <div className="game-content">
+              <div className="game-intro">
+                <p>Spin to win points!</p>
+                <p>Prizes range from 5 to 200 points!</p>
+                <button onClick={startGame} className="start-game-btn">
+                  Start Game
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -125,29 +135,29 @@ function SpinWheelGame({ onComplete, onClose, user }) {
     }
     
     return (
-      <div className="spin-wheel-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🎰 Spin the Wheel</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="game-intro">
-            {attemptInfo.canPlay ? (
-              <>
-                <p>Spin to win points!</p>
-                <p>Prizes range from 5 to 200 points!</p>
-                <div className="attempts-info">
-                  <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
-                  <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
-                  <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
-                  <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
-                </div>
-                <button onClick={startGame} className="start-game-btn">
-                  Start Game
-                </button>
-              </>
-            ) : (
-              <>
+          <div className="game-content">
+            <div className="game-intro">
+              {attemptInfo.canPlay ? (
+                <>
+                  <p>Spin to win points!</p>
+                  <p>Prizes range from 5 to 200 points!</p>
+                  <div className="attempts-info">
+                    <p><strong>Attempts Today:</strong> {attemptInfo.attemptsUsed} / {attemptInfo.dailyLimit}</p>
+                    <p><strong>Remaining:</strong> {attemptInfo.attemptsRemaining}</p>
+                    <p className="vip-tier"><strong>VIP Tier:</strong> {attemptInfo.vipTier.toUpperCase()}</p>
+                    <p className="reset-time">Resets in: {timeUntilReset.formatted}</p>
+                  </div>
+                  <button onClick={startGame} className="start-game-btn">
+                    Start Game
+                  </button>
+                </>
+              ) : (
                 <div className="no-attempts">
                   <h3>❌ No Attempts Remaining</h3>
                   <p>You've used all {attemptInfo.dailyLimit} attempts today.</p>
@@ -165,10 +175,10 @@ function SpinWheelGame({ onComplete, onClose, user }) {
                       </ul>
                     </div>
                   )}
+                  <button onClick={handleClose} className="start-game-btn">Close</button>
                 </div>
-                <button onClick={onClose} className="close-game-btn">Close</button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -177,16 +187,18 @@ function SpinWheelGame({ onComplete, onClose, user }) {
 
   if (result) {
     return (
-      <div className="spin-wheel-game">
+      <div className="game-modal">
         <div className="game-container">
           <div className="game-header">
             <h2>🎰 Spin Result!</h2>
-            <button onClick={onClose} className="close-btn">✕</button>
+            <button className="close-btn" onClick={handleClose}>✕</button>
           </div>
-          <div className="spin-result">
-            <div className="result-icon">🎉</div>
-            <h3>Congratulations!</h3>
-            <p className="result-points">You won {result.points} points!</p>
+          <div className="game-content">
+            <div className="game-result">
+              <div className="result-icon win">🎉</div>
+              <h3>Congratulations!</h3>
+              <p className="points-earned">You won {result.points} points!</p>
+            </div>
           </div>
         </div>
       </div>
@@ -194,39 +206,43 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   }
 
   return (
-    <div className="spin-wheel-game">
+    <div className="game-modal">
       <div className="game-container">
         <div className="game-header">
           <h2>🎰 Spin the Wheel</h2>
-          <button onClick={onClose} className="close-btn">✕</button>
+          <button className="close-btn" onClick={handleClose}>✕</button>
         </div>
         
-        <div className="wheel-container">
-          <div className="wheel-pointer">▼</div>
-          <div ref={wheelRef} className="wheel">
-            {prizes.map((prize, index) => (
-              <div
-                key={index}
-                className="wheel-segment"
-                style={{
-                  transform: `rotate(${(360 / prizes.length) * index}deg)`,
-                  backgroundColor: prize.color
-                }}
-              >
-                <span className="prize-label">{prize.label}</span>
+        <div className="game-content">
+          <div className="wheel-section">
+            <div className="wheel-pointer">▼</div>
+            <div className="wheel-container">
+              <div ref={wheelRef} className="wheel">
+                {prizes.map((prize, index) => (
+                  <div
+                    key={index}
+                    className="wheel-segment"
+                    style={{
+                      transform: `rotate(${(360 / prizes.length) * index}deg)`,
+                      backgroundColor: prize.color
+                    }}
+                  >
+                    <span className="prize-label">{prize.label}</span>
+                  </div>
+                ))}
+                <div className="wheel-center">SPIN</div>
               </div>
-            ))}
-            <div className="wheel-center">SPIN</div>
+            </div>
           </div>
-        </div>
 
-        <button 
-          onClick={spinWheel} 
-          disabled={spinning}
-          className="spin-btn"
-        >
-          {spinning ? 'Spinning...' : 'Spin Now!'}
-        </button>
+          <button 
+            onClick={spinWheel} 
+            disabled={spinning}
+            className={`spin-btn ${spinning ? 'spinning' : ''}`}
+          >
+            {spinning ? 'Spinning...' : 'Spin Now!'}
+          </button>
+        </div>
       </div>
     </div>
   );

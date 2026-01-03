@@ -147,6 +147,13 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                   <span className="nav-text">Tasks</span>
                 </Link>
                 <Link 
+                  to="/daily-rewards" 
+                  className={`nav-link ${location.pathname === '/daily-rewards' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">🎁</span>
+                  <span className="nav-text">Rewards</span>
+                </Link>
+                <Link 
                   to="/lucky-draw" 
                   className={`nav-link ${location.pathname === '/lucky-draw' ? 'active' : ''}`}
                 >
@@ -159,6 +166,13 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                 >
                   <span className="nav-icon">🏆</span>
                   <span className="nav-text">Leaderboard</span>
+                </Link>
+                <Link 
+                  to="/conversion" 
+                  className={`nav-link ${location.pathname === '/conversion' ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">💳</span>
+                  <span className="nav-text">Wallet</span>
                 </Link>
               </div>
             </div>
@@ -191,7 +205,134 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
               </button>
             </div>
 
-            <div className="user-profile">
+            {/* Desktop User Menu */}
+            <div className="desktop-user-menu">
+              <div className="user-profile" onClick={() => setMenuOpen(!menuOpen)}>
+                <div className="user-avatar">{user.avatar}</div>
+                <div className="user-info">
+                  <div className="user-name">{user.username}</div>
+                  <div className="user-level">Level {user.vipLevel}</div>
+                </div>
+                <div className="dropdown-arrow">▼</div>
+              </div>
+              
+              {/* Desktop Dropdown Menu */}
+              {menuOpen && (
+                <div className="desktop-dropdown">
+                  <div className="dropdown-overlay" onClick={() => setMenuOpen(false)}></div>
+                  <div className="dropdown-content">
+                    {/* User Info Header */}
+                    <div className="dropdown-header">
+                      <div className="dropdown-user-info">
+                        <div className="dropdown-avatar">{user.avatar}</div>
+                        <div className="dropdown-user-details">
+                          <div className="dropdown-username">{user.username}</div>
+                          <div className="dropdown-user-id">ID: {user.userId.slice(-6)}</div>
+                          <div className="dropdown-balance">💎 {user.points.toLocaleString()} Cipro</div>
+                        </div>
+                      </div>
+                      <div className="dropdown-level-badge">
+                        Level {user.vipLevel}
+                      </div>
+                    </div>
+                    
+                    {/* Navigation Menu */}
+                    <div className="dropdown-nav">
+                      {isAdmin ? (
+                        <>
+                          <div className="dropdown-section">
+                            <div className="dropdown-section-title">Admin Panel</div>
+                            <Link to="/admin" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">🛡️</span>
+                              <span className="dropdown-text">Admin Dashboard</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                          </div>
+                          <div className="dropdown-divider"></div>
+                          <div className="dropdown-section">
+                            <button onClick={() => { onLogout(); setMenuOpen(false); }} className="dropdown-item logout">
+                              <span className="dropdown-icon">🚪</span>
+                              <span className="dropdown-text">Logout</span>
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Account Section */}
+                          <div className="dropdown-section">
+                            <div className="dropdown-section-title">Account</div>
+                            <Link to="/profile" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">👤</span>
+                              <span className="dropdown-text">Profile Settings</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                            <Link to="/notifications" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">🔔</span>
+                              <span className="dropdown-text">Notifications</span>
+                              {notifications.length > 0 && (
+                                <span className="dropdown-badge">{notifications.length}</span>
+                              )}
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                          </div>
+                          
+                          {/* Progress Section */}
+                          <div className="dropdown-section">
+                            <div className="dropdown-section-title">Progress</div>
+                            <Link to="/achievements" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">🎖️</span>
+                              <span className="dropdown-text">Achievements</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                            <Link to="/vip-tiers" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">💎</span>
+                              <span className="dropdown-text">VIP Tiers</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                          </div>
+                          
+                          {/* Earn Section */}
+                          <div className="dropdown-section">
+                            <div className="dropdown-section-title">Earn More</div>
+                            <Link to="/referral" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">👥</span>
+                              <span className="dropdown-text">Referral Program</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                            <Link to="/airdrop" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">🪂</span>
+                              <span className="dropdown-text">Airdrops</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                          </div>
+                          
+                          {/* Support Section */}
+                          <div className="dropdown-section">
+                            <div className="dropdown-section-title">Support</div>
+                            <Link to="/faq" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                              <span className="dropdown-icon">❓</span>
+                              <span className="dropdown-text">Help & FAQ</span>
+                              <span className="dropdown-arrow">→</span>
+                            </Link>
+                          </div>
+                          
+                          <div className="dropdown-divider"></div>
+                          <div className="dropdown-section">
+                            <button onClick={() => { onLogout(); setMenuOpen(false); }} className="dropdown-item logout">
+                              <span className="dropdown-icon">🚪</span>
+                              <span className="dropdown-text">Logout</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile User Profile (hidden on desktop) */}
+            <div className="mobile-user-profile">
               <div className="user-avatar">{user.avatar}</div>
               <div className="user-info">
                 <div className="user-name">{user.username}</div>
