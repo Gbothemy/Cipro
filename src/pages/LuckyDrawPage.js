@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../db/supabase';
+import { db, supabase } from '../db/supabase';
 import SEOHead from '../components/SEOHead';
 import { formatBalance } from '../utils/formatBalance';
-import './LuckyDrawPage.css';
+import LuckyDrawPayment from '../components/LuckyDrawPayment';
 
 function LuckyDrawPage({ user, updateUser, addNotification }) {
   const [isDrawActive, setIsDrawActive] = useState(false);
-  const [timeUntilNext, setTimeUntilNext] = useState('');
-  const [timeUntilEnd, setTimeUntilEnd] = useState('');
   const [countdownData, setCountdownData] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [userTickets, setUserTickets] = useState(0);
   const [totalTickets, setTotalTickets] = useState(0);
@@ -21,13 +19,16 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
   const [showResults, setShowResults] = useState(false);
   const [userWinnings, setUserWinnings] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [ticketAnimation, setTicketAnimation] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedTicketQuantity, setSelectedTicketQuantity] = useState(1);
+  const [userPayments, setUserPayments] = useState([]);
 
   useEffect(() => {
     checkDrawStatus();
     loadUserTickets();
     loadPrizePool();
     loadRecentWinners();
+    loadUserPayments();
     
     // Update timer every second
     const timer = setInterval(checkDrawStatus, 1000);
@@ -50,7 +51,6 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
       endOfSunday.setHours(23, 59, 59, 999);
       
       const timeLeft = endOfSunday - now;
-      setTimeUntilEnd(formatTimeRemaining(timeLeft));
       setCountdownData(getCountdownData(timeLeft));
     } else {
       // Calculate time until next Friday
@@ -64,7 +64,6 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
       nextFriday.setHours(0, 0, 0, 0);
       
       const timeLeft = nextFriday - now;
-      setTimeUntilNext(formatTimeRemaining(timeLeft));
       setCountdownData(getCountdownData(timeLeft));
     }
   }, []);
@@ -76,18 +75,6 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
     const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
     
     return { days, hours, minutes, seconds };
-  };
-
-  const formatTimeRemaining = (milliseconds) => {
-    const { days, hours, minutes, seconds } = getCountdownData(milliseconds);
-    
-    if (days > 0) {
-      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    } else if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else {
-      return `${minutes}m ${seconds}s`;
-    }
   };
 
   const loadUserTickets = async () => {
@@ -118,6 +105,28 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
     }
   };
 
+  const loadUserPayments = async () => {
+    try {
+      const payments = await db.getUserLuckyDrawPayments(user.userId);
+      setUserPayments(payments);
+    } catch (error) {
+      console.error('Error loading user payments:', error);
+    }
+  };
+
+  const handleBuyTickets = (quantity) => {
+    setSelectedTicketQuantity(quantity);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = async (result) => {
+    setShowPaymentModal(false);
+    addNotification(result.message, 'success');
+    
+    // Reload user payments to show the new pending payment
+    await loadUserPayments();
+  };
+
   const buyTickets = async (quantity) => {
     const ticketPrice = 2; // $2 USDT per ticket
     const totalCost = quantity * ticketPrice;
@@ -128,7 +137,6 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
     }
     
     setLoading(true);
-    setTicketAnimation(true);
     
     try {
       // Deduct USDT and add tickets
@@ -152,7 +160,6 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
       addNotification('Failed to buy tickets. Please try again.', 'error');
     } finally {
       setLoading(false);
-      setTimeout(() => setTicketAnimation(false), 1000);
     }
   };
 
@@ -206,12 +213,8 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
     }
   };
 
-  const getWinChance = () => {
-    return "0.1"; // Fixed 0.1% win chance for all participants
-  };
-
   return (
-    <div className="lucky-draw-page">
+    <div className="animate-fade-in">
       <SEOHead 
         title="🎰 Lucky Draw - Win Big Every Weekend | Cipro"
         description="Join our weekend Lucky Draw! Buy tickets with Cipro points and win amazing cryptocurrency prizes. Draw runs Friday to Sunday every week."
@@ -219,209 +222,277 @@ function LuckyDrawPage({ user, updateUser, addNotification }) {
       />
 
       {/* Header Section */}
-      <div className="lucky-draw-header">
-        <div className="header-content">
-          <h1 className="lucky-draw-title">
+      <div className="bg-gradient-primary text-white p-6 mb-6 rounded-2xl shadow-primary-lg overflow-hidden relative">
+        <div className="absolute inset-0 opacity-10">
+          <div className="w-full h-full bg-white rounded-full transform scale-150 -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+        <div className="relative z-10 text-center container">
+          <h1 className="text-3xl md:text-4xl font-black mb-3 flex items-center justify-center gap-3">
             🎰 Weekend Lucky Draw
           </h1>
-          <p className="lucky-draw-subtitle">
+          <p className="text-lg mb-4 opacity-90 font-medium">
             Buy tickets and win amazing cryptocurrency prizes every weekend!
           </p>
           
-          <div className={`draw-status ${isDrawActive ? 'status-active' : 'status-closed'}`}>
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm uppercase tracking-wide shadow-lg backdrop-blur-sm border-2 border-white/30 ${
+            isDrawActive 
+              ? 'bg-success-color/20 text-success-light animate-pulse' 
+              : 'bg-error-color/20 text-error-light'
+          }`}>
             {isDrawActive ? '🟢 DRAW ACTIVE' : '🔴 DRAW CLOSED'}
           </div>
         </div>
       </div>
 
-      {/* Countdown Timer */}
-      <div className="lucky-draw-container">
-        <div className="countdown-timer">
-          <h2 className="countdown-title">
-            {isDrawActive ? '⏰ Draw Ends In' : '⏳ Next Draw Starts In'}
-          </h2>
-          <div className="countdown-display">
-            <div className="countdown-unit">
-              <span className="countdown-number">{countdownData.days}</span>
-              <span className="countdown-label">Days</span>
-            </div>
-            <div className="countdown-unit">
-              <span className="countdown-number">{countdownData.hours}</span>
-              <span className="countdown-label">Hours</span>
-            </div>
-            <div className="countdown-unit">
-              <span className="countdown-number">{countdownData.minutes}</span>
-              <span className="countdown-label">Minutes</span>
-            </div>
-            <div className="countdown-unit">
-              <span className="countdown-number">{countdownData.seconds}</span>
-              <span className="countdown-label">Seconds</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="main-content">
-        {/* Prize Pool Section */}
-        <div className="prize-pool-section">
-          <h2 className="section-title">💰 Prize Pool</h2>
-          <div className="prize-pool-grid">
-            <div className="prize-item">
-              <div className="prize-currency">Cipro</div>
-              <div className="prize-amount">{currentPrizePool.cipro.toLocaleString()}</div>
-            </div>
-            <div className="prize-item">
-              <div className="prize-currency">USDT</div>
-              <div className="prize-amount">${currentPrizePool.usdt.toFixed(2)}</div>
-            </div>
-            <div className="prize-item">
-              <div className="prize-currency">VIP Upgrade</div>
-              <div className="prize-amount">Next Tier</div>
-            </div>
-          </div>
-          
-          {/* User Stats */}
-          <div className="user-stats">
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-value">{userTickets}</span>
-                <span className="stat-label">Your Tickets</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{totalTickets.toLocaleString()}</span>
-                <span className="stat-label">Total Tickets</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{totalTickets > 0 ? 'Active' : 'Waiting'}</span>
-                <span className="stat-label">Draw Status</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">${user.balance.usdt.toFixed(2)}</span>
-                <span className="stat-label">Your USDT</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Ticket Section */}
-        <div className="ticket-section">
-          <h2 className="section-title">🎫 Buy Tickets</h2>
-          <div className="ticket-purchase">
-            <div className="ticket-price-info">
-              <p>1 Ticket = $2.00 USDT</p>
-            </div>
-            
-            {isDrawActive ? (
-              <>
-                <div className="ticket-options">
-                  <button 
-                    className="ticket-option" 
-                    onClick={() => buyTickets(1)}
-                    disabled={loading || user.balance.usdt < 2}
-                  >
-                    {loading ? '⏳ Processing...' : '🎫 Buy 1 Ticket'}
-                    <small>$2.00 USDT</small>
-                  </button>
-                  <button 
-                    className="ticket-option" 
-                    onClick={() => buyTickets(5)}
-                    disabled={loading || user.balance.usdt < 10}
-                  >
-                    {loading ? '⏳ Processing...' : '🎫 Buy 5 Tickets'}
-                    <small>$10.00 USDT</small>
-                  </button>
-                  <button 
-                    className="ticket-option" 
-                    onClick={() => buyTickets(10)}
-                    disabled={loading || user.balance.usdt < 20}
-                  >
-                    {loading ? '⏳ Processing...' : '🎫 Buy 10 Tickets'}
-                    <small>$20.00 USDT</small>
-                  </button>
+      <div className="container">
+        {/* Countdown Timer */}
+        <div className="card mb-6">
+          <div className="card-body text-center">
+            <h2 className="text-xl font-bold text-primary mb-4 flex items-center justify-center gap-2">
+              {isDrawActive ? '⏰ Draw Ends In' : '⏳ Next Draw Starts In'}
+            </h2>
+            <div className="grid grid-cols-4 gap-3 max-w-md mx-auto">
+              {[
+                { value: countdownData.days, label: 'Days' },
+                { value: countdownData.hours, label: 'Hours' },
+                { value: countdownData.minutes, label: 'Minutes' },
+                { value: countdownData.seconds, label: 'Seconds' }
+              ].map((unit, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-3 border-2 border-gray-200 hover:border-primary transition hover:-translate-y-1">
+                  <div className="text-2xl font-black text-primary font-mono">{unit.value}</div>
+                  <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide mt-1">{unit.label}</div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                {/* Draw Participation */}
-                {userTickets > 0 && (
-                  <div className="draw-participation">
-                    <h3>🎲 Ready to Draw?</h3>
-                    <p>You have {userTickets} ticket{userTickets > 1 ? 's' : ''}</p>
-                    <p>Good luck! 🍀</p>
-                    
-                    {!showResults ? (
-                      <button 
-                        className="participate-btn"
-                        onClick={participateInDraw}
-                        disabled={isDrawing}
-                      >
-                        {isDrawing ? (
-                          <>
-                            <div className="spinner" style={{ display: 'inline-block', marginRight: '10px', width: '20px', height: '20px' }}></div>
-                            Drawing...
-                          </>
-                        ) : (
-                          '🎰 Participate in Draw'
-                        )}
-                      </button>
-                    ) : (
-                      <div className="draw-results">
-                        {userWinnings ? (
-                          <div className="winner-result">
-                            <h3>🎉 Congratulations! You Won!</h3>
-                            <div className="winnings">
-                              <div>💎 {userWinnings.cipro.toLocaleString()} Cipro</div>
-                              <div>💵 ${userWinnings.usdt.toFixed(2)} USDT</div>
-                              <div>⭐ VIP Level Upgrade</div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="no-win-result">
-                            <h3>Better luck next time!</h3>
-                            <p>Thanks for participating in the Lucky Draw.</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+        <div className="grid gap-6 mb-6">
+          {/* Prize Pool Section */}
+          <div className="card card-hover">
+            <div className="card-body">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                💰 Prize Pool
+              </h2>
+              
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {[
+                  { currency: 'Cipro', amount: currentPrizePool.cipro.toLocaleString(), color: 'text-primary' },
+                  { currency: 'USDT', amount: `$${currentPrizePool.usdt.toFixed(2)}`, color: 'text-success' },
+                  { currency: 'VIP Upgrade', amount: 'Next Tier', color: 'text-warning' }
+                ].map((prize, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 text-center border-2 border-gray-200 hover:border-primary transition hover:-translate-y-1 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-primary transform scale-x-0 transition-transform hover:scale-x-100"></div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide mb-2">{prize.currency}</div>
+                    <div className={`text-lg font-bold font-mono ${prize.color}`}>{prize.amount}</div>
                   </div>
-                )}
-              </>
+                ))}
+              </div>
+              
+              {/* User Stats */}
+              <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { value: userTickets, label: 'Your Tickets' },
+                    { value: totalTickets.toLocaleString(), label: 'Total Tickets' },
+                    { value: totalTickets > 0 ? 'Active' : 'Waiting', label: 'Draw Status' }
+                  ].map((stat, index) => (
+                    <div key={index} className="text-center p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition hover:-translate-y-1">
+                      <div className="text-lg font-bold text-primary font-mono">{stat.value}</div>
+                      <div className="text-xs text-gray-600 font-medium mt-1">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Ticket Section */}
+          <div className="card card-hover">
+            <div className="card-body">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                🎫 Buy Tickets
+              </h2>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-6 border-2 border-gray-200 text-center">
+                <p className="text-lg font-semibold text-gray-800 m-0">1 Ticket = $2.00 USDT</p>
+              </div>
+              
+              {isDrawActive ? (
+                <>
+                  <div className="grid md:grid-cols-3 gap-4 mb-6">
+                    {[
+                      { quantity: 1, cost: 2 },
+                      { quantity: 5, cost: 10 },
+                      { quantity: 10, cost: 20 }
+                    ].map((option, index) => (
+                      <button 
+                        key={index}
+                        className="btn btn-primary btn-lg ripple-effect"
+                        onClick={() => handleBuyTickets(option.quantity)}
+                        disabled={loading}
+                      >
+                        <div className="text-center">
+                          <div>{loading ? '⏳ Processing...' : `🎫 Buy ${option.quantity} Ticket${option.quantity > 1 ? 's' : ''}`}</div>
+                          <small className="block text-sm opacity-90 mt-1">${option.cost.toFixed(2)} USD</small>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Draw Participation */}
+                  {userTickets > 0 && (
+                    <div className="bg-success text-white rounded-2xl p-6 text-center shadow-lg">
+                      <h3 className="text-lg font-bold mb-3 flex items-center justify-center gap-2">
+                        🎲 Ready to Draw?
+                      </h3>
+                      <p className="mb-2 opacity-95">You have {userTickets} ticket{userTickets > 1 ? 's' : ''}</p>
+                      <p className="mb-4 opacity-95">Good luck! 🍀</p>
+                      
+                      {!showResults ? (
+                        <button 
+                          className="btn btn-secondary btn-lg"
+                          onClick={participateInDraw}
+                          disabled={isDrawing}
+                        >
+                          {isDrawing ? (
+                            <div className="flex items-center gap-3">
+                              <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
+                              Drawing...
+                            </div>
+                          ) : (
+                            '🎰 Participate in Draw'
+                          )}
+                        </button>
+                      ) : (
+                        <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm border-2 border-white/30">
+                          {userWinnings ? (
+                            <div>
+                              <h3 className="text-lg font-bold mb-3">🎉 Congratulations! You Won!</h3>
+                              <div className="flex flex-wrap gap-3 justify-center">
+                                <div className="bg-white/20 px-4 py-2 rounded-full font-semibold backdrop-blur-sm border border-white/30">
+                                  💎 {userWinnings.cipro.toLocaleString()} Cipro
+                                </div>
+                                <div className="bg-white/20 px-4 py-2 rounded-full font-semibold backdrop-blur-sm border border-white/30">
+                                  💵 ${userWinnings.usdt.toFixed(2)} USDT
+                                </div>
+                                <div className="bg-white/20 px-4 py-2 rounded-full font-semibold backdrop-blur-sm border border-white/30">
+                                  ⭐ VIP Level Upgrade
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <h3 className="text-lg mb-2">Better luck next time!</h3>
+                              <p>Thanks for participating in the Lucky Draw.</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <h3 className="text-lg font-bold mb-3 flex items-center justify-center gap-2">
+                    🔒 Ticket Sales Closed
+                  </h3>
+                  <p>Come back during the weekend to buy tickets!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* User Payment History */}
+        {userPayments.length > 0 && (
+          <div className="card card-hover mb-6">
+            <div className="card-body">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                💳 Your Payment History
+              </h2>
+              <div className="space-y-3">
+                {userPayments.slice(0, 5).map((payment, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold text-gray-800">
+                        {payment.ticket_quantity} Ticket{payment.ticket_quantity > 1 ? 's' : ''}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        ${payment.amount} {payment.currency} • {new Date(payment.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                        payment.status === 'approved' 
+                          ? 'bg-green-100 text-green-800' 
+                          : payment.status === 'rejected'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {payment.status === 'approved' ? '✅ Approved' : 
+                         payment.status === 'rejected' ? '❌ Rejected' : 
+                         '⏳ Pending'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Winners */}
+        <div className="card card-hover">
+          <div className="card-body">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+              🏆 Recent Winners
+            </h2>
+            {winners.length > 0 ? (
+              <div className="grid gap-3">
+                {winners.map((winner, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex flex-col md:flex-row justify-between items-center border-2 border-gray-200 hover:border-primary transition hover:-translate-y-1 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-primary transform scale-x-0 transition-transform hover:scale-x-100"></div>
+                    <div className="text-center md:text-left mb-3 md:mb-0">
+                      <div className="font-bold text-gray-800 text-sm mb-1">
+                        {winner.username || `Player ${winner.user_id.slice(-4)}`}
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">
+                        {new Date(winner.draw_date).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-center md:text-right text-success font-bold text-sm font-mono">
+                      {winner.sol_won > 0 && `◎ ${formatBalance(winner.sol_won)} SOL`}
+                      {winner.eth_won > 0 && ` Ξ ${formatBalance(winner.eth_won)} ETH`}
+                      {winner.usdt_won > 0 && ` 💵 ${formatBalance(winner.usdt_won)} USDT`}
+                      {winner.usdc_won > 0 && ` 💵 ${formatBalance(winner.usdc_won)} USDC`}
+                      {winner.points_won > 0 && ` 💎 ${winner.points_won.toLocaleString()} Cipro`}
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="draw-closed-state">
-                <h3>🔒 Ticket Sales Closed</h3>
-                <p>Come back during the weekend to buy tickets!</p>
+              <div className="text-center py-8 text-gray-500">
+                <h3 className="text-lg font-bold mb-3 flex items-center justify-center gap-2">
+                  🎯 No Winners Yet
+                </h3>
+                <p>Be the first to win big in our Lucky Draw!</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Recent Winners */}
-      <div className="winners-section">
-        <h2 className="section-title">🏆 Recent Winners</h2>
-        {winners.length > 0 ? (
-          <div className="winners-list">
-            {winners.map((winner, index) => (
-              <div key={index} className="winner-item">
-                <div className="winner-info">
-                  <div className="winner-name">{winner.username || `Player ${winner.user_id.slice(-4)}`}</div>
-                  <div className="winner-date">{new Date(winner.draw_date).toLocaleDateString()}</div>
-                </div>
-                <div className="winner-prize">
-                  {winner.sol_won > 0 && `◎ ${formatBalance(winner.sol_won)} SOL`}
-                  {winner.eth_won > 0 && ` Ξ ${formatBalance(winner.eth_won)} ETH`}
-                  {winner.usdt_won > 0 && ` 💵 ${formatBalance(winner.usdt_won)} USDT`}
-                  {winner.usdc_won > 0 && ` 💵 ${formatBalance(winner.usdc_won)} USDC`}
-                  {winner.points_won > 0 && ` 💎 ${winner.points_won.toLocaleString()} Cipro`}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="no-winners">
-            <h3>🎯 No Winners Yet</h3>
-            <p>Be the first to win big in our Lucky Draw!</p>
-          </div>
-        )}
-      </div>
-      </div>
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <LuckyDrawPayment
+          user={user}
+          ticketQuantity={selectedTicketQuantity}
+          totalCost={selectedTicketQuantity * 2}
+          onPaymentSuccess={handlePaymentSuccess}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import soundManager from '../utils/soundManager';
 import themeManager from '../utils/themeManager';
@@ -10,8 +10,19 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [isDarkMode, setIsDarkMode] = useState(themeManager.isDark());
   const [logoError, setLogoError] = useState(false);
-  const [logoRetryCount, setLogoRetryCount] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+
+  // Scroll detection for header effects
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleSound = () => {
     const newState = soundManager.toggle();
@@ -28,24 +39,40 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   };
 
   const navigationItems = [
-    { path: '/', icon: '🎮', label: 'Mining', section: 'main' },
-    { path: '/tasks', icon: '📋', label: 'Tasks', section: 'main' },
-    { path: '/daily-rewards', icon: '🎁', label: 'Rewards', section: 'main' },
-    { path: '/lucky-draw', icon: '🎰', label: 'Lucky Draw', section: 'earn' },
-    { path: '/airdrop', icon: '🪂', label: 'Airdrop', section: 'earn' },
-    { path: '/referral', icon: '👥', label: 'Referral', section: 'earn' },
-    { path: '/conversion', icon: '💳', label: 'Wallet', section: 'wallet' },
-    { path: '/leaderboard', icon: '🏆', label: 'Leaderboard', section: 'community' },
-    { path: '/achievements', icon: '🎖️', label: 'Achievements', section: 'community' },
-    { path: '/vip-tiers', icon: '💎', label: 'VIP', section: 'community' },
-    { path: '/profile', icon: '👤', label: 'Profile', section: 'account' },
-    { path: '/notifications', icon: '🔔', label: 'Notifications', section: 'account' },
-    { path: '/faq', icon: '❓', label: 'FAQ', section: 'account' }
+    { path: '/', icon: '🎮', label: 'Mining', section: 'main', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    { path: '/tasks', icon: '📋', label: 'Tasks', section: 'main', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    { path: '/daily-rewards', icon: '🎁', label: 'Rewards', section: 'main', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { path: '/lucky-draw', icon: '🎰', label: 'Lucky Draw', section: 'earn', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', badge: 'New' },
+    { path: '/airdrop', icon: '🪂', label: 'Airdrop', section: 'earn', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+    { path: '/referral', icon: '👥', label: 'Referral', section: 'earn', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
+    { path: '/conversion', icon: '💳', label: 'Wallet', section: 'wallet', gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' },
+    { path: '/leaderboard', icon: '🏆', label: 'Leaderboard', section: 'community', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    { path: '/achievements', icon: '🎖️', label: 'Achievements', section: 'community', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    { path: '/vip-tiers', icon: '💎', label: 'VIP', section: 'community', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { path: '/profile', icon: '👤', label: 'Profile', section: 'account', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+    { path: '/notifications', icon: '🔔', label: 'Notifications', section: 'account', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+    { path: '/faq', icon: '❓', label: 'FAQ', section: 'account', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }
   ];
 
   const getActiveSection = () => {
     const currentItem = navigationItems.find(item => item.path === location.pathname);
     return currentItem?.section || 'main';
+  };
+
+  const groupedNavItems = navigationItems.reduce((acc, item) => {
+    if (!acc[item.section]) {
+      acc[item.section] = [];
+    }
+    acc[item.section].push(item);
+    return acc;
+  }, {});
+
+  const sectionTitles = {
+    main: 'Main Features',
+    earn: 'Earn More',
+    wallet: 'Wallet',
+    community: 'Community',
+    account: 'Account'
   };
 
   return (
@@ -68,7 +95,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
       </div>
 
       {/* Modern Header */}
-      <header className="modern-header">
+      <header className={`modern-header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-container">
           {/* Left Section */}
           <div className="header-left">
@@ -87,16 +114,15 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
             <Link to="/" className="brand-logo">
               {!logoError ? (
                 <img 
-                  src={`/ciprohub.png?v=${logoRetryCount}`}
-                  alt="CIPRO" 
+                  src="/ciprohub.png"
+                  alt="Logo" 
                   className="logo-img"
                   onError={() => setLogoError(true)}
                   onLoad={() => setLogoError(false)}
                 />
               ) : (
                 <div className="logo-fallback">
-                  <span className="logo-text">CIPRO</span>
-                  <span className="logo-tagline">Gaming</span>
+                  <span className="logo-text">C</span>
                 </div>
               )}
             </Link>
@@ -192,10 +218,12 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                     <div className="stat-item">
                       <span className="stat-icon">💎</span>
                       <span className="stat-value">{user.points.toLocaleString()}</span>
+                      <span className="stat-label">Points</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-icon">⭐</span>
                       <span className="stat-value">Level {user.vipLevel}</span>
+                      <span className="stat-label">VIP</span>
                     </div>
                   </div>
                   {isAdmin && <div className="admin-badge">🛡️ Admin</div>}
@@ -230,141 +258,32 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
                   </div>
                 </>
               ) : (
-                // User Navigation
+                // User Navigation with Grouped Sections
                 <>
-                  {/* Main Features */}
-                  <div className="nav-section">
-                    <div className="nav-section-title">Main Features</div>
-                    <Link 
-                      to="/" 
-                      className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🎮</span>
-                      <span className="nav-item-text">Mining Games</span>
-                      <span className="nav-item-badge">Hot</span>
-                    </Link>
-                    <Link 
-                      to="/tasks" 
-                      className={`nav-item ${location.pathname === '/tasks' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">📋</span>
-                      <span className="nav-item-text">Daily Tasks</span>
-                    </Link>
-                    <Link 
-                      to="/daily-rewards" 
-                      className={`nav-item ${location.pathname === '/daily-rewards' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🎁</span>
-                      <span className="nav-item-text">Daily Rewards</span>
-                    </Link>
-                  </div>
-
-                  {/* Earn More */}
-                  <div className="nav-section">
-                    <div className="nav-section-title">Earn More</div>
-                    <Link 
-                      to="/lucky-draw" 
-                      className={`nav-item ${location.pathname === '/lucky-draw' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🎰</span>
-                      <span className="nav-item-text">Lucky Draw</span>
-                      <span className="nav-item-badge new">New</span>
-                    </Link>
-                    <Link 
-                      to="/airdrop" 
-                      className={`nav-item ${location.pathname === '/airdrop' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🪂</span>
-                      <span className="nav-item-text">Airdrop</span>
-                    </Link>
-                    <Link 
-                      to="/referral" 
-                      className={`nav-item ${location.pathname === '/referral' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">👥</span>
-                      <span className="nav-item-text">Referral Program</span>
-                    </Link>
-                  </div>
-
-                  {/* Wallet & Finance */}
-                  <div className="nav-section">
-                    <div className="nav-section-title">Wallet</div>
-                    <Link 
-                      to="/conversion" 
-                      className={`nav-item ${location.pathname === '/conversion' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">💳</span>
-                      <span className="nav-item-text">Convert & Withdraw</span>
-                    </Link>
-                  </div>
-
-                  {/* Community */}
-                  <div className="nav-section">
-                    <div className="nav-section-title">Community</div>
-                    <Link 
-                      to="/leaderboard" 
-                      className={`nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🏆</span>
-                      <span className="nav-item-text">Leaderboard</span>
-                    </Link>
-                    <Link 
-                      to="/achievements" 
-                      className={`nav-item ${location.pathname === '/achievements' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🎖️</span>
-                      <span className="nav-item-text">Achievements</span>
-                    </Link>
-                    <Link 
-                      to="/vip-tiers" 
-                      className={`nav-item ${location.pathname === '/vip-tiers' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">💎</span>
-                      <span className="nav-item-text">VIP Tiers</span>
-                    </Link>
-                  </div>
-
-                  {/* Account & Settings */}
-                  <div className="nav-section">
-                    <div className="nav-section-title">Account</div>
-                    <Link 
-                      to="/profile" 
-                      className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">👤</span>
-                      <span className="nav-item-text">My Profile</span>
-                    </Link>
-                    <Link 
-                      to="/notifications" 
-                      className={`nav-item ${location.pathname === '/notifications' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">🔔</span>
-                      <span className="nav-item-text">Notifications</span>
-                      {notifications.length > 0 && (
-                        <span className="nav-item-count">{notifications.length}</span>
-                      )}
-                    </Link>
-                    <Link 
-                      to="/faq" 
-                      className={`nav-item ${location.pathname === '/faq' ? 'active' : ''}`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="nav-item-icon">❓</span>
-                      <span className="nav-item-text">Help & FAQ</span>
-                    </Link>
-                  </div>
+                  {Object.entries(groupedNavItems).map(([section, items]) => (
+                    <div key={section} className="nav-section">
+                      <div className="nav-section-title">{sectionTitles[section]}</div>
+                      {items.map((item) => (
+                        <Link 
+                          key={item.path}
+                          to={item.path} 
+                          className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <span className="nav-item-icon">{item.icon}</span>
+                          <span className="nav-item-text">{item.label}</span>
+                          {item.badge && (
+                            <span className={`nav-item-badge ${item.badge.toLowerCase()}`}>
+                              {item.badge}
+                            </span>
+                          )}
+                          {item.path === '/notifications' && notifications.length > 0 && (
+                            <span className="nav-item-count">{notifications.length}</span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
 
                   {/* Logout */}
                   <div className="nav-section">
@@ -408,7 +327,7 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
               <div className="footer-brand">
                 <div className="footer-logo">
                   <img 
-                    src={`${process.env.PUBLIC_URL}/ciprohub.png`}
+                    src="/ciprohub.png"
                     alt="Cipro"
                     className="footer-logo-image"
                     onError={(e) => {
