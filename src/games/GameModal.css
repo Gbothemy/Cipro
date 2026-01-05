@@ -274,7 +274,7 @@ body.dark-mode .upgrade-prompt {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Large Phones & Small Tablets */
 @media (max-width: 768px) {
   .game-modal {
     padding: 0;
@@ -284,84 +284,208 @@ body.dark-mode .upgrade-prompt {
     max-width: calc(100vw - 20px);
     max-height: calc(100vh - 20px);
     margin: 10px;
-    border-radius: 15px;
+    border-radius: 16px;
   }
   
   .game-header {
-    padding: 15px 20px 10px;
+    padding: 16px 20px 12px;
+    gap: 12px;
   }
   
   .game-header h2 {
     font-size: 20px;
   }
   
+  .timer {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .close-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
   .game-content {
-    padding: 15px 20px 20px;
+    padding: 16px 20px 20px;
   }
   
   .start-game-btn {
-    padding: 12px 30px;
+    padding: 14px 28px;
     font-size: 16px;
   }
 }
 
+/* Mobile Responsive - Standard Phones */
 @media (max-width: 480px) {
   .game-container {
-    max-width: calc(100vw - 10px);
-    max-height: calc(100vh - 10px);
-    margin: 5px;
-    border-radius: 12px;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    margin: 8px;
+    border-radius: 14px;
   }
   
   .game-header {
-    padding: 12px 15px 8px;
+    padding: 14px 16px 10px;
+    gap: 10px;
   }
   
   .game-header h2 {
     font-size: 18px;
+    line-height: 1.2;
   }
   
   .close-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .timer {
+    padding: 5px 10px;
+    font-size: 13px;
   }
   
   .game-content {
-    padding: 12px 15px 15px;
+    padding: 14px 16px 16px;
+  }
+  
+  .start-game-btn {
+    padding: 12px 24px;
+    font-size: 15px;
   }
 }
 
-/* Extra small screens */
+/* Small Mobile Devices */
 @media (max-width: 360px) {
   .game-container {
-    max-width: calc(100vw - 5px);
-    max-height: calc(100vh - 5px);
-    margin: 2.5px;
+    max-width: calc(100vw - 12px);
+    max-height: calc(100vh - 12px);
+    margin: 6px;
+    border-radius: 12px;
+  }
+  
+  .game-header {
+    padding: 12px 14px 8px;
+    gap: 8px;
+  }
+  
+  .game-header h2 {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+  
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .timer {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .game-content {
+    padding: 12px 14px 14px;
+  }
+  
+  .start-game-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Extra Small Devices (iPhone SE, etc.) */
+@media (max-width: 320px) {
+  .game-container {
+    max-width: calc(100vw - 8px);
+    max-height: calc(100vh - 8px);
+    margin: 4px;
     border-radius: 10px;
   }
   
   .game-header {
     padding: 10px 12px 6px;
+    gap: 6px;
   }
   
   .game-header h2 {
-    font-size: 16px;
+    font-size: 15px;
+    line-height: 1.1;
   }
   
   .close-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+  }
+  
+  .timer {
+    padding: 3px 6px;
+    font-size: 11px;
   }
   
   .game-content {
     padding: 10px 12px 12px;
   }
   
-  .timer {
-    padding: 6px 12px;
-    font-size: 14px;
+  .start-game-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Tablet Portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .game-container {
+    max-width: min(600px, calc(100vw - 60px));
+    max-height: min(700px, calc(100vh - 60px));
+    margin: 30px;
+    border-radius: 24px;
+  }
+  
+  .game-header {
+    padding: 24px 36px 18px;
+  }
+  
+  .game-header h2 {
+    font-size: 26px;
+  }
+  
+  .game-content {
+    padding: 20px 36px 36px;
+  }
+}
+
+/* Desktop & Large Screens */
+@media (min-width: 1025px) {
+  .game-container {
+    max-width: min(650px, calc(100vw - 80px));
+    max-height: min(750px, calc(100vh - 80px));
+    margin: 40px;
+    border-radius: 28px;
+  }
+  
+  .game-header {
+    padding: 28px 40px 20px;
+  }
+  
+  .game-header h2 {
+    font-size: 28px;
+  }
+  
+  .game-content {
+    padding: 24px 40px 40px;
+  }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1440px) {
+  .game-container {
+    max-width: min(700px, calc(100vw - 100px));
+    max-height: min(800px, calc(100vh - 100px));
   }
 }
 

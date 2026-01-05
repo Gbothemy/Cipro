@@ -57,7 +57,6 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
     if (user?.userId && attemptInfo && !attemptInfo.canPlay) return;
     
     const selectedQuestions = getRandomQuestions(settings.questions, difficulty);
-    console.log('Selected questions:', selectedQuestions); // Debug log
     setQuestions(selectedQuestions);
     setGameStarted(true);
     setTimeLeft(settings.timePerQuestion);
@@ -284,8 +283,6 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
 
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-
-  console.log('Current question:', question); // Debug log
 
   return (
     <div className="game-modal">

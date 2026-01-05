@@ -76,34 +76,195 @@ body.dark-mode .correct-answer {
   color: #a8e6a3;
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Large Phones & Small Tablets */
 @media (max-width: 768px) {
-  .puzzle-options {
-    grid-template-columns: 1fr;
+  .puzzle-type {
+    padding: 6px 14px;
+    font-size: 11px;
+    margin-bottom: 12px;
   }
   
   .puzzle-question {
     font-size: 18px;
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .option-btn {
+    padding: 14px 18px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+  
+  .correct-answer {
+    padding: 10px;
+    margin: 14px 0;
+    border-radius: 6px;
+  }
+}
+
+/* Mobile Responsive - Standard Phones */
+@media (max-width: 480px) {
+  .puzzle-type {
+    padding: 5px 12px;
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .puzzle-question {
+    font-size: 16px;
+    margin-bottom: 18px;
+    line-height: 1.25;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
   
   .option-btn {
     padding: 12px 16px;
     font-size: 14px;
+    border-radius: 8px;
+  }
+  
+  .correct-answer {
+    padding: 8px;
+    margin: 12px 0;
+    border-radius: 5px;
+    font-size: 14px;
   }
 }
 
-@media (max-width: 480px) {
-  .puzzle-question {
-    font-size: 16px;
-    margin-bottom: 20px;
+/* Small Mobile Devices */
+@media (max-width: 360px) {
+  .puzzle-type {
+    padding: 4px 10px;
+    font-size: 9px;
+    margin-bottom: 8px;
   }
   
-  .option-btn {
-    padding: 10px 12px;
-    font-size: 13px;
+  .puzzle-question {
+    font-size: 15px;
+    margin-bottom: 16px;
+    line-height: 1.2;
   }
   
   .puzzle-options {
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .option-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  
+  .correct-answer {
+    padding: 6px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 320px) {
+  .puzzle-type {
+    padding: 3px 8px;
+    font-size: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .puzzle-question {
+    font-size: 14px;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  
+  .option-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+  
+  .correct-answer {
+    padding: 5px;
+    margin: 8px 0;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+}
+
+/* Tablet Portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .puzzle-type {
+    padding: 9px 18px;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  
+  .puzzle-question {
+    font-size: 22px;
+    margin-bottom: 28px;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  
+  .option-btn {
+    padding: 16px 22px;
+    font-size: 17px;
+    border-radius: 14px;
+  }
+  
+  .correct-answer {
+    padding: 14px;
+    margin: 18px 0;
+    border-radius: 10px;
+  }
+}
+
+/* Desktop & Large Screens */
+@media (min-width: 1025px) {
+  .puzzle-type {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .puzzle-question {
+    font-size: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .option-btn {
+    padding: 18px 24px;
+    font-size: 18px;
+    border-radius: 16px;
+  }
+  
+  .correct-answer {
+    padding: 16px;
+    margin: 20px 0;
+    border-radius: 12px;
   }
 }

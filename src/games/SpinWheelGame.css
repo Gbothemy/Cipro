@@ -120,52 +120,228 @@ body.dark-mode .wheel-center {
   background: linear-gradient(135deg, #8b9eff 0%, #9c88ff 100%);
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Large Phones & Small Tablets */
 @media (max-width: 768px) {
+  .wheel-section {
+    margin: 16px 0;
+  }
+  
   .wheel {
-    width: 250px;
-    height: 250px;
+    width: 260px;
+    height: 260px;
   }
   
   .prize-label {
-    font-size: 18px;
-    top: 25px;
+    font-size: 17px;
+    top: 26px;
   }
   
   .wheel-center {
-    width: 70px;
-    height: 70px;
-    font-size: 14px;
+    width: 68px;
+    height: 68px;
+    font-size: 13px;
   }
   
   .wheel-pointer {
-    font-size: 35px;
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 24px;
+  }
+  
+  .spin-btn {
+    padding: 14px 32px;
+    font-size: 16px;
+    max-width: 220px;
   }
 }
 
+/* Mobile Responsive - Standard Phones */
 @media (max-width: 480px) {
+  .wheel-section {
+    margin: 14px 0;
+  }
+  
   .wheel {
-    width: 200px;
-    height: 200px;
+    width: 220px;
+    height: 220px;
   }
   
   .prize-label {
-    font-size: 16px;
-    top: 20px;
+    font-size: 15px;
+    top: 22px;
   }
   
   .wheel-center {
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
     font-size: 12px;
   }
   
   .wheel-pointer {
-    font-size: 30px;
+    font-size: 32px;
+    margin-bottom: 6px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 20px;
   }
   
   .spin-btn {
-    padding: 12px 30px;
-    font-size: 16px;
+    padding: 12px 28px;
+    font-size: 15px;
+    max-width: 200px;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 360px) {
+  .wheel-section {
+    margin: 12px 0;
+  }
+  
+  .wheel {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .prize-label {
+    font-size: 13px;
+    top: 18px;
+  }
+  
+  .wheel-center {
+    width: 50px;
+    height: 50px;
+    font-size: 11px;
+  }
+  
+  .wheel-pointer {
+    font-size: 28px;
+    margin-bottom: 5px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 16px;
+  }
+  
+  .spin-btn {
+    padding: 10px 24px;
+    font-size: 14px;
+    max-width: 180px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 320px) {
+  .wheel-section {
+    margin: 10px 0;
+  }
+  
+  .wheel {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .prize-label {
+    font-size: 12px;
+    top: 16px;
+  }
+  
+  .wheel-center {
+    width: 45px;
+    height: 45px;
+    font-size: 10px;
+  }
+  
+  .wheel-pointer {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 14px;
+  }
+  
+  .spin-btn {
+    padding: 8px 20px;
+    font-size: 13px;
+    max-width: 160px;
+  }
+}
+
+/* Tablet Portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wheel-section {
+    margin: 24px 0;
+  }
+  
+  .wheel {
+    width: 320px;
+    height: 320px;
+  }
+  
+  .prize-label {
+    font-size: 20px;
+    top: 32px;
+  }
+  
+  .wheel-center {
+    width: 85px;
+    height: 85px;
+    font-size: 17px;
+  }
+  
+  .wheel-pointer {
+    font-size: 44px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 32px;
+  }
+  
+  .spin-btn {
+    padding: 16px 44px;
+    font-size: 19px;
+    max-width: 280px;
+  }
+}
+
+/* Desktop & Large Screens */
+@media (min-width: 1025px) {
+  .wheel-section {
+    margin: 28px 0;
+  }
+  
+  .wheel {
+    width: 350px;
+    height: 350px;
+  }
+  
+  .prize-label {
+    font-size: 22px;
+    top: 35px;
+  }
+  
+  .wheel-center {
+    width: 90px;
+    height: 90px;
+    font-size: 18px;
+  }
+  
+  .wheel-pointer {
+    font-size: 48px;
+  }
+  
+  .wheel-container {
+    margin-bottom: 36px;
+  }
+  
+  .spin-btn {
+    padding: 18px 48px;
+    font-size: 20px;
+    max-width: 300px;
   }
 }
