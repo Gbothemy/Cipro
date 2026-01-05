@@ -30,18 +30,18 @@ function MemoryGame({ onComplete, onClose, user }) {
   };
 
   const checkAttempts = async () => {
-    if (!user?.id) {
+    if (!user?.userId) {
       setLoading(false);
       return;
     }
 
-    const info = await canPlayGame(user.id, 'memory');
+    const info = await canPlayGame(user.userId, 'memory');
     setAttemptInfo(info);
     setLoading(false);
   };
 
   const initGame = () => {
-    if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
+    if (user?.userId && attemptInfo && !attemptInfo.canPlay) return;
 
     const seed = Date.now();
     const shuffled = [...emojis, ...emojis]
@@ -94,9 +94,9 @@ function MemoryGame({ onComplete, onClose, user }) {
     
     const points = Math.max(200 - (moves * 5), 50);
     
-    if (user?.id) {
+    if (user?.userId) {
       try {
-        await recordGameAttempt(user.id, 'memory', {
+        await recordGameAttempt(user.userId, 'memory', {
           won: true,
           score: points,
           moves: moves,
@@ -133,7 +133,7 @@ function MemoryGame({ onComplete, onClose, user }) {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    if (!user?.id || !attemptInfo) {
+    if (!user?.userId || !attemptInfo) {
       return (
         <div className="game-modal">
           <div className="game-container">

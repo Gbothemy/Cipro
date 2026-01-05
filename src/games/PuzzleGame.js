@@ -39,18 +39,18 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
   }, [timeLeft, gameStarted]);
 
   const checkAttempts = async () => {
-    if (!user?.id) {
+    if (!user?.userId) {
       setLoading(false);
       return;
     }
 
-    const info = await canPlayGame(user.id, 'puzzle');
+    const info = await canPlayGame(user.userId, 'puzzle');
     setAttemptInfo(info);
     setLoading(false);
   };
 
   const startGame = async () => {
-    if (user?.id && attemptInfo && !attemptInfo.canPlay) {
+    if (user?.userId && attemptInfo && !attemptInfo.canPlay) {
       return;
     }
 
@@ -79,9 +79,9 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
   const handleGameEnd = async (won) => {
     setGameStarted(false);
     
-    if (user?.id) {
+    if (user?.userId) {
       try {
-        await recordGameAttempt(user.id, 'puzzle', {
+        await recordGameAttempt(user.userId, 'puzzle', {
           won,
           score: won ? 50 : 10,
           difficulty
@@ -117,7 +117,7 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
   if (!gameStarted && !puzzle.type) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    if (!user?.id || !attemptInfo) {
+    if (!user?.userId || !attemptInfo) {
       return (
         <div className="game-modal">
           <div className="game-container">

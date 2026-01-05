@@ -39,59 +39,55 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   };
 
   const checkAttempts = async () => {
-    if (!user?.id) {
+    if (!user?.userId) {
       setLoading(false);
       return;
     }
 
-    const info = await canPlayGame(user.id, 'trivia');
-    setAttemptInfo(info);
+    try {
+      const info = await canPlayGame(user.userId, 'trivia');
+      setAttemptInfo(info);
+    } catch (error) {
+      console.error('Error checking attempts:', error);
+    }
     setLoading(false);
   };
 
   const startGame = () => {
-    if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
+    if (user?.userId && attemptInfo && !attemptInfo.canPlay) return;
     
     const selectedQuestions = getRandomQuestions(settings.questions, difficulty);
+    console.log('Selected questions:', selectedQuestions); // Debug log
     setQuestions(selectedQuestions);
     setGameStarted(true);
+    setTimeLeft(settings.timePerQuestion);
     soundManager.gameStart();
   };
 
   useEffect(() => {
-    if (questions.length === 0 || gameOver || showResult) return;
+    if (!gameStarted || gameOver || showResult) return;
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          handleTimeout();
-          return settings.timePerQuestion;
-        }
-        if (prev <= 5) {
-          soundManager.tick();
+          handleAnswer(-1); // Time's up
+          return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestion, gameOver, showResult, questions.length]);
+  }, [gameStarted, gameOver, showResult, currentQuestion]);
 
-  const handleTimeout = () => {
-    setShowResult(true);
-    setTimeout(() => {
-      moveToNext();
-    }, 1500);
-  };
-
-  const handleAnswer = (index) => {
+  const handleAnswer = (answerIndex) => {
     if (selectedAnswer !== null) return;
 
-    soundManager.click();
-    setSelectedAnswer(index);
+    setSelectedAnswer(answerIndex);
+    const question = questions[currentQuestion];
+    const isCorrect = answerIndex === question.correct;
     
-    const correct = index === questions[currentQuestion].correct;
-    if (correct) {
+    if (isCorrect) {
       setScore(score + settings.pointsPerCorrect);
       soundManager.correct();
     } else {
@@ -117,11 +113,11 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
 
   const endGame = async () => {
     setGameOver(true);
-    soundManager.gameEnd();
+    soundManager.gameOver();
 
-    if (user?.id) {
+    if (user?.userId) {
       try {
-        await recordGameAttempt(user.id, 'trivia', {
+        await recordGameAttempt(user.userId, 'trivia', {
           score,
           questionsAnswered: currentQuestion + 1,
           difficulty
@@ -157,7 +153,7 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    if (!user?.id || !attemptInfo) {
+    if (!user?.userId || !attemptInfo) {
       return (
         <div className="game-modal">
           <div className="game-container">
@@ -267,8 +263,29 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
     );
   }
 
+  // Safety check for questions and current question
+  if (!questions || questions.length === 0 || !questions[currentQuestion]) {
+    return (
+      <div className="game-modal">
+        <div className="game-container">
+          <div className="game-header">
+            <h2>🎯 Trivia Challenge</h2>
+            <button className="close-btn" onClick={handleClose}>✕</button>
+          </div>
+          <div className="game-content">
+            <div className="game-intro">
+              <p>Loading questions...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+  console.log('Current question:', question); // Debug log
 
   return (
     <div className="game-modal">
@@ -294,7 +311,7 @@ const TriviaGame = ({ onComplete, onClose, user, difficulty = 'easy' }) => {
             
             <div className="answers-section">
               <div className="answers-grid">
-                {question.answers.map((answer, index) => (
+                {(question.answers || question.options) && (question.answers || question.options).map((answer, index) => (
                   <button
                     key={index}
                     onClick={() => handleAnswer(index)}

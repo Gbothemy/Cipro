@@ -37,25 +37,25 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   };
 
   const checkAttempts = async () => {
-    if (!user?.id) {
+    if (!user?.userId) {
       setLoading(false);
       return;
     }
 
-    const info = await canPlayGame(user.id, 'spinwheel');
+    const info = await canPlayGame(user.userId, 'spinwheel');
     setAttemptInfo(info);
     setLoading(false);
   };
 
   const startGame = () => {
-    if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
+    if (user?.userId && attemptInfo && !attemptInfo.canPlay) return;
     setGameStarted(true);
   };
 
   const spinWheel = async () => {
     if (spinning) return;
     
-    if (user?.id && attemptInfo && !attemptInfo.canPlay) return;
+    if (user?.userId && attemptInfo && !attemptInfo.canPlay) return;
 
     setSpinning(true);
     soundManager.spin();
@@ -72,9 +72,9 @@ function SpinWheelGame({ onComplete, onClose, user }) {
       setSpinning(false);
       setResult(prize);
 
-      if (user?.id) {
+      if (user?.userId) {
         try {
-          await recordGameAttempt(user.id, 'spinwheel', {
+          await recordGameAttempt(user.userId, 'spinwheel', {
             won: true,
             score: prize.points,
             difficulty: 'easy'
@@ -112,7 +112,7 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   if (!gameStarted) {
     const timeUntilReset = getTimeUntilReset(attemptInfo?.resetTime);
     
-    if (!user?.id || !attemptInfo) {
+    if (!user?.userId || !attemptInfo) {
       return (
         <div className="game-modal">
           <div className="game-container">
