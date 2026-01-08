@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { getRandomPuzzle, getTotalPuzzleCount } from '../data/puzzleBank';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
@@ -16,14 +16,26 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
   useEffect(() => {
     checkAttempts();
     document.body.classList.add('modal-open');
+    
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
 
+  useEffect(() => {
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (document.body.classList.contains('modal-open')) {
+        document.body.classList.remove('modal-open');
+      }
+    };
+  }, []);
+
   const handleClose = () => {
     document.body.classList.remove('modal-open');
-    onClose();
+    if (onClose) {
+      onClose();
+    }
   };
 
   useEffect(() => {
@@ -44,9 +56,23 @@ function PuzzleGame({ onComplete, onClose, user, difficulty = 'easy' }) {
       return;
     }
 
-    const info = await canPlayGame(user.userId, 'puzzle');
-    setAttemptInfo(info);
-    setLoading(false);
+    try {
+      const info = await canPlayGame(user.userId, 'puzzle');
+      setAttemptInfo(info);
+    } catch (error) {
+      console.error('Error checking game attempts:', error);
+      // Set fallback data if checking fails
+      setAttemptInfo({
+        canPlay: true,
+        attemptsUsed: 0,
+        attemptsRemaining: 5,
+        dailyLimit: 5,
+        vipTier: 'Bronze',
+        resetTime: null
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const startGame = async () => {

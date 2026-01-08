@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db, supabase } from '../db/supabase';
 import SEOHead from '../components/SEOHead';
 import { formatBalance } from '../utils/formatBalance';

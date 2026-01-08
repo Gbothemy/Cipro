@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
 import './GameModal.css';
@@ -19,14 +19,26 @@ function MemoryGame({ onComplete, onClose, user }) {
   useEffect(() => {
     checkAttempts();
     document.body.classList.add('modal-open');
+    
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
 
+  useEffect(() => {
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (document.body.classList.contains('modal-open')) {
+        document.body.classList.remove('modal-open');
+      }
+    };
+  }, []);
+
   const handleClose = () => {
     document.body.classList.remove('modal-open');
-    onClose();
+    if (onClose) {
+      onClose();
+    }
   };
 
   const checkAttempts = async () => {
@@ -35,9 +47,23 @@ function MemoryGame({ onComplete, onClose, user }) {
       return;
     }
 
-    const info = await canPlayGame(user.userId, 'memory');
-    setAttemptInfo(info);
-    setLoading(false);
+    try {
+      const info = await canPlayGame(user.userId, 'memory');
+      setAttemptInfo(info);
+    } catch (error) {
+      console.error('Error checking game attempts:', error);
+      // Set fallback data if checking fails
+      setAttemptInfo({
+        canPlay: true,
+        attemptsUsed: 0,
+        attemptsRemaining: 5,
+        dailyLimit: 5,
+        vipTier: 'Bronze',
+        resetTime: null
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const initGame = () => {
@@ -104,11 +130,14 @@ function MemoryGame({ onComplete, onClose, user }) {
         });
       } catch (error) {
         console.error('Error recording game attempt:', error);
+        // Continue with game completion even if recording fails
       }
     }
 
     setTimeout(() => {
-      onComplete(true, points);
+      if (onComplete) {
+        onComplete(true, points);
+      }
     }, 2000);
   };
 

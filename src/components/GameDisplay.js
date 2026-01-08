@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PuzzleGame from '../games/PuzzleGame';
 import SpinWheelGame from '../games/SpinWheelGame';
@@ -107,6 +107,19 @@ const GameDisplay = ({
       });
     } catch (error) {
       console.error('Error loading game attempts:', error);
+      // Set fallback data if loading fails
+      setGameAttempts({
+        canPlay: true,
+        attemptsUsed: 0,
+        attemptsRemaining: 5,
+        dailyLimit: 5,
+        vipTier: 'Bronze',
+        resetTime: null,
+        timeUntilReset: 'Unknown'
+      });
+      if (addNotification) {
+        addNotification('Unable to load game attempt data. Using defaults.', 'warning');
+      }
     }
   };
 
@@ -175,11 +188,29 @@ const GameDisplay = ({
         
         addNotification(`🎉 Game completed! +${points} points earned!`, 'success');
       } else {
-        addNotification('Error recording game. Please try again.', 'error');
+        addNotification('Error recording game. Points not saved.', 'error');
       }
     } catch (error) {
       console.error('Error completing game:', error);
       addNotification('Error saving progress. Please try again.', 'error');
+      
+      // Still update local user state as fallback
+      try {
+        const newPoints = user.points + points;
+        const newExp = user.exp + Math.floor(points / 5);
+        const newCompletedTasks = user.completedTasks + 1;
+        
+        await updateUser({
+          points: newPoints,
+          exp: newExp,
+          completedTasks: newCompletedTasks
+        });
+        
+        addNotification(`Game completed locally! +${points} points earned!`, 'info');
+      } catch (updateError) {
+        console.error('Error updating user locally:', updateError);
+        addNotification('Unable to save progress. Please contact support.', 'error');
+      }
     }
     
     setActiveGame(null);

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';
 import './GameModal.css';
@@ -26,14 +26,26 @@ function SpinWheelGame({ onComplete, onClose, user }) {
   useEffect(() => {
     checkAttempts();
     document.body.classList.add('modal-open');
+    
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
 
+  useEffect(() => {
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (document.body.classList.contains('modal-open')) {
+        document.body.classList.remove('modal-open');
+      }
+    };
+  }, []);
+
   const handleClose = () => {
     document.body.classList.remove('modal-open');
-    onClose();
+    if (onClose) {
+      onClose();
+    }
   };
 
   const checkAttempts = async () => {
@@ -42,9 +54,23 @@ function SpinWheelGame({ onComplete, onClose, user }) {
       return;
     }
 
-    const info = await canPlayGame(user.userId, 'spinwheel');
-    setAttemptInfo(info);
-    setLoading(false);
+    try {
+      const info = await canPlayGame(user.userId, 'spinwheel');
+      setAttemptInfo(info);
+    } catch (error) {
+      console.error('Error checking game attempts:', error);
+      // Set fallback data if checking fails
+      setAttemptInfo({
+        canPlay: true,
+        attemptsUsed: 0,
+        attemptsRemaining: 5,
+        dailyLimit: 5,
+        vipTier: 'Bronze',
+        resetTime: null
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const startGame = () => {
