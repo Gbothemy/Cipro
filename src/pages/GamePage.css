@@ -2,6 +2,25 @@
   padding-bottom: 20px;
 }
 
+/* Mobile-first responsive padding */
+@media (max-width: 767px) {
+  .game-page {
+    padding-bottom: 85px; /* Account for bottom navigation */
+  }
+}
+
+@media (max-width: 480px) {
+  .game-page {
+    padding-bottom: 80px;
+  }
+}
+
+@media (max-width: 360px) {
+  .game-page {
+    padding-bottom: 75px;
+  }
+}
+
 .page-header {
   margin-bottom: 30px;
 }
@@ -341,6 +360,10 @@
 }
 
 @media (max-width: 768px) {
+  .game-page {
+    padding-bottom: 85px; /* Account for bottom navigation */
+  }
+  
   .page-header {
     margin-bottom: 20px;
   }
@@ -352,6 +375,21 @@
   
   .page-subtitle {
     font-size: 14px;
+  }
+  
+  .balance-card {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+  
+  .balance-card h2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .points-display {
+    font-size: 36px;
   }
   
   .stats-grid {
@@ -393,6 +431,7 @@
   
   .mining-card {
     padding: 16px;
+    border-radius: 16px;
   }
   
   .mining-icon {
@@ -418,6 +457,7 @@
   .start-btn {
     padding: 10px 20px;
     font-size: 13px;
+    border-radius: 20px;
   }
   
   .cooldown-text {
