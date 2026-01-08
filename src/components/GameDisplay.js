@@ -165,6 +165,11 @@ const GameDisplay = ({
           completedTasks: newCompletedTasks
         });
 
+        // Update task progress for games played
+        if (window.updateTaskProgress && window.updateTaskProgress.game) {
+          window.updateTaskProgress.game(1);
+        }
+
         // Reload game attempts
         await loadGameAttempts();
         
