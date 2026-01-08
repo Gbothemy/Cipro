@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import soundManager from '../utils/soundManager';
 import { getRandomPuzzle, getTotalPuzzleCount } from '../data/puzzleBank';
 import { canPlayGame, recordGameAttempt, getTimeUntilReset } from '../utils/gameAttemptManager';

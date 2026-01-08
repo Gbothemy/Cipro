@@ -1,13 +1,15 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
 import CiproLoader from './components/CiproLoader';
-import PerformanceOptimizer from './components/PerformanceOptimizer';
+// Temporarily comment out PerformanceOptimizer to debug
+// import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { db } from './db/supabase';
-import trafficTracker from './utils/trafficTracker';
-import { initializeAnalytics } from './utils/analytics';
-import { initializeSEO } from './utils/seoOptimization';
+// Temporarily comment out utilities to debug
+// import trafficTracker from './utils/trafficTracker';
+// import { initializeAnalytics } from './utils/analytics';
+// import { initializeSEO } from './utils/seoOptimization';
 import './App.css';
 
 // Lazy load pages
@@ -39,8 +41,9 @@ function RouteTracker() {
   const location = useLocation();
   
   useEffect(() => {
-    // Track page view on route change
-    trafficTracker.onPageChange();
+    // Track page view on route change - debugging mode
+    // trafficTracker.onPageChange(); // Temporarily commented out
+    console.log('Route changed to:', location.pathname);
   }, [location]);
   
   return null;
@@ -80,12 +83,17 @@ function App() {
 
   // Check authentication on mount and restore session
   useEffect(() => {
-    // Initialize SEO and Analytics
-    initializeSEO();
-    initializeAnalytics({
-      ga4MeasurementId: process.env.REACT_APP_GA4_MEASUREMENT_ID,
-      facebookPixelId: process.env.REACT_APP_FACEBOOK_PIXEL_ID
-    });
+    // Initialize SEO and Analytics with error handling
+    try {
+      // initializeSEO(); // Temporarily commented out
+      // initializeAnalytics({
+      //   ga4MeasurementId: process.env.REACT_APP_GA4_MEASUREMENT_ID,
+      //   facebookPixelId: process.env.REACT_APP_FACEBOOK_PIXEL_ID
+      // }); // Temporarily commented out
+      console.log('Analytics initialization skipped for debugging');
+    } catch (error) {
+      console.error('Error initializing analytics:', error);
+    }
 
     const savedAuthUser = localStorage.getItem('authUser');
     if (savedAuthUser) {
@@ -221,7 +229,7 @@ function App() {
 
   return (
     <HelmetProvider>
-      <PerformanceOptimizer />
+      {/* <PerformanceOptimizer /> Temporarily commented out for debugging */}
       <Router>
         <RouteTracker />
       <Suspense fallback={
