@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db, supabase } from '../db/supabase';
+import { db } from '../db/neon';
 import SEOHead from '../components/SEOHead';
 import { formatBalance } from '../utils/formatBalance';
 import LuckyDrawPayment from '../components/LuckyDrawPayment';

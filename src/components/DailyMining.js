@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import AnimatedCounter from './AnimatedCounter';
 import ProgressBar from './ProgressBar';
 import ConfettiEffect from './ConfettiEffect';

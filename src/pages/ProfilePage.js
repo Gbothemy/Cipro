@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import { formatBalance } from '../utils/formatBalance';
 import './ProfilePage.css';
 

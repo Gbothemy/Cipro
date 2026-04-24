@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import { getVIPConfig } from '../utils/vipConfig';
 import { COMPANY_WALLETS } from '../config/walletConfig';
 import RevenueDashboard from './RevenueDashboard';

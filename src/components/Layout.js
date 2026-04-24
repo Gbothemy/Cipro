@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import soundManager from '../utils/soundManager';
 import themeManager from '../utils/themeManager';
 import GoogleAd, { AdSlots } from './GoogleAd';
+// import MobileIndicator from './MobileIndicator';
 import './Layout.css';
 
 function Layout({ children, user, notifications = [], onLogout, isAdmin = false }) {
@@ -39,19 +40,20 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   };
 
   const navigationItems = [
-    { path: '/', icon: '🎮', label: 'Mining', section: 'main', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    // Core Features (4 main items)
+    { path: '/', icon: '🎮', label: 'Games', section: 'main', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
     { path: '/tasks', icon: '📋', label: 'Tasks', section: 'main', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { path: '/daily-rewards', icon: '🎁', label: 'Rewards', section: 'main', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-    { path: '/lucky-draw', icon: '🎰', label: 'Lucky Draw', section: 'earn', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', badge: 'New' },
-    { path: '/airdrop', icon: '🪂', label: 'Airdrop', section: 'earn', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
-    { path: '/referral', icon: '👥', label: 'Referral', section: 'earn', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
-    { path: '/conversion', icon: '💳', label: 'Wallet', section: 'wallet', gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' },
-    { path: '/leaderboard', icon: '🏆', label: 'Leaderboard', section: 'community', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { path: '/achievements', icon: '🎖️', label: 'Achievements', section: 'community', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { path: '/vip-tiers', icon: '💎', label: 'VIP', section: 'community', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { path: '/conversion', icon: '💳', label: 'Wallet', section: 'main', gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)' },
+    { path: '/leaderboard', icon: '🏆', label: 'Leaderboard', section: 'main', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    
+    // Secondary Features (moved to "More" section)
+    { path: '/daily-rewards', icon: '🎁', label: 'Daily Rewards', section: 'more', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { path: '/referral', icon: '👥', label: 'Invite Friends', section: 'more', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
+    { path: '/achievements', icon: '🎖️', label: 'Achievements', section: 'more', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    
+    // Account Features
     { path: '/profile', icon: '👤', label: 'Profile', section: 'account', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-    { path: '/notifications', icon: '🔔', label: 'Notifications', section: 'account', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
-    { path: '/faq', icon: '❓', label: 'FAQ', section: 'account', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }
+    { path: '/faq', icon: '❓', label: 'Help', section: 'account', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }
   ];
 
   const getActiveSection = () => {
@@ -68,15 +70,16 @@ function Layout({ children, user, notifications = [], onLogout, isAdmin = false 
   }, {});
 
   const sectionTitles = {
-    main: 'Main Features',
-    earn: 'Earn More',
-    wallet: 'Wallet',
-    community: 'Community',
+    main: 'Main',
+    more: 'More',
     account: 'Account'
   };
 
   return (
     <div className="app-container">
+      {/* Mobile Indicator - Temporarily disabled */}
+      {/* <MobileIndicator /> */}
+      
       {/* Enhanced Notifications */}
       <div className="notifications-container">
         {notifications.map(notif => (

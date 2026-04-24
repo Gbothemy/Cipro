@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 
 function LuckyDrawPayment({ user, onPaymentSuccess, onClose, ticketQuantity, totalCost }) {
   const [paymentMethod, setPaymentMethod] = useState('usdt');

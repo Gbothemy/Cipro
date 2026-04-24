@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import SkeletonLoader from '../components/SkeletonLoader';
 import SEOHead from '../components/SEOHead';
 import { formatBalance } from '../utils/formatBalance';

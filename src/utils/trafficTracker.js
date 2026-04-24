@@ -1,5 +1,5 @@
 // Traffic and Revenue Tracking System
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 
 class TrafficTracker {
   constructor() {

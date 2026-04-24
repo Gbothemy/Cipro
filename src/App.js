@@ -5,7 +5,7 @@ import Layout from './components/Layout';
 import CiproLoader from './components/CiproLoader';
 // Temporarily comment out PerformanceOptimizer to debug
 // import PerformanceOptimizer from './components/PerformanceOptimizer';
-import { db } from './db/supabase';
+import { db } from './db/neon';
 // Temporarily comment out utilities to debug
 // import trafficTracker from './utils/trafficTracker';
 // import { initializeAnalytics } from './utils/analytics';

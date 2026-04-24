@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 
 function LuckyDrawAdmin({ addNotification }) {
   const [payments, setPayments] = useState([]);

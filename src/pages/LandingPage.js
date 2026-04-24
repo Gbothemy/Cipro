@@ -1,49 +1,41 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import SimpleValueProp from '../components/SimpleValueProp';
+// import ValueProposition from '../components/ValueProposition';
 import './LandingPage.css';
 
 function LandingPage() {
   const navigate = useNavigate();
   
-  // Hardcoded stats - not retrieved from database
+  // Remove fake stats - be honest about being new
   const stats = [
-    { value: '100k+', label: 'Active Players' },
-    { value: '$10k+', label: 'Rewards Paid' },
-    { value: '500k+', label: 'Tasks Completed' },
-    { value: '4.9/5', label: 'User Rating' }
+    { value: '4', label: 'Fun Games' },
+    { value: '$1', label: 'Per 10k Points' },
+    { value: '$5', label: 'Min Withdrawal' },
+    { value: '24/7', label: 'Available' }
   ];
 
   const features = [
     {
       icon: '🎮',
-      title: 'Play & Earn',
-      description: 'Complete mining tasks and earn crypto rewards instantly'
+      title: 'Play Games',
+      description: 'Four fun games: Puzzle, Memory, Trivia, and Spin Wheel'
     },
     {
-      icon: '💰',
-      title: 'Daily Airdrops',
-      description: 'Claim free SOL, ETH, USDT, and USDC every 24 hours'
+      icon: '📋',
+      title: 'Complete Tasks',
+      description: 'Daily challenges and achievements for bonus points'
     },
     {
-      icon: '👥',
-      title: 'Refer Friends',
-      description: 'Earn 10% commission from all your referrals'
+      icon: '💳',
+      title: 'Earn Crypto',
+      description: 'Convert points to USDT, SOL, ETH, or USDC'
     },
     {
       icon: '🏆',
       title: 'Compete',
-      description: 'Climb the leaderboard and win exclusive rewards'
-    },
-    {
-      icon: '🎁',
-      title: 'Reward Packs',
-      description: 'Unlock special packs with amazing prizes'
-    },
-    {
-      icon: '⭐',
-      title: 'VIP Levels',
-      description: 'Level up and unlock premium benefits'
+      description: 'Climb the leaderboard and track your progress'
     }
   ];
 
@@ -206,6 +198,11 @@ function LandingPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Value Proposition Section */}
+      <section className="value-prop-section">
+        <SimpleValueProp />
       </section>
 
       {/* How It Works */}

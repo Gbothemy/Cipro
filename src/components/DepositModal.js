@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { COMPANY_WALLETS, generatePaymentLink, generateQRData } from '../config/walletConfig';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import './DepositModal.css';
 
 function DepositModal({ isOpen, onClose, user, addNotification, subscriptionTier = null, billingCycle = 'monthly' }) {

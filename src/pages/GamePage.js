@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../db/supabase';
+import { db } from '../db/neon';
 import DailyMining from '../components/DailyMining';
 import ActivityFeed from '../components/ActivityFeed';
 import GameDisplay from '../components/GameDisplay';
