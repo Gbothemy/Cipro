@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { query } from '../../../lib/db';
+import { query, healthCheck } from '../../../lib/db';
+import cache from '../../../lib/cache';
+import { getMockData } from '../../../lib/mockData';
+
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA === 'true';
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -12,16 +16,67 @@ export async function OPTIONS() {
   });
 }
 
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get('action');
+
+  if (action === 'health') {
+    const health = await healthCheck();
+    return NextResponse.json(health);
+  }
+
+  return NextResponse.json({ error: 'Use POST for database operations' }, { status: 405 });
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
     const { action, ...params } = body;
-    const result = await handleAction(action, params);
+    
+    if (!action) {
+      return NextResponse.json({ data: null, error: 'Action is required' }, { status: 400 });
+    }
+
+    // Try database first, fallback to mock data if unavailable
+    let result;
+    try {
+      result = await handleAction(action, params);
+    } catch (dbError) {
+      console.error(`Database error for action ${action}:`, dbError.message);
+      
+      if (USE_MOCK_DATA || shouldUseMockData(dbError)) {
+        console.log(`Using mock data for action: ${action}`);
+        result = getMockData(action, params);
+        if (result === null) throw dbError;
+      } else {
+        throw dbError;
+      }
+    }
+
     return NextResponse.json({ data: result, error: null });
   } catch (err) {
-    console.error('DB API error:', err.message);
-    return NextResponse.json({ data: null, error: err.message }, { status: 500 });
+    console.error('API error:', {
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+    return NextResponse.json(
+      { data: null, error: err.message || 'Internal server error' },
+      { status: 500 }
+    );
   }
+}
+
+function shouldUseMockData(error) {
+  const mockDataErrors = [
+    'relation',
+    'does not exist',
+    'connect',
+    'ECONNREFUSED',
+    'ENOTFOUND',
+    'timeout',
+    'no pg_hba.conf entry',
+  ];
+  return mockDataErrors.some(err => error.message?.toLowerCase().includes(err.toLowerCase()));
 }
 
 async function handleAction(action, p) {
@@ -63,10 +118,16 @@ async function handleAction(action, p) {
       return formatUser(r.rows[0]);
     }
     case 'getAllUsers': {
+      const cacheKey = 'all-users';
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+      
       const r = await query(
         `SELECT u.*, b.sol, b.eth, b.usdt, b.usdc FROM users u LEFT JOIN balances b ON b.user_id=u.user_id WHERE u.is_admin=false ORDER BY u.points DESC`
       );
-      return r.rows.map(formatUser);
+      const users = r.rows.map(formatUser);
+      cache.set(cacheKey, users, 300);
+      return users;
     }
     case 'updateBalance': {
       const r = await query(
@@ -80,6 +141,10 @@ async function handleAction(action, p) {
         `UPDATE users SET points=points+$1 WHERE user_id=$2 RETURNING *`,
         [p.points, p.user_id]
       );
+      // Invalidate caches
+      cache.delete('all-users');
+      cache.delete('leaderboard-points-10');
+      cache.delete('leaderboard-points-50');
       return formatUser(r.rows[0]);
     }
     case 'createWithdrawalRequest': {
@@ -121,18 +186,29 @@ async function handleAction(action, p) {
     }
     case 'getLeaderboard': {
       const limit = p.limit || 10;
+      const cacheKey = `leaderboard-${p.type || 'points'}-${limit}`;
+      
+      // Check cache first
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+      
+      let result;
       if (p.type === 'earnings') {
         const r = await query(`SELECT u.user_id,u.username,u.avatar,b.sol,b.eth,b.usdt,b.usdc FROM users u LEFT JOIN balances b ON b.user_id=u.user_id WHERE u.is_admin=false`);
-        return r.rows.map(u => ({
+        result = r.rows.map(u => ({
           ...u, total_earnings: (u.sol||0)*100 + (u.eth||0)*2000 + (u.usdt||0) + (u.usdc||0)
         })).sort((a,b) => b.total_earnings - a.total_earnings).slice(0, limit);
-      }
-      if (p.type === 'streak') {
+      } else if (p.type === 'streak') {
         const r = await query(`SELECT user_id,username,avatar,day_streak,points FROM users WHERE is_admin=false ORDER BY day_streak DESC LIMIT $1`, [limit]);
-        return r.rows;
+        result = r.rows;
+      } else {
+        const r = await query(`SELECT user_id,username,avatar,points,vip_level FROM users WHERE is_admin=false ORDER BY points DESC LIMIT $1`, [limit]);
+        result = r.rows;
       }
-      const r = await query(`SELECT user_id,username,avatar,points,vip_level FROM users WHERE is_admin=false ORDER BY points DESC LIMIT $1`, [limit]);
-      return r.rows;
+      
+      // Cache for 5 minutes
+      cache.set(cacheKey, result, 300);
+      return result;
     }
     case 'getTasks': {
       const r = p.taskType
