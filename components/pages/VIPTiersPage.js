@@ -19,7 +19,7 @@ export default function VIPTiersPage() {
   const handlePurchase = async (tier) => {
     if (!user?.userId || tier.level <= currentLevel) return;
     
-    const userBalance = user?.balance?.usdt || 0;
+    const userBalance = Number(user?.balance?.usdt || 0);
     if (userBalance < tier.priceUSDT) {
       addNotification({
         type: 'error',
@@ -75,7 +75,7 @@ export default function VIPTiersPage() {
         </div>
         <div className="ml-auto text-right">
           <p className="text-xs text-dim">USDT Balance</p>
-          <p className="font-bold text-success">${(user?.balance?.usdt || 0).toFixed(2)}</p>
+          <p className="font-bold text-success">${Number(user?.balance?.usdt || 0).toFixed(2)}</p>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function VIPTiersPage() {
         {TIERS.map((tier) => {
           const isActive = tier.level === currentLevel;
           const isUnlocked = tier.level <= currentLevel;
-          const userBalance = user?.balance?.usdt || 0;
+          const userBalance = Number(user?.balance?.usdt || 0);
           const canPurchase = tier.level > currentLevel && userBalance >= tier.priceUSDT;
           const isPurchasing = purchasing === tier.level;
           

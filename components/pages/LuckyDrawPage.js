@@ -58,7 +58,7 @@ export default function LuckyDrawPage() {
     if (!user?.userId || purchasing) return;
     
     const cost = quantity * TICKET_PRICE;
-    const userBalance = user?.balance?.usdt || 0;
+    const userBalance = Number(user?.balance?.usdt || 0);
     
     if (userBalance < cost) {
       addNotification({
@@ -239,7 +239,7 @@ export default function LuckyDrawPage() {
 
         <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
           <p className="text-xs text-success">
-            💰 Your Balance: ${(user?.balance?.usdt || 0).toFixed(2)} USDT
+            💰 Your Balance: ${Number(user?.balance?.usdt || 0).toFixed(2)} USDT
           </p>
         </div>
       </div>
