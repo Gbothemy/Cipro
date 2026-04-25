@@ -10,8 +10,10 @@ const NAV_ITEMS = [
   { path: '/tasks',        icon: '📋', label: 'Tasks' },
   { path: '/conversion',   icon: '💳', label: 'Wallet' },
   { path: '/leaderboard',  icon: '🏆', label: 'Leaderboard' },
+  { path: '/lucky-draw',   icon: '🎰', label: 'Lucky Draw' },
   { path: '/daily-rewards',icon: '🎁', label: 'Daily' },
   { path: '/referral',     icon: '👥', label: 'Invite' },
+  { path: '/vip-tiers',    icon: '👑', label: 'VIP' },
   { path: '/achievements', icon: '🎖️', label: 'Achievements' },
   { path: '/profile',      icon: '👤', label: 'Profile' },
   { path: '/faq',          icon: '❓', label: 'Help' },
@@ -20,7 +22,7 @@ const NAV_ITEMS = [
 const BOTTOM_NAV = [
   { path: '/game',        icon: '🎮', label: 'Games' },
   { path: '/tasks',       icon: '📋', label: 'Tasks' },
-  { path: '/leaderboard', icon: '🏆', label: 'Board' },
+  { path: '/lucky-draw',  icon: '🎰', label: 'Draw' },
   { path: '/conversion',  icon: '💳', label: 'Wallet' },
   { path: '/profile',     icon: '👤', label: 'Profile' },
 ];

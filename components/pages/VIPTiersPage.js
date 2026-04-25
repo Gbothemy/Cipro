@@ -1,23 +1,65 @@
 'use client';
+import { useState } from 'react';
 import useStore from '../../app/store/useStore';
+import { db } from '../../lib/apiClient';
 
 const TIERS = [
-  { level: 1, name: 'Bronze', icon: '🥉', color: 'from-amber-700 to-amber-600', minPoints: 0, dailyGames: 5, conversionBonus: '0%', perks: ['5 game attempts/day', 'Standard conversion rate', 'Daily rewards'] },
-  { level: 2, name: 'Silver', icon: '🥈', color: 'from-slate-400 to-slate-300', minPoints: 10000, dailyGames: 7, conversionBonus: '5%', perks: ['7 game attempts/day', '5% better conversion', 'Priority support'] },
-  { level: 3, name: 'Gold', icon: '🥇', color: 'from-amber-500 to-yellow-400', minPoints: 50000, dailyGames: 10, conversionBonus: '10%', perks: ['10 game attempts/day', '10% better conversion', 'Exclusive tasks'] },
-  { level: 4, name: 'Platinum', icon: '💎', color: 'from-cyan-400 to-blue-400', minPoints: 200000, dailyGames: 15, conversionBonus: '15%', perks: ['15 game attempts/day', '15% better conversion', 'Lucky draw tickets'] },
-  { level: 5, name: 'Diamond', icon: '👑', color: 'from-purple-400 to-pink-400', minPoints: 1000000, dailyGames: 20, conversionBonus: '20%', perks: ['20 game attempts/day', '20% better conversion', 'VIP-only events'] },
+  { level: 1, name: 'Bronze', icon: '🥉', color: 'from-amber-700 to-amber-600', minPoints: 0, price: 0, dailyGames: 5, conversionBonus: '0%', perks: ['5 game attempts/day', 'Standard conversion rate', 'Daily rewards'] },
+  { level: 2, name: 'Silver', icon: '🥈', color: 'from-slate-400 to-slate-300', minPoints: 10000, price: 5000, dailyGames: 7, conversionBonus: '5%', perks: ['7 game attempts/day', '5% better conversion', 'Priority support'] },
+  { level: 3, name: 'Gold', icon: '🥇', color: 'from-amber-500 to-yellow-400', minPoints: 50000, price: 15000, dailyGames: 10, conversionBonus: '10%', perks: ['10 game attempts/day', '10% better conversion', 'Exclusive tasks'] },
+  { level: 4, name: 'Platinum', icon: '💎', color: 'from-cyan-400 to-blue-400', minPoints: 200000, price: 40000, dailyGames: 15, conversionBonus: '15%', perks: ['15 game attempts/day', '15% better conversion', 'Lucky draw tickets'] },
+  { level: 5, name: 'Diamond', icon: '👑', color: 'from-purple-400 to-pink-400', minPoints: 1000000, price: 100000, dailyGames: 20, conversionBonus: '20%', perks: ['20 game attempts/day', '20% better conversion', 'VIP-only events'] },
 ];
 
 export default function VIPTiersPage() {
-  const { user } = useStore();
+  const { user, updateUser, addNotification } = useStore();
+  const [purchasing, setPurchasing] = useState(null);
   const currentLevel = user?.vipLevel || 1;
+
+  const handlePurchase = async (tier) => {
+    if (!user?.userId || tier.level <= currentLevel) return;
+    
+    const userPoints = user?.points || 0;
+    if (userPoints < tier.price) {
+      addNotification({
+        type: 'error',
+        title: 'Insufficient Points',
+        message: `You need ${tier.price.toLocaleString()} points to upgrade to ${tier.name}`,
+      });
+      return;
+    }
+
+    setPurchasing(tier.level);
+    try {
+      // Deduct points and upgrade VIP level
+      const updatedUser = await db.updateUser(user.userId, {
+        points: userPoints - tier.price,
+        vipLevel: tier.level,
+      });
+      
+      updateUser(updatedUser);
+      addNotification({
+        type: 'success',
+        title: '🎉 VIP Upgraded!',
+        message: `You are now ${tier.name} tier! Enjoy your new benefits.`,
+      });
+    } catch (error) {
+      console.error(error);
+      addNotification({
+        type: 'error',
+        title: 'Upgrade Failed',
+        message: error.message || 'Failed to upgrade VIP tier',
+      });
+    } finally {
+      setPurchasing(null);
+    }
+  };
 
   return (
     <div className="page-container">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">VIP Tiers</h1>
-        <p className="text-muted mt-2">Unlock better rewards as you level up</p>
+        <p className="text-muted mt-2">Unlock better rewards as you level up or purchase instantly</p>
       </div>
 
       {/* Current tier */}
@@ -28,7 +70,7 @@ export default function VIPTiersPage() {
           <p className="text-xl font-bold text-white">{TIERS[currentLevel - 1]?.name || 'Bronze'}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-xs text-dim">Total Points</p>
+          <p className="text-xs text-dim">Your Points</p>
           <p className="font-bold text-primary">{(user?.points || 0).toLocaleString()}</p>
         </div>
       </div>
@@ -37,6 +79,9 @@ export default function VIPTiersPage() {
         {TIERS.map((tier) => {
           const isActive = tier.level === currentLevel;
           const isUnlocked = tier.level <= currentLevel;
+          const canPurchase = tier.level > currentLevel && (user?.points || 0) >= tier.price;
+          const isPurchasing = purchasing === tier.level;
+          
           return (
             <div
               key={tier.level}
@@ -63,8 +108,10 @@ export default function VIPTiersPage() {
                 <h3 className="font-bold text-white">{tier.name}</h3>
                 {isActive && <span className="badge-primary text-xs">Current</span>}
               </div>
-              <p className="text-xs text-dim mb-4">{tier.minPoints.toLocaleString()} pts required</p>
-              <ul className="flex-col gap-2">
+              <p className="text-xs text-dim mb-4">
+                {tier.level === 1 ? 'Free tier' : `${tier.price.toLocaleString()} points`}
+              </p>
+              <ul className="flex-col gap-2 mb-4">
                 {tier.perks.map((perk, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs text-muted">
                     <span className={isUnlocked ? 'text-success' : 'text-dim'}>✓</span>
@@ -72,9 +119,57 @@ export default function VIPTiersPage() {
                   </li>
                 ))}
               </ul>
+              
+              {tier.level > currentLevel && (
+                <button
+                  onClick={() => handlePurchase(tier)}
+                  disabled={!canPurchase || isPurchasing}
+                  className={canPurchase ? 'btn btn-primary w-full text-sm' : 'btn w-full text-sm opacity-50 cursor-not-allowed'}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {isPurchasing ? '⏳ Upgrading...' : canPurchase ? `💎 Upgrade Now` : '🔒 Locked'}
+                </button>
+              )}
+              
+              {isActive && (
+                <div className="text-center text-xs text-success font-medium">
+                  ✓ Active
+                </div>
+              )}
             </div>
           );
         })}
+      </div>
+
+      {/* Info section */}
+      <div className="card p-5 mt-6">
+        <h3 className="font-semibold text-white mb-3">How to Upgrade</h3>
+        <div className="grid gap-3">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">💰</span>
+            <div>
+              <p className="text-sm font-medium text-white">Purchase with Points</p>
+              <p className="text-xs text-dim">Use your earned points to instantly upgrade to any tier</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-xl">🎰</span>
+            <div>
+              <p className="text-sm font-medium text-white">Win in Lucky Draw</p>
+              <p className="text-xs text-dim">Get a free VIP upgrade by winning the lucky draw</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-xl">📈</span>
+            <div>
+              <p className="text-sm font-medium text-white">Earn Points</p>
+              <p className="text-xs text-dim">Play games, complete tasks, and refer friends to earn points</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
