@@ -21,15 +21,22 @@ const NAMES = [
 ];
 
 const generateDefaultUsers = () => {
-  return NAMES.map((name, i) => ({
-    user_id: `DEFAULT-${i}`,
-    username: name,
-    avatar: AVATARS[i % AVATARS.length],
-    points: Math.floor(Math.random() * 50000) + 10000 - (i * 800),
-    total_earnings: (Math.random() * 500 + 50 - (i * 8)).toFixed(2),
-    day_streak: Math.floor(Math.random() * 30) + 5 - Math.floor(i / 2),
-    vip_level: i < 10 ? Math.floor(Math.random() * 3) + 2 : 1,
-  })).sort((a, b) => b.points - a.points);
+  return NAMES.map((name, i) => {
+    // Ensure all values are positive
+    const basePoints = 60000 - (i * 1000); // Decreasing from 60k to 11k
+    const baseEarnings = 600 - (i * 10); // Decreasing from 600 to 110
+    const baseStreak = 35 - Math.floor(i / 2); // Decreasing from 35 to 10
+    
+    return {
+      user_id: `DEFAULT-${i}`,
+      username: name,
+      avatar: AVATARS[i % AVATARS.length],
+      points: Math.max(1000, basePoints + Math.floor(Math.random() * 5000)),
+      total_earnings: Math.max(10, Number((baseEarnings + Math.random() * 50).toFixed(2))),
+      day_streak: Math.max(1, baseStreak + Math.floor(Math.random() * 5)),
+      vip_level: i < 10 ? Math.floor(Math.random() * 3) + 2 : 1,
+    };
+  }).sort((a, b) => b.points - a.points);
 };
 
 export default function LeaderboardPage() {
@@ -50,12 +57,27 @@ export default function LeaderboardPage() {
         db.getLeaderboard('streak', 50),
       ]);
       
-      // Use default users if database returns empty
+      // Generate default users
       const defaultUsers = generateDefaultUsers();
+      
+      // Merge real users with default users (real users first, then fill with defaults)
+      const mergeUsers = (realUsers, defaultUsers, sortKey) => {
+        const merged = [...realUsers];
+        const needed = 50 - realUsers.length;
+        if (needed > 0) {
+          merged.push(...defaultUsers.slice(0, needed));
+        }
+        return merged.sort((a, b) => {
+          const aVal = Number(a[sortKey] || 0);
+          const bVal = Number(b[sortKey] || 0);
+          return bVal - aVal;
+        });
+      };
+      
       setData({ 
-        points: points.length > 0 ? points : defaultUsers.sort((a, b) => b.points - a.points),
-        earnings: earnings.length > 0 ? earnings : defaultUsers.sort((a, b) => b.total_earnings - a.total_earnings),
-        streak: streak.length > 0 ? streak : defaultUsers.sort((a, b) => b.day_streak - a.day_streak),
+        points: mergeUsers(points, defaultUsers, 'points'),
+        earnings: mergeUsers(earnings, defaultUsers, 'total_earnings'),
+        streak: mergeUsers(streak, defaultUsers, 'day_streak'),
       });
     } catch (e) {
       console.error(e);
@@ -63,7 +85,7 @@ export default function LeaderboardPage() {
       const defaultUsers = generateDefaultUsers();
       setData({ 
         points: defaultUsers.sort((a, b) => b.points - a.points),
-        earnings: defaultUsers.sort((a, b) => b.total_earnings - a.total_earnings),
+        earnings: defaultUsers.sort((a, b) => Number(b.total_earnings) - Number(a.total_earnings)),
         streak: defaultUsers.sort((a, b) => b.day_streak - a.day_streak),
       });
     } finally {
@@ -74,10 +96,10 @@ export default function LeaderboardPage() {
   const currentList = data[activeTab] || [];
 
   const getValue = (entry) => {
-    if (activeTab === 'points') return `${(entry.points || 0).toLocaleString()} pts`;
-    if (activeTab === 'earnings') return `$${((entry.total_earnings || 0)).toFixed(2)}`;
-    return `${entry.day_streak || 0} days`;
-  };
+      if (activeTab === 'points') return `${(entry.points || 0).toLocaleString()} pts`;
+      if (activeTab === 'earnings') return `$${Number(entry.total_earnings || 0).toFixed(2)}`;
+      return `${entry.day_streak || 0} days`;
+    };
 
   const getRankStyle = (i) => {
     if (i === 0) return '#fbbf24'; // gold

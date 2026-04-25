@@ -24,31 +24,63 @@ export default function TasksPage() {
   }, [user?.userId]);
 
   const initTasks = async () => {
-    const today = new Date().toISOString().split('T')[0];
-    const claimedKey = `claimedTasks_${user.userId}_${today}`;
-    const savedClaimed = JSON.parse(localStorage.getItem(claimedKey) || '{}');
-    setClaimed(savedClaimed);
-
     try {
-      const [dbTasks, gamesPlayed] = await Promise.all([
+      const [dbTasks, userTasks, gamesPlayed, miningSessions, pointsEarned] = await Promise.all([
         db.getTasks().catch(() => []),
+        db.getUserTasks(user.userId).catch(() => []),
         db.getGamesPlayedToday(user.userId).catch(() => 0),
+        db.getMiningSessionsToday(user.userId).catch(() => 0),
+        db.getPointsEarnedThisMonth(user.userId).catch(() => 0),
       ]);
 
       const allTasks = dbTasks.length > 0 ? dbTasks : FALLBACK_TASKS;
       const grouped = { daily: [], weekly: [], monthly: [] };
 
+      // Create a map of user task progress
+      const userTaskMap = {};
+      userTasks.forEach(ut => {
+        userTaskMap[ut.task_id] = ut;
+      });
+
       allTasks.forEach((t) => {
         const type = t.task_type || 'daily';
         let progress = 0;
+        
+        // Calculate progress based on task type
         if (t.id === 'daily_login') progress = 1;
         if (t.id === 'play_games') progress = Math.min(gamesPlayed, t.required_count);
+        if (t.id === 'mining_session') progress = Math.min(miningSessions, t.required_count);
         if (t.id === 'earn_points') progress = Math.min(user.points || 0, t.required_count);
-        if (grouped[type]) grouped[type].push({ ...t, progress });
+        if (t.id === 'weekly_games') progress = Math.min(gamesPlayed, t.required_count); // Should track weekly
+        if (t.id === 'monthly_points') progress = Math.min(pointsEarned, t.required_count);
+        
+        // Check if task is claimed from database
+        const userTask = userTaskMap[t.id];
+        const isClaimed = userTask?.is_claimed || false;
+        
+        if (grouped[type]) {
+          grouped[type].push({ 
+            ...t, 
+            progress,
+            is_claimed: isClaimed,
+            user_task_id: userTask?.id
+          });
+        }
       });
 
       setTasks(grouped);
+      
+      // Build claimed map from database
+      const claimedMap = {};
+      userTasks.forEach(ut => {
+        if (ut.is_claimed) {
+          claimedMap[ut.task_id] = true;
+        }
+      });
+      setClaimed(claimedMap);
+      
     } catch (e) {
+      console.error('Error loading tasks:', e);
       const grouped = { daily: [], weekly: [], monthly: [] };
       FALLBACK_TASKS.forEach((t) => {
         grouped[t.task_type]?.push({ ...t, progress: t.id === 'daily_login' ? 1 : 0 });
@@ -62,16 +94,34 @@ export default function TasksPage() {
   const claimTask = async (task) => {
     if (claimed[task.id]) return;
     try {
+      // Update task progress first
+      await db.updateTaskProgress(user.userId, task.id, task.progress);
+      
+      // Claim the task
+      await db.claimTask(user.userId, task.id);
+      
+      // Add points to user
       await db.addPoints(user.userId, task.reward_points);
       addPoints(task.reward_points);
-      addNotification({ type: 'success', title: 'Task Complete!', message: `+${task.reward_points} points earned` });
-      const today = new Date().toISOString().split('T')[0];
-      const claimedKey = `claimedTasks_${user.userId}_${today}`;
+      addNotification({ 
+        type: 'success', 
+        title: 'Task Complete!', 
+        message: `+${task.reward_points} points earned` 
+      });
+      
+      // Update local state
       const updated = { ...claimed, [task.id]: true };
       setClaimed(updated);
-      localStorage.setItem(claimedKey, JSON.stringify(updated));
+      
+      // Refresh tasks to get updated data
+      initTasks();
     } catch (e) {
-      console.error(e);
+      console.error('Error claiming task:', e);
+      addNotification({ 
+        type: 'error', 
+        title: 'Error', 
+        message: 'Failed to claim task. Please try again.' 
+      });
     }
   };
 

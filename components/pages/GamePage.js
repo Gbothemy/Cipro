@@ -176,20 +176,35 @@ function GameModal({ gameId, user, onComplete, onClose }) {
 }
 
 // ── Trivia Game ──────────────────────────────────────────────────────────────
-const TRIVIA_QUESTIONS = [
+const ALL_TRIVIA_QUESTIONS = [
   { q: 'What is Bitcoin?', options: ['A cryptocurrency', 'A bank', 'A stock', 'A bond'], answer: 0 },
   { q: 'What does "DeFi" stand for?', options: ['Decentralized Finance', 'Digital Finance', 'Defined Finance', 'Default Finance'], answer: 0 },
   { q: 'What is a blockchain?', options: ['A chain of blocks', 'A distributed ledger', 'A type of database', 'All of the above'], answer: 3 },
   { q: 'What is Ethereum?', options: ['A cryptocurrency platform', 'A bank', 'A game', 'A social network'], answer: 0 },
   { q: 'What is a crypto wallet?', options: ['Stores private keys', 'Stores coins physically', 'A bank account', 'A credit card'], answer: 0 },
+  { q: 'What is mining in crypto?', options: ['Digging for coins', 'Validating transactions', 'Buying coins', 'Trading coins'], answer: 1 },
+  { q: 'What is a smart contract?', options: ['A legal document', 'Self-executing code', 'A paper contract', 'A bank agreement'], answer: 1 },
+  { q: 'What does NFT stand for?', options: ['New Financial Token', 'Non-Fungible Token', 'Net Finance Trade', 'No Fee Transaction'], answer: 1 },
+  { q: 'What is gas fee?', options: ['Fuel cost', 'Transaction fee', 'Mining reward', 'Staking bonus'], answer: 1 },
+  { q: 'What is staking?', options: ['Selling coins', 'Locking coins for rewards', 'Mining coins', 'Trading coins'], answer: 1 },
+  { q: 'What is a private key?', options: ['Password to wallet', 'Public address', 'Username', 'Email'], answer: 0 },
+  { q: 'What is HODL?', options: ['Hold On for Dear Life', 'High Order Digital Ledger', 'Hash Of Digital Link', 'Hold Or Drop Later'], answer: 0 },
+  { q: 'What is a token?', options: ['Physical coin', 'Digital asset on blockchain', 'Bank note', 'Credit card'], answer: 1 },
+  { q: 'What is Web3?', options: ['Third website', 'Decentralized internet', 'Web browser', 'Social media'], answer: 1 },
+  { q: 'What is a DAO?', options: ['Digital Asset Owner', 'Decentralized Autonomous Organization', 'Data Access Object', 'Direct Asset Order'], answer: 1 },
 ];
 
 function TriviaInline({ onComplete, gameId }) {
+  const [questions] = useState(() => {
+    // Shuffle and pick 5 random questions
+    const shuffled = [...ALL_TRIVIA_QUESTIONS].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 5);
+  });
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
   const [done, setDone] = useState(false);
-  const q = TRIVIA_QUESTIONS[idx];
+  const q = questions[idx];
 
   const pick = (i) => {
     if (selected !== null) return;
@@ -197,7 +212,7 @@ function TriviaInline({ onComplete, gameId }) {
     const correct = i === q.answer;
     if (correct) setScore((s) => s + 1);
     setTimeout(() => {
-      if (idx + 1 < TRIVIA_QUESTIONS.length) { setIdx((x) => x + 1); setSelected(null); }
+      if (idx + 1 < questions.length) { setIdx((x) => x + 1); setSelected(null); }
       else setDone(true);
     }, 800);
   };
@@ -207,7 +222,7 @@ function TriviaInline({ onComplete, gameId }) {
     return (
       <div className="text-center py-4">
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-        <h3 className="text-xl font-bold text-white mb-2">{score}/{TRIVIA_QUESTIONS.length} Correct!</h3>
+        <h3 className="text-xl font-bold text-white mb-2">{score}/{questions.length} Correct!</h3>
         <p className="text-muted mb-6">You earned <span className="text-primary font-bold">+{pts} points</span></p>
         <button onClick={() => onComplete(gameId, { points: pts, won: score > 2, score })} className="btn btn-primary px-8">Claim Reward</button>
       </div>
@@ -217,7 +232,7 @@ function TriviaInline({ onComplete, gameId }) {
   return (
     <div>
       <div className="flex justify-between text-xs text-muted mb-4">
-        <span>Question {idx + 1}/{TRIVIA_QUESTIONS.length}</span>
+        <span>Question {idx + 1}/{questions.length}</span>
         <span className="text-primary font-semibold">{score} correct</span>
       </div>
       <p className="font-semibold text-white mb-4">{q.q}</p>
@@ -269,22 +284,38 @@ function MemoryInline({ onComplete, gameId }) {
   const [done, setDone] = useState(false);
 
   const flip = (id) => {
-    if (flipped.length === 2 || cards[id].flipped || cards[id].matched) return;
-    const newCards = cards.map((c) => c.id === id ? { ...c, flipped: true } : c);
+    if (flipped.length === 2 || cards.find(c => c.id === id)?.flipped || cards.find(c => c.id === id)?.matched) return;
+    
     const newFlipped = [...flipped, id];
-    setCards(newCards);
     setFlipped(newFlipped);
+    
+    const newCards = cards.map((c) => c.id === id ? { ...c, flipped: true } : c);
+    setCards(newCards);
+    
     if (newFlipped.length === 2) {
       setMoves((m) => m + 1);
-      const [a, b] = newFlipped;
-      if (newCards[a].emoji === newCards[b].emoji) {
-        const matched = newCards.map((c) => newFlipped.includes(c.id) ? { ...c, matched: true } : c);
+      const [firstId, secondId] = newFlipped;
+      const firstCard = newCards.find(c => c.id === firstId);
+      const secondCard = newCards.find(c => c.id === secondId);
+      
+      if (firstCard.emoji === secondCard.emoji) {
+        // Match found
+        const matched = newCards.map((c) => 
+          c.id === firstId || c.id === secondId ? { ...c, matched: true } : c
+        );
         setCards(matched);
         setFlipped([]);
-        if (matched.every((c) => c.matched)) setDone(true);
+        
+        // Check if all matched
+        if (matched.every((c) => c.matched)) {
+          setTimeout(() => setDone(true), 500);
+        }
       } else {
+        // No match - flip back after delay
         setTimeout(() => {
-          setCards((prev) => prev.map((c) => newFlipped.includes(c.id) ? { ...c, flipped: false } : c));
+          setCards((prev) => prev.map((c) => 
+            c.id === firstId || c.id === secondId ? { ...c, flipped: false } : c
+          ));
           setFlipped([]);
         }, 900);
       }

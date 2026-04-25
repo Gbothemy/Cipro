@@ -166,6 +166,50 @@ export default function ProfilePage() {
         ))}
       </div>
 
+      {/* Deposited Balance */}
+      <div className="card p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-white">💰 Deposited Balance</h3>
+          <button 
+            onClick={() => router.push('/deposit')}
+            className="btn btn-primary btn-sm py-2 px-4 text-xs"
+          >
+            + Deposit
+          </button>
+        </div>
+        <div className="grid-2 gap-3">
+          {[
+            { label: 'SOL', value: user?.balance?.sol || 0, icon: '◎' },
+            { label: 'ETH', value: user?.balance?.eth || 0, icon: 'Ξ' },
+            { label: 'USDT', value: user?.balance?.usdt || 0, icon: '₮' },
+            { label: 'USDC', value: user?.balance?.usdc || 0, icon: '$' },
+          ].map((crypto, i) => (
+            <div 
+              key={i} 
+              className="p-3 rounded-lg"
+              style={{ 
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.05)'
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted mb-1">{crypto.label}</p>
+                  <p className="font-bold text-white">
+                    {crypto.icon} {Number(crypto.value).toFixed(crypto.label === 'USDT' || crypto.label === 'USDC' ? 2 : 4)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(102,126,234,0.05)', border: '1px solid rgba(102,126,234,0.1)' }}>
+          <p className="text-xs text-primary">
+            💡 Only deposited funds can be used for VIP upgrades and Lucky Draw tickets
+          </p>
+        </div>
+      </div>
+
       {/* Logout */}
       <button
         onClick={handleLogout}
