@@ -63,7 +63,7 @@ export default function LuckyDrawPage() {
         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.05), rgba(139,92,246,0.05))' }} />
         <div className="relative">
           <p className="text-sm text-muted mb-2">Current Prize Pool</p>
-          <div className="flex items-center justify-center gap-6 mb-4">
+          <div className="flex items-center justify-center gap-4 flex-wrap mb-4">
             <div>
               <div className="text-3xl font-black" style={{ color: '#fbbf24' }}>{(pool.cipro || 0).toLocaleString()}</div>
               <div className="text-xs text-dim">CIPRO Points</div>
@@ -73,6 +73,15 @@ export default function LuckyDrawPage() {
               <div className="text-3xl font-black text-success">${pool.usdt || 0}</div>
               <div className="text-xs text-dim">USDT</div>
             </div>
+            {pool.vipUpgrade && (
+              <>
+                <div className="text-dim">+</div>
+                <div>
+                  <div className="text-3xl font-black" style={{ color: '#8b5cf6' }}>👑</div>
+                  <div className="text-xs text-dim">VIP Upgrade</div>
+                </div>
+              </>
+            )}
           </div>
           <p className="text-xs text-dim">{pool.totalTickets || 0} tickets in pool</p>
         </div>
@@ -121,8 +130,71 @@ export default function LuckyDrawPage() {
           {spinning ? '🌀 Drawing...' : tickets < 1 ? 'No Tickets' : '🎰 Draw Now'}
         </button>
         {tickets < 1 && (
-          <p className="text-xs text-dim mt-3">Purchase tickets to participate in the lucky draw</p>
+          <p className="text-xs text-dim mt-3">Earn tickets by completing tasks and playing games</p>
         )}
+      </div>
+
+      {/* How to get tickets */}
+      <div className="card p-6 mb-6">
+        <h3 className="font-semibold text-white mb-4">How to Get Tickets</h3>
+        <div className="grid gap-3">
+          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">🎮</span>
+            <div>
+              <p className="text-sm font-medium text-white">Play Games</p>
+              <p className="text-xs text-dim">Earn 1 ticket for every 5 games played</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">✅</span>
+            <div>
+              <p className="text-sm font-medium text-white">Complete Tasks</p>
+              <p className="text-xs text-dim">Get tickets as rewards for completing daily tasks</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">👥</span>
+            <div>
+              <p className="text-sm font-medium text-white">Refer Friends</p>
+              <p className="text-xs text-dim">Receive 3 tickets for each friend who joins</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">👑</span>
+            <div>
+              <p className="text-sm font-medium text-white">VIP Benefits</p>
+              <p className="text-xs text-dim">Higher VIP levels get bonus tickets daily</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Prize info */}
+      <div className="card p-6 mb-6">
+        <h3 className="font-semibold text-white mb-4">Possible Prizes</h3>
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💰</span>
+              <span className="text-sm font-medium text-white">CIPRO Points</span>
+            </div>
+            <span className="text-sm font-bold" style={{ color: '#fbbf24' }}>1,000 - 50,000</span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💵</span>
+              <span className="text-sm font-medium text-white">USDT</span>
+            </div>
+            <span className="text-sm font-bold text-success">$1 - $20</span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👑</span>
+              <span className="text-sm font-medium text-white">VIP Upgrade</span>
+            </div>
+            <span className="text-sm font-bold" style={{ color: '#8b5cf6' }}>+1 Level</span>
+          </div>
+        </div>
       </div>
 
       {/* Recent winners */}
