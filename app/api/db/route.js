@@ -38,30 +38,57 @@ export async function POST(request) {
       return NextResponse.json({ data: null, error: 'Action is required' }, { status: 400 });
     }
 
+    // Log environment info for debugging
+    if (!process.env.DATABASE_URL) {
+      console.warn('⚠️ DATABASE_URL not set - using mock data');
+    }
+
     // Try database first, fallback to mock data if unavailable
     let result;
+    let usedMockData = false;
+    
     try {
       result = await handleAction(action, params);
     } catch (dbError) {
-      console.error(`Database error for action ${action}:`, dbError.message);
+      console.error(`Database error for action ${action}:`, {
+        message: dbError.message,
+        code: dbError.code,
+        hint: dbError.hint
+      });
       
       if (USE_MOCK_DATA || shouldUseMockData(dbError)) {
-        console.log(`Using mock data for action: ${action}`);
+        console.log(`📦 Using mock data for action: ${action}`);
         result = getMockData(action, params);
-        if (result === null) throw dbError;
+        usedMockData = true;
+        
+        if (result === null) {
+          // Mock data not available for this action
+          throw new Error(`Database unavailable and no mock data for action: ${action}`);
+        }
       } else {
         throw dbError;
       }
     }
 
-    return NextResponse.json({ data: result, error: null });
-  } catch (err) {
-    console.error('API error:', {
-      message: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    return NextResponse.json({ 
+      data: result, 
+      error: null,
+      _meta: usedMockData ? { source: 'mock', warning: 'Using mock data - DATABASE_URL not configured' } : { source: 'database' }
     });
+  } catch (err) {
+    console.error('❌ API error:', {
+      message: err.message,
+      code: err.code,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      databaseConfigured: !!process.env.DATABASE_URL
+    });
+    
     return NextResponse.json(
-      { data: null, error: err.message || 'Internal server error' },
+      { 
+        data: null, 
+        error: err.message || 'Internal server error',
+        hint: !process.env.DATABASE_URL ? 'DATABASE_URL environment variable is not set. Add it in Vercel Dashboard → Settings → Environment Variables' : undefined
+      },
       { status: 500 }
     );
   }
