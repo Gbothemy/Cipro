@@ -3,6 +3,20 @@ import { useState, useEffect } from 'react';
 import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
 
+const CRYPTO_RATES = {
+  sol: 100,    // 1 SOL = $100
+  eth: 2000,   // 1 ETH = $2000
+  usdt: 1,     // 1 USDT = $1
+  usdc: 1,     // 1 USDC = $1
+};
+
+const CRYPTO_INFO = {
+  sol: { name: 'Solana', icon: '◎', color: '#14F195' },
+  eth: { name: 'Ethereum', icon: 'Ξ', color: '#627EEA' },
+  usdt: { name: 'Tether', icon: '₮', color: '#26A17B' },
+  usdc: { name: 'USD Coin', icon: '$', color: '#2775CA' },
+};
+
 export default function LuckyDrawPage() {
   const { user, updateUser, addNotification } = useStore();
   const [tickets, setTickets] = useState(0);
@@ -11,8 +25,10 @@ export default function LuckyDrawPage() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [purchasing, setPurchasing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
-  const TICKET_PRICE = 1; // $1 USDT per ticket
+  const TICKET_PRICE = 1; // $1 USD per ticket
 
   useEffect(() => {
     if (user?.userId) loadData();

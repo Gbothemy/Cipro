@@ -11,41 +11,61 @@ const TIERS = [
   { level: 5, name: 'Diamond', icon: '👑', color: 'from-purple-400 to-pink-400', minPoints: 1000000, priceUSDT: 100, dailyGames: 20, conversionBonus: '20%', perks: ['20 game attempts/day', '20% better conversion', 'VIP-only events'] },
 ];
 
+const CRYPTO_RATES = {
+  sol: 100,    // 1 SOL = $100
+  eth: 2000,   // 1 ETH = $2000
+  usdt: 1,     // 1 USDT = $1
+  usdc: 1,     // 1 USDC = $1
+};
+
+const CRYPTO_INFO = {
+  sol: { name: 'Solana', icon: '◎', color: '#14F195' },
+  eth: { name: 'Ethereum', icon: 'Ξ', color: '#627EEA' },
+  usdt: { name: 'Tether', icon: '₮', color: '#26A17B' },
+  usdc: { name: 'USD Coin', icon: '$', color: '#2775CA' },
+};
+
 export default function VIPTiersPage() {
   const { user, updateUser, addNotification } = useStore();
   const [purchasing, setPurchasing] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedTier, setSelectedTier] = useState(null);
   const currentLevel = user?.vipLevel || 1;
 
-  const handlePurchase = async (tier) => {
+  const handlePurchase = async (tier, currency) => {
     if (!user?.userId || tier.level <= currentLevel) return;
     
-    const userBalance = Number(user?.balance?.usdt || 0);
-    if (userBalance < tier.priceUSDT) {
+    const priceInCurrency = tier.priceUSDT / CRYPTO_RATES[currency];
+    const userBalance = Number(user?.balance?.[currency] || 0);
+    
+    if (userBalance < priceInCurrency) {
       addNotification({
         type: 'error',
         title: 'Insufficient Balance',
-        message: `You need $${tier.priceUSDT} USDT to upgrade to ${tier.name}. Go to Wallet to add funds.`,
+        message: `You need ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}. Go to Wallet to add funds.`,
       });
       return;
     }
 
     setPurchasing(tier.level);
+    setShowPaymentModal(false);
+    
     try {
-      // Deduct USDT and upgrade VIP level
-      await db.updateBalance(user.userId, 'usdt', userBalance - tier.priceUSDT);
+      // Deduct crypto and upgrade VIP level
+      await db.updateBalance(user.userId, currency, userBalance - priceInCurrency);
       const updatedUser = await db.updateUser(user.userId, {
         vipLevel: tier.level,
       });
       
       updateUser({
         ...updatedUser,
-        balance: { ...user.balance, usdt: userBalance - tier.priceUSDT }
+        balance: { ...user.balance, [currency]: userBalance - priceInCurrency }
       });
       
       addNotification({
         type: 'success',
         title: '🎉 VIP Upgraded!',
-        message: `You are now ${tier.name} tier! Enjoy your new benefits.`,
+        message: `You are now ${tier.name} tier! Paid ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}`,
       });
     } catch (error) {
       console.error(error);
@@ -59,11 +79,16 @@ export default function VIPTiersPage() {
     }
   };
 
+  const openPaymentModal = (tier) => {
+    setSelectedTier(tier);
+    setShowPaymentModal(true);
+  };
+
   return (
     <div className="page-container">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">VIP Tiers</h1>
-        <p className="text-muted mt-2">Unlock better rewards as you level up or purchase instantly</p>
+        <p className="text-muted mt-2">Unlock better rewards as you level up or purchase instantly with crypto</p>
       </div>
 
       {/* Current tier */}
@@ -74,8 +99,11 @@ export default function VIPTiersPage() {
           <p className="text-xl font-bold text-white">{TIERS[currentLevel - 1]?.name || 'Bronze'}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-xs text-dim">USDT Balance</p>
-          <p className="font-bold text-success">${Number(user?.balance?.usdt || 0).toFixed(2)}</p>
+          <p className="text-xs text-dim">Wallet Balance</p>
+          <div className="flex gap-2 text-xs">
+            <span style={{ color: CRYPTO_INFO.sol.color }}>{Number(user?.balance?.sol || 0).toFixed(2)} SOL</span>
+            <span style={{ color: CRYPTO_INFO.eth.color }}>{Number(user?.balance?.eth || 0).toFixed(4)} ETH</span>
+          </div>
         </div>
       </div>
 
@@ -83,8 +111,6 @@ export default function VIPTiersPage() {
         {TIERS.map((tier) => {
           const isActive = tier.level === currentLevel;
           const isUnlocked = tier.level <= currentLevel;
-          const userBalance = Number(user?.balance?.usdt || 0);
-          const canPurchase = tier.level > currentLevel && userBalance >= tier.priceUSDT;
           const isPurchasing = purchasing === tier.level;
           
           return (
@@ -114,7 +140,7 @@ export default function VIPTiersPage() {
                 {isActive && <span className="badge-primary text-xs">Current</span>}
               </div>
               <p className="text-xs text-dim mb-4">
-                {tier.level === 1 ? 'Free tier' : `$${tier.priceUSDT} USDT`}
+                {tier.level === 1 ? 'Free tier' : `$${tier.priceUSDT} USD`}
               </p>
               <ul className="flex-col gap-2 mb-4">
                 {tier.perks.map((perk, i) => (
@@ -127,15 +153,15 @@ export default function VIPTiersPage() {
               
               {tier.level > currentLevel && (
                 <button
-                  onClick={() => handlePurchase(tier)}
-                  disabled={!canPurchase || isPurchasing}
-                  className={canPurchase ? 'btn btn-primary w-full text-sm' : 'btn w-full text-sm opacity-50 cursor-not-allowed'}
+                  onClick={() => openPaymentModal(tier)}
+                  disabled={isPurchasing}
+                  className="btn btn-primary w-full text-sm"
                   style={{
                     padding: '0.5rem 1rem',
                     fontSize: '0.875rem',
                   }}
                 >
-                  {isPurchasing ? '⏳ Processing...' : canPurchase ? `💳 Buy for $${tier.priceUSDT}` : '🔒 Insufficient Funds'}
+                  {isPurchasing ? '⏳ Processing...' : `💳 Buy with Crypto`}
                 </button>
               )}
               
@@ -149,6 +175,65 @@ export default function VIPTiersPage() {
         })}
       </div>
 
+      {/* Payment Modal */}
+      {showPaymentModal && selectedTier && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ background: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setShowPaymentModal(false)}
+        >
+          <div 
+            className="card p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold text-white mb-4">Choose Payment Method</h3>
+            <p className="text-sm text-muted mb-6">
+              Upgrade to {selectedTier.name} tier for ${selectedTier.priceUSDT}
+            </p>
+            
+            <div className="grid gap-3">
+              {Object.entries(CRYPTO_INFO).map(([currency, info]) => {
+                const priceInCurrency = selectedTier.priceUSDT / CRYPTO_RATES[currency];
+                const userBalance = Number(user?.balance?.[currency] || 0);
+                const canAfford = userBalance >= priceInCurrency;
+                
+                return (
+                  <button
+                    key={currency}
+                    onClick={() => handlePurchase(selectedTier, currency)}
+                    disabled={!canAfford}
+                    className={canAfford ? 'btn btn-primary flex items-center justify-between p-4' : 'btn flex items-center justify-between p-4 opacity-50 cursor-not-allowed'}
+                    style={{ 
+                      borderRadius: '0.75rem',
+                      background: canAfford ? undefined : 'rgba(255,255,255,0.05)'
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span style={{ fontSize: '1.5rem', color: info.color }}>{info.icon}</span>
+                      <div className="text-left">
+                        <p className="font-semibold text-white">{info.name}</p>
+                        <p className="text-xs text-dim">Balance: {userBalance.toFixed(4)}</p>
+                      </div>
+                    </div>
+                    <span className="font-bold" style={{ color: canAfford ? info.color : 'var(--text-dim)' }}>
+                      {priceInCurrency.toFixed(4)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="btn w-full mt-4 text-sm"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Info section */}
       <div className="card p-5 mt-6">
         <h3 className="font-semibold text-white mb-3">How to Upgrade</h3>
@@ -156,8 +241,8 @@ export default function VIPTiersPage() {
           <div className="flex items-start gap-3">
             <span className="text-xl">💳</span>
             <div>
-              <p className="text-sm font-medium text-white">Purchase with USDT</p>
-              <p className="text-xs text-dim">Buy VIP tiers instantly with USDT from your wallet</p>
+              <p className="text-sm font-medium text-white">Purchase with Crypto</p>
+              <p className="text-xs text-dim">Buy VIP tiers instantly with SOL, ETH, USDT, or USDC</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -171,7 +256,7 @@ export default function VIPTiersPage() {
             <span className="text-xl">💰</span>
             <div>
               <p className="text-sm font-medium text-white">Add Funds</p>
-              <p className="text-xs text-dim">Convert points to USDT or deposit directly to your wallet</p>
+              <p className="text-xs text-dim">Convert points to crypto or deposit directly to your wallet</p>
             </div>
           </div>
         </div>
