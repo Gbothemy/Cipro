@@ -3,7 +3,8 @@ import { query, healthCheck } from '../../../lib/db';
 import cache from '../../../lib/cache';
 import { getMockData } from '../../../lib/mockData';
 
-const USE_MOCK_DATA = process.env.USE_MOCK_DATA === 'true';
+// Force mock data if database is not configured or USE_MOCK_DATA is set
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA === 'true' || !process.env.DATABASE_URL;
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -75,8 +76,21 @@ function shouldUseMockData(error) {
     'ENOTFOUND',
     'timeout',
     'no pg_hba.conf entry',
+    'database',
+    'connection',
+    'ETIMEDOUT',
+    'ECONNRESET',
+    'password authentication failed',
+    'could not connect',
+    'server closed the connection',
   ];
-  return mockDataErrors.some(err => error.message?.toLowerCase().includes(err.toLowerCase()));
+  const errorMessage = error.message?.toLowerCase() || '';
+  const errorCode = error.code?.toLowerCase() || '';
+  
+  return mockDataErrors.some(err => 
+    errorMessage.includes(err.toLowerCase()) || 
+    errorCode.includes(err.toLowerCase())
+  );
 }
 
 async function handleAction(action, p) {
