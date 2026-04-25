@@ -17,28 +17,41 @@ export default function FAQPage() {
   const [open, setOpen] = useState(null);
 
   return (
-    <div className="min-h-screen bg-dark-900 py-20 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen py-20 px-4" style={{ background: '#0a0a0f' }}>
+      <div style={{ maxWidth: '42rem', margin: '0 auto' }}>
         <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6 text-slate-400 hover:text-white transition-colors text-sm">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6 text-muted text-sm" style={{ transition: 'color 0.2s' }}>
             ← Back to Home
           </Link>
           <h1 className="text-4xl font-black text-white mb-3">FAQ</h1>
-          <p className="text-slate-400">Frequently asked questions about Cipro</p>
+          <p className="text-muted">Frequently asked questions about Cipro</p>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex-col gap-3">
           {FAQS.map((faq, i) => (
             <div key={i} className="card overflow-hidden">
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 className="w-full flex items-center justify-between p-5 text-left"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 <span className="font-semibold text-white text-sm pr-4">{faq.q}</span>
-                <span className={`text-primary transition-transform duration-200 flex-shrink-0 ${open === i ? 'rotate-45' : ''}`}>+</span>
+                <span 
+                  className="text-primary flex-shrink-0"
+                  style={{ 
+                    transition: 'transform 0.2s',
+                    transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)'
+                  }}
+                >+</span>
               </button>
               {open === i && (
-                <div className="px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-4">
+                <div 
+                  className="px-5 pb-5 text-sm text-muted pt-4"
+                  style={{ 
+                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                    lineHeight: '1.6'
+                  }}
+                >
                   {faq.a}
                 </div>
               )}
@@ -47,8 +60,8 @@ export default function FAQPage() {
         </div>
 
         <div className="text-center mt-10">
-          <p className="text-slate-400 text-sm mb-3">Still have questions?</p>
-          <Link href="/support" className="btn-primary inline-block px-6 py-3">Contact Support</Link>
+          <p className="text-muted text-sm mb-3">Still have questions?</p>
+          <Link href="/support" className="btn btn-primary inline-block px-6 py-3">Contact Support</Link>
         </div>
       </div>
     </div>

@@ -49,32 +49,30 @@ export default function AchievementsPage() {
     <div className="page-container">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Achievements</h1>
-        <p className="text-slate-400 mt-1">{unlockedCount}/{achievements.length} unlocked</p>
+        <p className="text-muted mt-2">{unlockedCount}/{achievements.length} unlocked</p>
       </div>
 
       {/* Progress */}
       <div className="card p-5 mb-6">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-slate-300">Overall Progress</span>
+          <span className="text-sm font-medium text-light">Overall Progress</span>
           <span className="text-sm font-bold text-primary">{unlockedCount}/{achievements.length}</span>
         </div>
-        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+        <div className="progress-track">
           <div
-            className="h-full bg-gradient-brand rounded-full transition-all duration-500"
+            className="progress-fill"
             style={{ width: `${achievements.length > 0 ? (unlockedCount / achievements.length) * 100 : 0}%` }}
           />
         </div>
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
         {categories.map((c) => (
           <button
             key={c}
             onClick={() => setFilter(c)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 capitalize ${
-              filter === c ? 'bg-primary text-white shadow-brand' : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-            }`}
+            className={filter === c ? 'btn btn-primary flex-shrink-0 px-4 py-2 text-sm capitalize' : 'btn btn-secondary flex-shrink-0 px-4 py-2 text-sm capitalize'}
           >
             {c}
           </button>
@@ -82,34 +80,45 @@ export default function AchievementsPage() {
       </div>
 
       {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="card p-5 animate-pulse h-28" />
+            <div key={i} className="card p-5 skeleton" style={{ height: '7rem' }} />
           ))}
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid-3">
           {filtered.map((ach) => {
             const isUnlocked = unlocked.includes(ach.id);
             return (
               <div
                 key={ach.id}
-                className={`card p-5 transition-all duration-300 ${
-                  isUnlocked ? 'border-amber-500/30 bg-amber-500/3' : 'opacity-60'
-                }`}
+                className="card p-5"
+                style={{
+                  borderColor: isUnlocked ? 'rgba(251,191,36,0.3)' : undefined,
+                  background: isUnlocked ? 'rgba(251,191,36,0.03)' : undefined,
+                  opacity: isUnlocked ? 1 : 0.6,
+                  transition: 'all 0.3s'
+                }}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                    isUnlocked ? 'bg-amber-500/15' : 'bg-white/5 grayscale'
-                  }`}>
+                  <div 
+                    className="rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      fontSize: '1.5rem',
+                      background: isUnlocked ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)',
+                      filter: isUnlocked ? 'none' : 'grayscale(1)'
+                    }}
+                  >
                     {ach.icon}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1" style={{ minWidth: 0 }}>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-white text-sm">{ach.title}</h3>
-                      {isUnlocked && <span className="text-amber-400 text-xs">✓</span>}
+                      {isUnlocked && <span className="text-warning text-xs">✓</span>}
                     </div>
-                    <p className="text-xs text-slate-400 mb-2">{ach.description}</p>
+                    <p className="text-xs text-muted mb-2">{ach.description}</p>
                     <span className="badge-primary text-xs">+{ach.reward_points || ach.points} pts</span>
                   </div>
                 </div>

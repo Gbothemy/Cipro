@@ -17,45 +17,57 @@ export default function VIPTiersPage() {
     <div className="page-container">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">VIP Tiers</h1>
-        <p className="text-slate-400 mt-1">Unlock better rewards as you level up</p>
+        <p className="text-muted mt-2">Unlock better rewards as you level up</p>
       </div>
 
       {/* Current tier */}
       <div className="card p-5 mb-8 flex items-center gap-4">
-        <div className="text-4xl">{TIERS[currentLevel - 1]?.icon || '🥉'}</div>
+        <div style={{ fontSize: '2.5rem' }}>{TIERS[currentLevel - 1]?.icon || '🥉'}</div>
         <div>
-          <p className="text-sm text-slate-400">Your Current Tier</p>
+          <p className="text-sm text-muted">Your Current Tier</p>
           <p className="text-xl font-bold text-white">{TIERS[currentLevel - 1]?.name || 'Bronze'}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-xs text-slate-500">Total Points</p>
+          <p className="text-xs text-dim">Total Points</p>
           <p className="font-bold text-primary">{(user?.points || 0).toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid-3">
         {TIERS.map((tier) => {
           const isActive = tier.level === currentLevel;
           const isUnlocked = tier.level <= currentLevel;
           return (
             <div
               key={tier.level}
-              className={`card p-5 transition-all duration-300 ${
-                isActive ? 'border-primary/40 shadow-brand' : isUnlocked ? 'border-white/10' : 'opacity-60'
-              }`}
+              className="card p-5"
+              style={{
+                borderColor: isActive ? 'rgba(102,126,234,0.4)' : isUnlocked ? 'rgba(255,255,255,0.1)' : undefined,
+                opacity: isUnlocked ? 1 : 0.6,
+                boxShadow: isActive ? '0 4px 20px rgba(102,126,234,0.4)' : undefined,
+                transition: 'all 0.3s'
+              }}
             >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tier.color} flex items-center justify-center text-2xl mb-4 shadow-lg`}>
+              <div 
+                className="rounded-xl flex items-center justify-center shadow-lg mb-4"
+                style={{
+                  width: '3.5rem',
+                  height: '3.5rem',
+                  fontSize: '1.5rem',
+                  background: `linear-gradient(135deg, ${tier.color.includes('amber-700') ? '#b45309, #d97706' : tier.color.includes('slate') ? '#94a3b8, #cbd5e1' : tier.color.includes('amber-500') ? '#f59e0b, #fbbf24' : tier.color.includes('cyan') ? '#22d3ee, #3b82f6' : '#a78bfa, #ec4899'})`
+                }}
+              >
                 {tier.icon}
               </div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-bold text-white">{tier.name}</h3>
                 {isActive && <span className="badge-primary text-xs">Current</span>}
               </div>
-              <p className="text-xs text-slate-500 mb-4">{tier.minPoints.toLocaleString()} pts required</p>
-              <ul className="space-y-1.5">
+              <p className="text-xs text-dim mb-4">{tier.minPoints.toLocaleString()} pts required</p>
+              <ul className="flex-col gap-2">
                 {tier.perks.map((perk, i) => (
-                  <li key={i} className="flex items-center gap-2 text-xs text-slate-400">
-                    <span className={isUnlocked ? 'text-emerald-400' : 'text-slate-600'}>✓</span>
+                  <li key={i} className="flex items-center gap-2 text-xs text-muted">
+                    <span className={isUnlocked ? 'text-success' : 'text-dim'}>✓</span>
                     {perk}
                   </li>
                 ))}
