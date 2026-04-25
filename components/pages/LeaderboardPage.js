@@ -26,9 +26,23 @@ export default function LeaderboardPage() {
         db.getLeaderboard('earnings', 50),
         db.getLeaderboard('streak', 50),
       ]);
-      setData({ points, earnings, streak });
+      
+      // Use default users if database returns empty
+      const defaultUsers = generateDefaultUsers();
+      setData({ 
+        points: points.length > 0 ? points : defaultUsers.sort((a, b) => b.points - a.points),
+        earnings: earnings.length > 0 ? earnings : defaultUsers.sort((a, b) => b.total_earnings - a.total_earnings),
+        streak: streak.length > 0 ? streak : defaultUsers.sort((a, b) => b.day_streak - a.day_streak),
+      });
     } catch (e) {
       console.error(e);
+      // On error, show default users
+      const defaultUsers = generateDefaultUsers();
+      setData({ 
+        points: defaultUsers.sort((a, b) => b.points - a.points),
+        earnings: defaultUsers.sort((a, b) => b.total_earnings - a.total_earnings),
+        streak: defaultUsers.sort((a, b) => b.day_streak - a.day_streak),
+      });
     } finally {
       setLoading(false);
     }
@@ -91,7 +105,10 @@ export default function LeaderboardPage() {
             ))}
           </div>
         ) : currentList.length === 0 ? (
-          <div className="p-12 text-center text-muted">No data yet</div>
+          <div className="p-12 text-center text-muted">
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
+            <p>No leaderboard data available</p>
+          </div>
         ) : (
           <div>
             {currentList.map((entry, i) => {
