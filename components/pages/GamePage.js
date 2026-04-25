@@ -58,11 +58,11 @@ export default function GamePage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Game Mining</h1>
-        <p className="text-slate-400 mt-1">Play games to earn Cipro points and crypto rewards</p>
+        <p className="text-muted mt-2">Play games to earn Cipro points and crypto rewards</p>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid-4 mb-8">
         {[
           { label: 'Total Points', value: (user?.points || 0).toLocaleString(), icon: '💎' },
           { label: 'VIP Level', value: `Level ${user?.vipLevel || 1}`, icon: '⭐' },
@@ -70,15 +70,15 @@ export default function GamePage() {
           { label: 'Games Today', value: Object.values(attempts).reduce((a, b) => a + b, 0), icon: '🎮' },
         ].map((s, i) => (
           <div key={i} className="stat-card">
-            <div className="text-2xl mb-1">{s.icon}</div>
-            <div className="text-xl font-bold text-white">{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
+            <div className="stat-icon">{s.icon}</div>
+            <div className="stat-value">{s.value}</div>
+            <div className="stat-label">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Games grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid-4">
         {GAMES.map((game) => {
           const remaining = getRemainingAttempts(game);
           const locked = remaining === 0;
@@ -86,30 +86,36 @@ export default function GamePage() {
             <div
               key={game.id}
               onClick={() => !locked && setActiveGame(game.id)}
-              className={`card p-6 transition-all duration-300 ${
-                locked
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'cursor-pointer hover:border-primary/40 hover:shadow-card-hover hover:-translate-y-1'
-              }`}
+              className={locked ? 'card p-6 opacity-50 cursor-not-allowed' : 'card-hover p-6'}
+              style={{ opacity: locked ? 0.5 : 1 }}
             >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${game.color} flex items-center justify-center text-2xl mb-4 shadow-lg`}>
+              <div 
+                className="flex items-center justify-center rounded-xl mb-4"
+                style={{
+                  width: '3.5rem',
+                  height: '3.5rem',
+                  background: `linear-gradient(135deg, ${game.color.includes('blue') ? '#667eea, #764ba2' : game.color.includes('purple') ? '#764ba2, #f093fb' : game.color.includes('amber') ? '#f6d365, #fda085' : '#43e97b, #38f9d7'})`,
+                  fontSize: '1.75rem',
+                  boxShadow: '0 4px 20px rgba(102,126,234,0.3)'
+                }}
+              >
                 {game.icon}
               </div>
-              <h3 className="font-bold text-white mb-1">{game.name}</h3>
-              <p className="text-xs text-slate-400 mb-4">{game.desc}</p>
-              <div className="flex items-center justify-between">
-                <span className="badge-primary text-xs">+{game.points} pts</span>
-                <span className={`text-xs font-medium ${locked ? 'text-red-400' : 'text-emerald-400'}`}>
+              <h3 className="font-bold text-white mb-2">{game.name}</h3>
+              <p className="text-sm text-muted mb-4">{game.desc}</p>
+              <div className="flex items-center justify-between mb-4">
+                <span className="badge-primary">+{game.points} pts</span>
+                <span className={`text-xs font-semibold ${locked ? 'text-error' : 'text-success'}`}>
                   {locked ? 'Limit reached' : `${remaining} left`}
                 </span>
               </div>
               {!locked && (
-                <button className="btn-primary w-full mt-4 py-2.5 text-sm">
+                <button className="btn btn-primary btn-full">
                   Play Now
                 </button>
               )}
               {locked && (
-                <div className="w-full mt-4 py-2.5 text-sm text-center text-slate-500 bg-white/5 rounded-xl">
+                <div className="w-full py-3 text-sm text-center text-dim rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   Resets tomorrow
                 </div>
               )}
@@ -145,22 +151,25 @@ function GameModal({ gameId, user, onComplete, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-dark-800 border border-white/10 rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
-        <div className="flex items-center justify-between p-5 border-b border-white/5">
+    <div className="modal-overlay">
+      <div className="modal animate-slide-up">
+        <div className="modal-header">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">{game?.icon}</span>
+            <span style={{ fontSize: '1.75rem' }}>{game?.icon}</span>
             <div>
               <h2 className="font-bold text-white">{game?.name}</h2>
-              <p className="text-xs text-slate-400">Earn up to {game?.points} points</p>
+              <p className="text-xs text-muted">Earn up to {game?.points} points</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+          <button 
+            onClick={onClose} 
+            className="btn-ghost"
+            style={{ width: '2rem', height: '2rem', padding: 0, minWidth: 'auto' }}
+          >
             ✕
           </button>
         </div>
-        <div className="p-5">{renderGame()}</div>
+        <div className="modal-body">{renderGame()}</div>
       </div>
     </div>
   );
@@ -197,36 +206,51 @@ function TriviaInline({ onComplete, gameId }) {
     const pts = score * 12;
     return (
       <div className="text-center py-4">
-        <div className="text-5xl mb-3">🎉</div>
-        <h3 className="text-xl font-bold text-white mb-1">{score}/{TRIVIA_QUESTIONS.length} Correct!</h3>
-        <p className="text-slate-400 mb-6">You earned <span className="text-primary font-bold">+{pts} points</span></p>
-        <button onClick={() => onComplete(gameId, { points: pts, won: score > 2, score })} className="btn-primary px-8">Claim Reward</button>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
+        <h3 className="text-xl font-bold text-white mb-2">{score}/{TRIVIA_QUESTIONS.length} Correct!</h3>
+        <p className="text-muted mb-6">You earned <span className="text-primary font-bold">+{pts} points</span></p>
+        <button onClick={() => onComplete(gameId, { points: pts, won: score > 2, score })} className="btn btn-primary px-8">Claim Reward</button>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="flex justify-between text-xs text-slate-400 mb-4">
+      <div className="flex justify-between text-xs text-muted mb-4">
         <span>Question {idx + 1}/{TRIVIA_QUESTIONS.length}</span>
-        <span className="text-primary font-medium">{score} correct</span>
+        <span className="text-primary font-semibold">{score} correct</span>
       </div>
       <p className="font-semibold text-white mb-4">{q.q}</p>
-      <div className="space-y-2">
-        {q.options.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => pick(i)}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium border transition-all duration-200 ${
-              selected === null ? 'border-white/10 bg-white/5 hover:border-primary/40 hover:bg-primary/10 text-slate-300' :
-              i === q.answer ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' :
-              selected === i ? 'border-red-500/50 bg-red-500/10 text-red-400' :
-              'border-white/5 bg-white/3 text-slate-500'
-            }`}
-          >
-            {opt}
-          </button>
-        ))}
+      <div className="flex-col gap-2">
+        {q.options.map((opt, i) => {
+          const isCorrect = i === q.answer;
+          const isSelected = selected === i;
+          const showResult = selected !== null;
+          
+          let btnClass = 'btn w-full text-left px-4 py-3 text-sm';
+          let btnStyle = { justifyContent: 'flex-start' };
+          
+          if (!showResult) {
+            btnClass += ' btn-secondary';
+          } else if (isCorrect) {
+            btnClass += ' badge-success';
+          } else if (isSelected) {
+            btnClass += ' badge-error';
+          } else {
+            btnClass += ' opacity-50';
+          }
+          
+          return (
+            <button
+              key={i}
+              onClick={() => pick(i)}
+              className={btnClass}
+              style={btnStyle}
+            >
+              {opt}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -271,30 +295,35 @@ function MemoryInline({ onComplete, gameId }) {
     const pts = Math.max(100 - moves * 5, 30);
     return (
       <div className="text-center py-4">
-        <div className="text-5xl mb-3">🏆</div>
-        <h3 className="text-xl font-bold text-white mb-1">All Matched!</h3>
-        <p className="text-slate-400 mb-6">Completed in {moves} moves — <span className="text-primary font-bold">+{pts} points</span></p>
-        <button onClick={() => onComplete(gameId, { points: pts, won: true, score: pts })} className="btn-primary px-8">Claim Reward</button>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
+        <h3 className="text-xl font-bold text-white mb-2">All Matched!</h3>
+        <p className="text-muted mb-6">Completed in {moves} moves — <span className="text-primary font-bold">+{pts} points</span></p>
+        <button onClick={() => onComplete(gameId, { points: pts, won: true, score: pts })} className="btn btn-primary px-8">Claim Reward</button>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="flex justify-between text-xs text-slate-400 mb-4">
+      <div className="flex justify-between text-xs text-muted mb-4">
         <span>Moves: {moves}</span>
         <span className="text-primary">{cards.filter((c) => c.matched).length / 2}/{EMOJIS.length} matched</span>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
         {cards.map((card) => (
           <button
             key={card.id}
             onClick={() => flip(card.id)}
-            className={`aspect-square rounded-xl text-2xl flex items-center justify-center transition-all duration-300 border ${
-              card.flipped || card.matched
-                ? 'bg-primary/15 border-primary/30 scale-105'
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
-            } ${card.matched ? 'opacity-50' : ''}`}
+            className="btn"
+            style={{
+              aspectRatio: '1',
+              fontSize: '1.75rem',
+              background: card.flipped || card.matched ? 'rgba(102,126,234,0.15)' : 'rgba(255,255,255,0.05)',
+              border: card.flipped || card.matched ? '1px solid rgba(102,126,234,0.3)' : '1px solid rgba(255,255,255,0.1)',
+              opacity: card.matched ? 0.5 : 1,
+              transform: card.flipped || card.matched ? 'scale(1.05)' : 'scale(1)',
+              transition: 'all 0.3s'
+            }}
           >
             {card.flipped || card.matched ? card.emoji : '❓'}
           </button>
@@ -335,21 +364,29 @@ function SpinInline({ onComplete, gameId }) {
     <div className="text-center">
       {/* Simple visual wheel */}
       <div
-        className="w-48 h-48 mx-auto rounded-full border-4 border-primary/40 flex items-center justify-center text-5xl mb-6 transition-transform duration-[3000ms] ease-out shadow-brand"
-        style={{ transform: `rotate(${rotation}deg)` }}
+        className="rounded-full flex items-center justify-center shadow-brand"
+        style={{
+          width: '12rem',
+          height: '12rem',
+          margin: '0 auto 1.5rem',
+          border: '4px solid rgba(102,126,234,0.4)',
+          fontSize: '3rem',
+          transform: `rotate(${rotation}deg)`,
+          transition: 'transform 3000ms ease-out'
+        }}
       >
         🎡
       </div>
       {result ? (
         <div>
-          <p className="text-2xl font-black text-white mb-1">{result.label}</p>
-          <p className="text-slate-400 mb-6">Lucky spin!</p>
-          <button onClick={() => onComplete(gameId, { points: result.points, won: true, score: result.points })} className="btn-primary px-8">
+          <p className="text-2xl font-black text-white mb-2">{result.label}</p>
+          <p className="text-muted mb-6">Lucky spin!</p>
+          <button onClick={() => onComplete(gameId, { points: result.points, won: true, score: result.points })} className="btn btn-primary px-8">
             Claim {result.points} Points
           </button>
         </div>
       ) : (
-        <button onClick={spin} disabled={spinning} className="btn-primary px-10 py-3.5">
+        <button onClick={spin} disabled={spinning} className="btn btn-primary px-10 py-4">
           {spinning ? '🌀 Spinning...' : '🎡 Spin Now'}
         </button>
       )}
@@ -386,10 +423,10 @@ function PuzzleInline({ onComplete, gameId }) {
   if (done) {
     return (
       <div className="text-center py-4">
-        <div className="text-5xl mb-3">🧩</div>
-        <h3 className="text-xl font-bold text-white mb-1">Solved!</h3>
-        <p className="text-slate-400 mb-6">Answer: <strong className="text-white">{puzzle.answer}</strong> — <span className="text-primary font-bold">+{pts} points</span></p>
-        <button onClick={() => onComplete(gameId, { points: pts, won: true, score: pts })} className="btn-primary px-8">Claim Reward</button>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧩</div>
+        <h3 className="text-xl font-bold text-white mb-2">Solved!</h3>
+        <p className="text-muted mb-6">Answer: <strong className="text-white">{puzzle.answer}</strong> — <span className="text-primary font-bold">+{pts} points</span></p>
+        <button onClick={() => onComplete(gameId, { points: pts, won: true, score: pts })} className="btn btn-primary px-8">Claim Reward</button>
       </div>
     );
   }
@@ -402,10 +439,10 @@ function PuzzleInline({ onComplete, gameId }) {
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && check()}
         placeholder="Your answer..."
-        className="input-field mb-3"
+        className="input mb-3"
       />
-      {feedback && <p className="text-amber-400 text-sm mb-3">{feedback}</p>}
-      <button onClick={check} className="btn-primary w-full py-3">Submit Answer</button>
+      {feedback && <p className="text-warning text-sm mb-3">{feedback}</p>}
+      <button onClick={check} className="btn btn-primary btn-full py-3">Submit Answer</button>
     </div>
   );
 }

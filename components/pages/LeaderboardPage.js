@@ -57,21 +57,19 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="page-container max-w-2xl">
+    <div className="page-container-md">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Leaderboard</h1>
-        <p className="text-slate-400 mt-1">Top players ranked by performance</p>
+        <p className="text-muted mt-2">Top players ranked by performance</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-dark-800/60 rounded-xl p-1 mb-6">
+      <div className="tabs mb-6">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              activeTab === t.key ? 'bg-primary text-white shadow-brand' : 'text-slate-400 hover:text-white'
-            }`}
+            className={activeTab === t.key ? 'tab tab-active' : 'tab'}
           >
             <span>{t.icon}</span>
             <span>{t.label}</span>
@@ -82,40 +80,58 @@ export default function LeaderboardPage() {
       {/* List */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="divide-y divide-white/5">
+          <div className="divider" style={{ margin: 0 }}>
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 animate-pulse">
-                <div className="w-8 h-4 bg-white/5 rounded" />
-                <div className="w-10 h-10 rounded-full bg-white/5" />
-                <div className="flex-1 h-4 bg-white/5 rounded" />
-                <div className="w-20 h-4 bg-white/5 rounded" />
+              <div key={i} className="flex items-center gap-4 p-4">
+                <div className="skeleton" style={{ width: '2rem', height: '1rem' }} />
+                <div className="skeleton rounded-full" style={{ width: '2.5rem', height: '2.5rem' }} />
+                <div className="skeleton flex-1" style={{ height: '1rem' }} />
+                <div className="skeleton" style={{ width: '5rem', height: '1rem' }} />
               </div>
             ))}
           </div>
         ) : currentList.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">No data yet</div>
+          <div className="p-12 text-center text-muted">No data yet</div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div>
             {currentList.map((entry, i) => {
               const isMe = entry.user_id === user?.userId || entry.userId === user?.userId;
               return (
                 <div
                   key={entry.user_id || i}
-                  className={`flex items-center gap-4 px-5 py-4 transition-colors ${isMe ? 'bg-primary/5' : 'hover:bg-white/2'}`}
+                  className="flex items-center gap-4 px-5 py-4"
+                  style={{
+                    background: isMe ? 'rgba(102,126,234,0.05)' : 'transparent',
+                    borderBottom: i < currentList.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => !isMe && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                  onMouseLeave={(e) => !isMe && (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className={`w-8 text-center font-bold text-sm ${getRankStyle(i)}`}>
+                  <span 
+                    className="font-bold text-sm text-center"
+                    style={{ 
+                      width: '2rem',
+                      color: getRankStyle(i) === 'text-amber-400' ? '#fbbf24' : 
+                             getRankStyle(i) === 'text-slate-300' ? '#cbd5e1' :
+                             getRankStyle(i) === 'text-amber-600' ? '#d97706' : '#64748b'
+                    }}
+                  >
                     {getRankIcon(i)}
                   </span>
-                  <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-lg flex-shrink-0">
+                  <div 
+                    className="rounded-full flex items-center justify-center flex-shrink-0 bg-grad-brand"
+                    style={{ width: '2.5rem', height: '2.5rem', fontSize: '1.125rem' }}
+                  >
                     {entry.avatar || '👤'}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1" style={{ minWidth: 0 }}>
                     <p className={`font-semibold text-sm truncate ${isMe ? 'text-primary' : 'text-white'}`}>
                       {entry.username || 'Anonymous'}
-                      {isMe && <span className="ml-2 text-xs text-primary/70">(you)</span>}
+                      {isMe && <span className="ml-2 text-xs" style={{ color: 'rgba(102,126,234,0.7)' }}>(you)</span>}
                     </p>
                     {entry.vip_level > 1 && (
-                      <span className="text-xs text-amber-400">VIP {entry.vip_level}</span>
+                      <span className="text-xs text-warning">VIP {entry.vip_level}</span>
                     )}
                   </div>
                   <span className="font-bold text-sm text-white">{getValue(entry)}</span>

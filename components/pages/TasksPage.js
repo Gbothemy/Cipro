@@ -87,18 +87,16 @@ export default function TasksPage() {
     <div className="page-container">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Tasks</h1>
-        <p className="text-slate-400 mt-1">Complete tasks to earn bonus points</p>
+        <p className="text-muted mt-2">Complete tasks to earn bonus points</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-dark-800/60 rounded-xl p-1 mb-6 w-fit">
+      <div className="tabs mb-6" style={{ width: 'fit-content' }}>
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              activeTab === t.key ? 'bg-primary text-white shadow-brand' : 'text-slate-400 hover:text-white'
-            }`}
+            className={activeTab === t.key ? 'tab tab-active' : 'tab'}
           >
             <span>{t.icon}</span>
             <span>{t.label}</span>
@@ -107,21 +105,21 @@ export default function TasksPage() {
       </div>
 
       {loading ? (
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="card p-5 animate-pulse">
-              <div className="h-4 bg-white/5 rounded w-3/4 mb-3" />
-              <div className="h-3 bg-white/5 rounded w-1/2" />
+            <div key={i} className="card p-5">
+              <div className="skeleton" style={{ height: '1rem', width: '75%', marginBottom: '0.75rem' }} />
+              <div className="skeleton" style={{ height: '0.75rem', width: '50%' }} />
             </div>
           ))}
         </div>
       ) : currentTasks.length === 0 ? (
         <div className="card p-12 text-center">
-          <div className="text-4xl mb-3">📭</div>
-          <p className="text-slate-400">No {activeTab} tasks available</p>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📭</div>
+          <p className="text-muted">No {activeTab} tasks available</p>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid-2">
           {currentTasks.map((task) => {
             const progress = task.progress || 0;
             const pct = Math.min((progress / task.required_count) * 100, 100);
@@ -129,37 +127,51 @@ export default function TasksPage() {
             const isClaimed = claimed[task.id];
 
             return (
-              <div key={task.id} className={`card p-5 transition-all duration-300 ${complete && !isClaimed ? 'border-emerald-500/30' : ''}`}>
+              <div 
+                key={task.id} 
+                className="card p-5"
+                style={{ 
+                  borderColor: complete && !isClaimed ? 'rgba(16,185,129,0.3)' : undefined,
+                  transition: 'all 0.3s'
+                }}
+              >
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                    isClaimed ? 'bg-emerald-500/10' : complete ? 'bg-emerald-500/15' : 'bg-white/5'
-                  }`}>
+                  <div 
+                    className="flex items-center justify-center rounded-xl flex-shrink-0"
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      fontSize: '1.5rem',
+                      background: isClaimed ? 'rgba(16,185,129,0.1)' : complete ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)'
+                    }}
+                  >
                     {isClaimed ? '✅' : task.icon}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex-1" style={{ minWidth: 0 }}>
+                    <div className="flex items-center justify-between gap-2 mb-2">
                       <h3 className="font-semibold text-white text-sm">{task.task_name}</h3>
                       <span className="badge-primary text-xs flex-shrink-0">+{task.reward_points}</span>
                     </div>
-                    <p className="text-xs text-slate-400 mb-3">{task.description}</p>
+                    <p className="text-xs text-muted mb-3">{task.description}</p>
                     {/* Progress bar */}
-                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
+                    <div className="progress-track mb-2">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${complete ? 'bg-emerald-500' : 'bg-gradient-brand'}`}
+                        className={complete ? 'progress-fill progress-fill-success' : 'progress-fill'}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{progress}/{task.required_count}</span>
+                      <span className="text-xs text-dim">{progress}/{task.required_count}</span>
                       {complete && !isClaimed && (
                         <button
                           onClick={() => claimTask(task)}
-                          className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+                          className="text-xs font-semibold text-success"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                         >
                           Claim →
                         </button>
                       )}
-                      {isClaimed && <span className="text-xs text-emerald-400 font-medium">Claimed ✓</span>}
+                      {isClaimed && <span className="text-xs text-success font-medium">Claimed ✓</span>}
                     </div>
                   </div>
                 </div>
