@@ -430,6 +430,59 @@ async function handleAction(action, p) {
       return r.rows.map(w => ({ user_id: w.user_id, username: w.username||'Anonymous', avatar: w.avatar||'👤', draw_date: w.draw_date, usdt_won: w.usdt_won||0, points_won: w.points_won||0 }));
     }
     case 'getRecentActivities': return [];
+    case 'createDepositRequest': {
+      const { userId, currency, amount, txHash, walletAddress, status } = p;
+      const r = await query(
+        `INSERT INTO deposit_requests (user_id, currency, amount, tx_hash, wallet_address, status, created_at) 
+         VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *`,
+        [userId, currency, amount, txHash, walletAddress, status || 'pending']
+      );
+      return r.rows[0];
+    }
+    case 'getDepositRequests': {
+      let sql = 'SELECT * FROM deposit_requests';
+      const conditions = [];
+      const values = [];
+      let paramCount = 1;
+      
+      if (p.user_id) {
+        conditions.push(`user_id=$${paramCount++}`);
+        values.push(p.user_id);
+      }
+      if (p.status) {
+        conditions.push(`status=$${paramCount++}`);
+        values.push(p.status);
+      }
+      
+      if (conditions.length > 0) {
+        sql += ' WHERE ' + conditions.join(' AND ');
+      }
+      sql += ' ORDER BY created_at DESC';
+      
+      const r = await query(sql, values);
+      return r.rows;
+    }
+    case 'updateDepositStatus': {
+      const r = await query(
+        `UPDATE deposit_requests SET status=$1, processed_by=$2, processed_at=NOW() WHERE id=$3 RETURNING *`,
+        [p.status, p.processed_by, p.id]
+      );
+      
+      // If approved, add to deposited balance
+      if (p.status === 'approved' && r.rows[0]) {
+        const deposit = r.rows[0];
+        // This would update the deposited_balance in the users table
+        await query(
+          `UPDATE users SET deposited_balance = 
+           COALESCE(deposited_balance, '{}'::jsonb) || 
+           jsonb_build_object($1, COALESCE((deposited_balance->>$1)::numeric, 0) + $2)
+           WHERE user_id = $3`,
+          [deposit.currency, deposit.amount, deposit.user_id]
+        );
+      }
+      
+      return r.rows[0];
+    }
     default:
       throw new Error(`Unknown action: ${action}`);
   }

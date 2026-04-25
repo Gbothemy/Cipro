@@ -30,6 +30,10 @@ export default function LuckyDrawPage() {
 
   const TICKET_PRICE = 1; // $1 USD per ticket
 
+  // Check if today is weekend (Saturday = 6, Sunday = 0)
+  const today = new Date();
+  const isWeekend = today.getDay() === 0 || today.getDay() === 6;
+
   useEffect(() => {
     if (user?.userId) loadData();
   }, [user?.userId]);
@@ -50,7 +54,7 @@ export default function LuckyDrawPage() {
   };
 
   const handleSpin = async () => {
-    if (tickets < 1 || spinning) return;
+    if (tickets < 1 || spinning || !isWeekend) return;
     setSpinning(true);
     setResult(null);
     await new Promise((r) => setTimeout(r, 2000));
@@ -70,29 +74,33 @@ export default function LuckyDrawPage() {
     }
   };
 
-  const handlePurchaseTickets = async (quantity) => {
+  const handlePurchaseTickets = async (quantity, currency) => {
     if (!user?.userId || purchasing) return;
     
     const cost = quantity * TICKET_PRICE;
-    const userBalance = Number(user?.balance?.usdt || 0);
+    const priceInCurrency = cost / CRYPTO_RATES[currency];
+    // Only use deposited balance, not earned balance
+    const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
     
-    if (userBalance < cost) {
+    if (depositedBalance < priceInCurrency) {
       addNotification({
         type: 'error',
-        title: 'Insufficient Balance',
-        message: `You need $${cost} USDT. Go to Wallet to add funds.`,
+        title: 'Insufficient Deposited Funds',
+        message: `You need ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()} in deposited funds. Earned funds cannot be used for tickets.`,
       });
       return;
     }
 
     setPurchasing(true);
+    setShowPaymentModal(false);
+    
     try {
-      // Deduct USDT and add tickets (this would be a real API call)
-      await db.updateBalance(user.userId, 'usdt', userBalance - cost);
+      // Deduct from deposited balance and add tickets
+      const newDepositedBalance = depositedBalance - priceInCurrency;
       
       updateUser({
         ...user,
-        balance: { ...user.balance, usdt: userBalance - cost }
+        depositedBalance: { ...user.depositedBalance, [currency]: newDepositedBalance }
       });
       
       setTickets(tickets + quantity);
@@ -100,7 +108,7 @@ export default function LuckyDrawPage() {
       addNotification({
         type: 'success',
         title: '🎫 Tickets Purchased!',
-        message: `You bought ${quantity} ticket${quantity > 1 ? 's' : ''} for $${cost} USDT`,
+        message: `You bought ${quantity} ticket${quantity > 1 ? 's' : ''} with ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}`,
       });
     } catch (error) {
       console.error(error);
@@ -114,12 +122,29 @@ export default function LuckyDrawPage() {
     }
   };
 
+  const openPaymentModal = (quantity) => {
+    setSelectedQuantity(quantity);
+    setShowPaymentModal(true);
+  };
+
   return (
     <div className="page-container page-container-md">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Lucky Draw</h1>
-        <p className="text-muted mt-1">Use tickets for a chance to win big prizes</p>
+        <p className="text-muted mt-1">Weekend only! Use tickets for a chance to win big prizes</p>
       </div>
+
+      {/* Weekend availability notice */}
+      {!isWeekend && (
+        <div className="card p-5 mb-6 text-center" style={{ background: 'rgba(251,191,36,0.1)', border: '2px solid rgba(251,191,36,0.3)' }}>
+          <div className="text-4xl mb-3">📅</div>
+          <h3 className="font-bold text-white mb-2">Lucky Draw is Weekend Only!</h3>
+          <p className="text-sm text-muted">
+            Come back on Saturday or Sunday to participate in the lucky draw.
+            You can still purchase tickets now to use on the weekend!
+          </p>
+        </div>
+      )}
 
       {/* Prize pool */}
       <div className="card p-6 mb-6 text-center relative overflow-hidden">
@@ -176,9 +201,9 @@ export default function LuckyDrawPage() {
         )}
         <button
           onClick={handleSpin}
-          disabled={tickets < 1 || spinning}
-          className={tickets < 1 ? 'btn opacity-50 cursor-not-allowed' : 'btn btn-primary'}
-          style={tickets < 1 ? {
+          disabled={tickets < 1 || spinning || !isWeekend}
+          className={tickets < 1 || !isWeekend ? 'btn opacity-50 cursor-not-allowed' : 'btn btn-primary'}
+          style={tickets < 1 || !isWeekend ? {
             background: 'rgba(255,255,255,0.05)',
             color: 'var(--text-dim)',
             padding: '1rem 2.5rem',
@@ -190,18 +215,19 @@ export default function LuckyDrawPage() {
             borderRadius: '1rem'
           }}
         >
-          {spinning ? '🌀 Drawing...' : tickets < 1 ? 'No Tickets' : '🎰 Draw Now'}
+          {spinning ? '🌀 Drawing...' : !isWeekend ? '📅 Weekend Only' : tickets < 1 ? 'No Tickets' : '🎰 Draw Now'}
         </button>
       </div>
 
       {/* Purchase Tickets */}
       <div className="card p-6 mb-6">
-        <h3 className="font-semibold text-white mb-4">💳 Buy Tickets</h3>
-        <p className="text-sm text-muted mb-4">Purchase tickets with USDT for instant draws</p>
+        <h3 className="font-semibold text-white mb-4">💳 Buy Tickets with Crypto</h3>
+        <p className="text-sm text-muted mb-2">Purchase tickets with deposited funds</p>
+        <p className="text-xs text-dim mb-4">⚠️ Only deposited funds can be used. Earned funds cannot be used for tickets.</p>
         
         <div className="grid gap-3">
           <button
-            onClick={() => handlePurchaseTickets(1)}
+            onClick={() => openPaymentModal(1)}
             disabled={purchasing}
             className="btn btn-primary flex items-center justify-between p-4"
             style={{ borderRadius: '0.75rem' }}
@@ -217,7 +243,7 @@ export default function LuckyDrawPage() {
           </button>
 
           <button
-            onClick={() => handlePurchaseTickets(5)}
+            onClick={() => openPaymentModal(5)}
             disabled={purchasing}
             className="btn btn-primary flex items-center justify-between p-4"
             style={{ borderRadius: '0.75rem' }}
@@ -233,7 +259,7 @@ export default function LuckyDrawPage() {
           </button>
 
           <button
-            onClick={() => handlePurchaseTickets(10)}
+            onClick={() => openPaymentModal(10)}
             disabled={purchasing}
             className="btn btn-primary flex items-center justify-between p-4"
             style={{ 
@@ -255,34 +281,96 @@ export default function LuckyDrawPage() {
 
         <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
           <p className="text-xs text-success">
-            💰 Your Balance: ${Number(user?.balance?.usdt || 0).toFixed(2)} USDT
+            💰 Deposited Balance: ${Number(user?.depositedBalance?.usdt || 0).toFixed(2)} USDT
           </p>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ background: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setShowPaymentModal(false)}
+        >
+          <div 
+            className="card p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold text-white mb-4">Choose Payment Method</h3>
+            <p className="text-sm text-muted mb-2">
+              Buy {selectedQuantity} ticket{selectedQuantity > 1 ? 's' : ''} for ${selectedQuantity * TICKET_PRICE}
+            </p>
+            <p className="text-xs text-dim mb-6">
+              ⚠️ Only deposited funds can be used for tickets
+            </p>
+            
+            <div className="grid gap-3">
+              {Object.entries(CRYPTO_INFO).map(([currency, info]) => {
+                const priceInCurrency = (selectedQuantity * TICKET_PRICE) / CRYPTO_RATES[currency];
+                const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+                const canAfford = depositedBalance >= priceInCurrency;
+                
+                return (
+                  <button
+                    key={currency}
+                    onClick={() => handlePurchaseTickets(selectedQuantity, currency)}
+                    disabled={!canAfford}
+                    className={canAfford ? 'btn btn-primary flex items-center justify-between p-4' : 'btn flex items-center justify-between p-4 opacity-50 cursor-not-allowed'}
+                    style={{ 
+                      borderRadius: '0.75rem',
+                      background: canAfford ? undefined : 'rgba(255,255,255,0.05)'
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span style={{ fontSize: '1.5rem', color: info.color }}>{info.icon}</span>
+                      <div className="text-left">
+                        <p className="font-semibold text-white">{info.name}</p>
+                        <p className="text-xs text-dim">Deposited: {depositedBalance.toFixed(4)}</p>
+                      </div>
+                    </div>
+                    <span className="font-bold" style={{ color: canAfford ? info.color : 'var(--text-dim)' }}>
+                      {priceInCurrency.toFixed(4)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="btn w-full mt-4 text-sm"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* How to get tickets */}
       <div className="card p-6 mb-6">
         <h3 className="font-semibold text-white mb-4">How to Get Tickets</h3>
         <div className="grid gap-3">
           <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">💳</span>
+            <div>
+              <p className="text-sm font-medium text-white">Buy with Deposited Crypto</p>
+              <p className="text-xs text-dim">Purchase tickets with SOL, ETH, USDT, or USDC from your deposited balance</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <span className="text-2xl">🎮</span>
             <div>
               <p className="text-sm font-medium text-white">Play Games</p>
-              <p className="text-xs text-dim">Earn 1 ticket for every 5 games played</p>
+              <p className="text-xs text-dim">Earn 1 free ticket for every 5 games played</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <span className="text-2xl">✅</span>
             <div>
               <p className="text-sm font-medium text-white">Complete Tasks</p>
-              <p className="text-xs text-dim">Get tickets as rewards for completing daily tasks</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <span className="text-2xl">👥</span>
-            <div>
-              <p className="text-sm font-medium text-white">Refer Friends</p>
-              <p className="text-xs text-dim">Receive 3 tickets for each friend who joins</p>
+              <p className="text-xs text-dim">Get free tickets as rewards for completing daily tasks</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>

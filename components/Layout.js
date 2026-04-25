@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { path: '/game',         icon: '🎮', label: 'Games' },
   { path: '/tasks',        icon: '📋', label: 'Tasks' },
   { path: '/conversion',   icon: '💳', label: 'Wallet' },
+  { path: '/deposit',      icon: '💰', label: 'Deposit' },
   { path: '/leaderboard',  icon: '🏆', label: 'Leaderboard' },
   { path: '/lucky-draw',   icon: '🎰', label: 'Lucky Draw' },
   { path: '/daily-rewards',icon: '🎁', label: 'Daily' },

@@ -4,11 +4,11 @@ import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
 
 const TIERS = [
-  { level: 1, name: 'Bronze', icon: '🥉', color: 'from-amber-700 to-amber-600', minPoints: 0, priceUSDT: 0, dailyGames: 5, conversionBonus: '0%', perks: ['5 game attempts/day', 'Standard conversion rate', 'Daily rewards'] },
-  { level: 2, name: 'Silver', icon: '🥈', color: 'from-slate-400 to-slate-300', minPoints: 10000, priceUSDT: 5, dailyGames: 7, conversionBonus: '5%', perks: ['7 game attempts/day', '5% better conversion', 'Priority support'] },
-  { level: 3, name: 'Gold', icon: '🥇', color: 'from-amber-500 to-yellow-400', minPoints: 50000, priceUSDT: 15, dailyGames: 10, conversionBonus: '10%', perks: ['10 game attempts/day', '10% better conversion', 'Exclusive tasks'] },
-  { level: 4, name: 'Platinum', icon: '💎', color: 'from-cyan-400 to-blue-400', minPoints: 200000, priceUSDT: 40, dailyGames: 15, conversionBonus: '15%', perks: ['15 game attempts/day', '15% better conversion', 'Lucky draw tickets'] },
-  { level: 5, name: 'Diamond', icon: '👑', color: 'from-purple-400 to-pink-400', minPoints: 1000000, priceUSDT: 100, dailyGames: 20, conversionBonus: '20%', perks: ['20 game attempts/day', '20% better conversion', 'VIP-only events'] },
+  { level: 1, name: 'Bronze', icon: '🥉', color: 'from-amber-700 to-amber-600', minPoints: 0, priceUSDT: 0, monthlyPrice: 0, dailyGames: 5, conversionBonus: '0%', perks: ['5 game attempts/day', 'Standard conversion rate', 'Daily rewards'] },
+  { level: 2, name: 'Silver', icon: '🥈', color: 'from-slate-400 to-slate-300', minPoints: 10000, priceUSDT: 5, monthlyPrice: 5, dailyGames: 7, conversionBonus: '5%', perks: ['7 game attempts/day', '5% better conversion', 'Priority support', 'Monthly subscription'] },
+  { level: 3, name: 'Gold', icon: '🥇', color: 'from-amber-500 to-yellow-400', minPoints: 50000, priceUSDT: 15, monthlyPrice: 15, dailyGames: 10, conversionBonus: '10%', perks: ['10 game attempts/day', '10% better conversion', 'Exclusive tasks', 'Monthly subscription'] },
+  { level: 4, name: 'Platinum', icon: '💎', color: 'from-cyan-400 to-blue-400', minPoints: 200000, priceUSDT: 40, monthlyPrice: 40, dailyGames: 15, conversionBonus: '15%', perks: ['15 game attempts/day', '15% better conversion', 'Lucky draw tickets', 'Monthly subscription'] },
+  { level: 5, name: 'Diamond', icon: '👑', color: 'from-purple-400 to-pink-400', minPoints: 1000000, priceUSDT: 100, monthlyPrice: 100, dailyGames: 20, conversionBonus: '20%', perks: ['20 game attempts/day', '20% better conversion', 'VIP-only events', 'Monthly subscription'] },
 ];
 
 const CRYPTO_RATES = {
@@ -35,14 +35,15 @@ export default function VIPTiersPage() {
   const handlePurchase = async (tier, currency) => {
     if (!user?.userId || tier.level <= currentLevel) return;
     
-    const priceInCurrency = tier.priceUSDT / CRYPTO_RATES[currency];
-    const userBalance = Number(user?.balance?.[currency] || 0);
+    const priceInCurrency = tier.monthlyPrice / CRYPTO_RATES[currency];
+    // Only use deposited balance, not earned balance
+    const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
     
-    if (userBalance < priceInCurrency) {
+    if (depositedBalance < priceInCurrency) {
       addNotification({
         type: 'error',
-        title: 'Insufficient Balance',
-        message: `You need ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}. Go to Wallet to add funds.`,
+        title: 'Insufficient Deposited Funds',
+        message: `You need ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()} in deposited funds. Earned funds cannot be used for VIP subscriptions.`,
       });
       return;
     }
@@ -51,28 +52,35 @@ export default function VIPTiersPage() {
     setShowPaymentModal(false);
     
     try {
-      // Deduct crypto and upgrade VIP level
-      await db.updateBalance(user.userId, currency, userBalance - priceInCurrency);
+      // Calculate subscription end date (30 days from now)
+      const subscriptionEnd = new Date();
+      subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+      
+      // Deduct from deposited balance and upgrade VIP level
       const updatedUser = await db.updateUser(user.userId, {
         vipLevel: tier.level,
+        vipSubscriptionEnd: subscriptionEnd.toISOString(),
       });
+      
+      // Update deposited balance separately
+      const newDepositedBalance = depositedBalance - priceInCurrency;
       
       updateUser({
         ...updatedUser,
-        balance: { ...user.balance, [currency]: userBalance - priceInCurrency }
+        depositedBalance: { ...user.depositedBalance, [currency]: newDepositedBalance }
       });
       
       addNotification({
         type: 'success',
-        title: '🎉 VIP Upgraded!',
-        message: `You are now ${tier.name} tier! Paid ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}`,
+        title: '🎉 VIP Subscription Active!',
+        message: `You are now ${tier.name} tier for 30 days! Paid ${priceInCurrency.toFixed(4)} ${currency.toUpperCase()}`,
       });
     } catch (error) {
       console.error(error);
       addNotification({
         type: 'error',
-        title: 'Upgrade Failed',
-        message: error.message || 'Failed to upgrade VIP tier',
+        title: 'Subscription Failed',
+        message: error.message || 'Failed to activate VIP subscription',
       });
     } finally {
       setPurchasing(null);
@@ -92,18 +100,31 @@ export default function VIPTiersPage() {
       </div>
 
       {/* Current tier */}
-      <div className="card p-5 mb-8 flex items-center gap-4">
-        <div style={{ fontSize: '2.5rem' }}>{TIERS[currentLevel - 1]?.icon || '🥉'}</div>
-        <div>
-          <p className="text-sm text-muted">Your Current Tier</p>
-          <p className="text-xl font-bold text-white">{TIERS[currentLevel - 1]?.name || 'Bronze'}</p>
-        </div>
-        <div className="ml-auto text-right">
-          <p className="text-xs text-dim">Wallet Balance</p>
-          <div className="flex gap-2 text-xs">
-            <span style={{ color: CRYPTO_INFO.sol.color }}>{Number(user?.balance?.sol || 0).toFixed(2)} SOL</span>
-            <span style={{ color: CRYPTO_INFO.eth.color }}>{Number(user?.balance?.eth || 0).toFixed(4)} ETH</span>
+      <div className="card p-5 mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div style={{ fontSize: '2.5rem' }}>{TIERS[currentLevel - 1]?.icon || '🥉'}</div>
+          <div className="flex-1">
+            <p className="text-sm text-muted">Your Current Tier</p>
+            <p className="text-xl font-bold text-white">{TIERS[currentLevel - 1]?.name || 'Bronze'}</p>
+            {user?.vipSubscriptionEnd && currentLevel > 1 && (
+              <p className="text-xs text-dim mt-1">
+                Expires: {new Date(user.vipSubscriptionEnd).toLocaleDateString()}
+              </p>
+            )}
           </div>
+          <div className="text-right">
+            <p className="text-xs text-dim">Deposited Balance</p>
+            <div className="flex gap-2 text-xs">
+              <span style={{ color: CRYPTO_INFO.sol.color }}>{Number(user?.depositedBalance?.sol || 0).toFixed(2)} SOL</span>
+              <span style={{ color: CRYPTO_INFO.eth.color }}>{Number(user?.depositedBalance?.eth || 0).toFixed(4)} ETH</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-3 rounded-lg" style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)' }}>
+          <p className="text-xs" style={{ color: '#fbbf24' }}>
+            ⚠️ VIP subscriptions are monthly and require deposited funds. Earned funds cannot be used.
+          </p>
         </div>
       </div>
 
@@ -140,7 +161,7 @@ export default function VIPTiersPage() {
                 {isActive && <span className="badge-primary text-xs">Current</span>}
               </div>
               <p className="text-xs text-dim mb-4">
-                {tier.level === 1 ? 'Free tier' : `$${tier.priceUSDT} USD`}
+                {tier.level === 1 ? 'Free tier' : `$${tier.monthlyPrice}/month`}
               </p>
               <ul className="flex-col gap-2 mb-4">
                 {tier.perks.map((perk, i) => (
@@ -161,7 +182,7 @@ export default function VIPTiersPage() {
                     fontSize: '0.875rem',
                   }}
                 >
-                  {isPurchasing ? '⏳ Processing...' : `💳 Buy with Crypto`}
+                  {isPurchasing ? '⏳ Processing...' : `💳 Subscribe Monthly`}
                 </button>
               )}
               
@@ -187,15 +208,18 @@ export default function VIPTiersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-xl font-bold text-white mb-4">Choose Payment Method</h3>
-            <p className="text-sm text-muted mb-6">
-              Upgrade to {selectedTier.name} tier for ${selectedTier.priceUSDT}
+            <p className="text-sm text-muted mb-2">
+              Subscribe to {selectedTier.name} tier for ${selectedTier.monthlyPrice}/month
+            </p>
+            <p className="text-xs text-dim mb-6">
+              ⚠️ Only deposited funds can be used. Subscription renews monthly.
             </p>
             
             <div className="grid gap-3">
               {Object.entries(CRYPTO_INFO).map(([currency, info]) => {
-                const priceInCurrency = selectedTier.priceUSDT / CRYPTO_RATES[currency];
-                const userBalance = Number(user?.balance?.[currency] || 0);
-                const canAfford = userBalance >= priceInCurrency;
+                const priceInCurrency = selectedTier.monthlyPrice / CRYPTO_RATES[currency];
+                const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+                const canAfford = depositedBalance >= priceInCurrency;
                 
                 return (
                   <button
@@ -212,7 +236,7 @@ export default function VIPTiersPage() {
                       <span style={{ fontSize: '1.5rem', color: info.color }}>{info.icon}</span>
                       <div className="text-left">
                         <p className="font-semibold text-white">{info.name}</p>
-                        <p className="text-xs text-dim">Balance: {userBalance.toFixed(4)}</p>
+                        <p className="text-xs text-dim">Deposited: {depositedBalance.toFixed(4)}</p>
                       </div>
                     </div>
                     <span className="font-bold" style={{ color: canAfford ? info.color : 'var(--text-dim)' }}>
@@ -236,27 +260,34 @@ export default function VIPTiersPage() {
 
       {/* Info section */}
       <div className="card p-5 mt-6">
-        <h3 className="font-semibold text-white mb-3">How to Upgrade</h3>
+        <h3 className="font-semibold text-white mb-3">Important Information</h3>
         <div className="grid gap-3">
           <div className="flex items-start gap-3">
-            <span className="text-xl">💳</span>
+            <span className="text-xl">📅</span>
             <div>
-              <p className="text-sm font-medium text-white">Purchase with Crypto</p>
-              <p className="text-xs text-dim">Buy VIP tiers instantly with SOL, ETH, USDT, or USDC</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="text-xl">🎰</span>
-            <div>
-              <p className="text-sm font-medium text-white">Win in Lucky Draw</p>
-              <p className="text-xs text-dim">Get a free VIP upgrade by winning the lucky draw</p>
+              <p className="text-sm font-medium text-white">Monthly Subscription</p>
+              <p className="text-xs text-dim">VIP tiers are billed monthly and auto-renew every 30 days</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-xl">💰</span>
             <div>
-              <p className="text-sm font-medium text-white">Add Funds</p>
-              <p className="text-xs text-dim">Convert points to crypto or deposit directly to your wallet</p>
+              <p className="text-sm font-medium text-white">Deposited Funds Only</p>
+              <p className="text-xs text-dim">Only funds you deposit can be used. Earned funds from games cannot be used for subscriptions</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-xl">💳</span>
+            <div>
+              <p className="text-sm font-medium text-white">Multiple Crypto Options</p>
+              <p className="text-xs text-dim">Pay with SOL, ETH, USDT, or USDC - your choice!</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-xl">🎰</span>
+            <div>
+              <p className="text-sm font-medium text-white">Win Free Upgrades</p>
+              <p className="text-xs text-dim">Get a free VIP upgrade by winning the weekend lucky draw</p>
             </div>
           </div>
         </div>
