@@ -27,7 +27,12 @@ export default function ConversionPage() {
   }, [user?.userId]);
 
   const points = user?.points || 0;
-  const balance = user?.balance || {};
+  const balance = {
+    sol: Number(user?.balance?.sol || 0),
+    eth: Number(user?.balance?.eth || 0),
+    usdt: Number(user?.balance?.usdt || 0),
+    usdc: Number(user?.balance?.usdc || 0),
+  };
   const rate = RATES[currency];
   const convertedAmount = convertAmt ? (parseInt(convertAmt) / rate).toFixed(6) : '0';
   const minPoints = rate * MIN_WITHDRAW[currency];
@@ -105,7 +110,7 @@ export default function ConversionPage() {
         {Object.entries(CURRENCY_INFO).map(([key, info]) => (
           <div key={key} className="card p-4 text-center">
             <div className="text-2xl mb-2" style={{ color: info.color }}>{info.icon}</div>
-            <div className="font-bold text-white text-sm">{(balance[key] || 0).toFixed(4)}</div>
+            <div className="font-bold text-white text-sm">{Number(balance[key] || 0).toFixed(4)}</div>
             <div className="text-xs text-dim">{info.name}</div>
           </div>
         ))}
@@ -219,7 +224,7 @@ export default function ConversionPage() {
               placeholder={`Min: ${MIN_WITHDRAW[currency]} ${currency.toUpperCase()}`}
               className="input"
             />
-            <p className="text-xs text-dim mt-2">Available: {(balance[currency] || 0).toFixed(6)} {currency.toUpperCase()}</p>
+            <p className="text-xs text-dim mt-2">Available: {Number(balance[currency] || 0).toFixed(6)} {currency.toUpperCase()}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-light mb-2">Wallet Address</label>
