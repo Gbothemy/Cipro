@@ -40,21 +40,33 @@ export default function ProfilePage() {
   const vipProgress = ((user?.exp || 0) / (user?.maxExp || 1000)) * 100;
 
   return (
-    <div className="page-container max-w-2xl">
+    <div className="page-container-md">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Profile</h1>
-        <p className="text-slate-400 mt-1">Manage your account settings</p>
+        <p className="text-muted mt-2">Manage your account settings</p>
       </div>
 
       {/* Profile card */}
       <div className="card p-6 mb-6">
         <div className="flex items-start gap-5">
           <div className="relative">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-brand flex items-center justify-center text-4xl shadow-brand">
+            <div 
+              className="rounded-xl bg-grad-brand flex items-center justify-center shadow-brand"
+              style={{ width: '5rem', height: '5rem', fontSize: '2.5rem' }}
+            >
               {editing ? form.avatar : user?.avatar || '👤'}
             </div>
             {user?.vipLevel > 1 && (
-              <div className="absolute -bottom-2 -right-2 bg-amber-500 text-dark-900 text-xs font-bold px-2 py-0.5 rounded-full">
+              <div 
+                className="absolute text-xs font-bold px-2 rounded-full"
+                style={{ 
+                  bottom: '-0.5rem', 
+                  right: '-0.5rem', 
+                  background: '#fbbf24', 
+                  color: '#0a0a0f',
+                  padding: '0.125rem 0.5rem'
+                }}
+              >
                 VIP {user.vipLevel}
               </div>
             )}
@@ -64,21 +76,21 @@ export default function ProfilePage() {
               <input
                 value={form.username}
                 onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-                className="input-field mb-2 text-lg font-bold"
+                className="input mb-2 text-lg font-bold"
               />
             ) : (
               <h2 className="text-xl font-bold text-white">{user?.username}</h2>
             )}
-            <p className="text-sm text-slate-400">{user?.userId}</p>
-            <div className="flex items-center gap-3 mt-2">
+            <p className="text-sm text-muted">{user?.userId}</p>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
               <span className="badge-primary">💎 {(user?.points || 0).toLocaleString()} pts</span>
-              <span className="badge bg-amber-500/20 text-amber-400 border border-amber-500/30">🔥 {user?.dayStreak || 0} streak</span>
+              <span className="badge-warning">🔥 {user?.dayStreak || 0} streak</span>
             </div>
           </div>
           <button
             onClick={() => editing ? handleSave() : setEditing(true)}
             disabled={loading}
-            className={editing ? 'btn-primary py-2 px-4 text-sm' : 'btn-secondary py-2 px-4 text-sm'}
+            className={editing ? 'btn btn-primary py-2 px-4 text-sm' : 'btn btn-secondary py-2 px-4 text-sm'}
           >
             {loading ? '...' : editing ? 'Save' : 'Edit'}
           </button>
@@ -86,16 +98,23 @@ export default function ProfilePage() {
 
         {/* Avatar picker */}
         {editing && (
-          <div className="mt-5 pt-5 border-t border-white/5">
-            <p className="text-sm font-medium text-slate-300 mb-3">Choose Avatar</p>
+          <div className="mt-5 pt-5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <p className="text-sm font-medium text-light mb-3">Choose Avatar</p>
             <div className="flex flex-wrap gap-2">
               {AVATARS.map((a) => (
                 <button
                   key={a}
                   onClick={() => setForm((f) => ({ ...f, avatar: a }))}
-                  className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
-                    form.avatar === a ? 'bg-primary/20 border-2 border-primary scale-110' : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                  }`}
+                  className="btn rounded-xl"
+                  style={{
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    fontSize: '1.25rem',
+                    padding: 0,
+                    background: form.avatar === a ? 'rgba(102,126,234,0.2)' : 'rgba(255,255,255,0.05)',
+                    border: form.avatar === a ? '2px solid #667eea' : '1px solid rgba(255,255,255,0.1)',
+                    transform: form.avatar === a ? 'scale(1.1)' : 'scale(1)'
+                  }}
                 >
                   {a}
                 </button>
@@ -107,13 +126,13 @@ export default function ProfilePage() {
         {/* Email */}
         {editing && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-light mb-2">Email</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
               placeholder="your@email.com"
-              className="input-field"
+              className="input"
             />
           </div>
         )}
@@ -125,14 +144,14 @@ export default function ProfilePage() {
           <h3 className="font-semibold text-white">VIP Progress</h3>
           <span className="badge-primary">Level {user?.vipLevel || 1}</span>
         </div>
-        <div className="h-2 bg-white/5 rounded-full overflow-hidden mb-2">
-          <div className="h-full bg-gradient-brand rounded-full transition-all duration-500" style={{ width: `${vipProgress}%` }} />
+        <div className="progress-track mb-2">
+          <div className="progress-fill" style={{ width: `${vipProgress}%` }} />
         </div>
-        <p className="text-xs text-slate-500">{user?.exp || 0} / {user?.maxExp || 1000} XP to next level</p>
+        <p className="text-xs text-dim">{user?.exp || 0} / {user?.maxExp || 1000} XP to next level</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid-2 mb-6">
         {[
           { label: 'Total Points', value: (user?.points || 0).toLocaleString(), icon: '💎' },
           { label: 'Day Streak', value: `${user?.dayStreak || 0} days`, icon: '🔥' },
@@ -140,9 +159,9 @@ export default function ProfilePage() {
           { label: 'VIP Level', value: user?.vipLevel || 1, icon: '⭐' },
         ].map((s, i) => (
           <div key={i} className="stat-card">
-            <div className="text-2xl mb-1">{s.icon}</div>
-            <div className="text-xl font-bold text-white">{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
+            <div className="stat-icon">{s.icon}</div>
+            <div className="stat-value">{s.value}</div>
+            <div className="stat-label">{s.label}</div>
           </div>
         ))}
       </div>
@@ -150,7 +169,7 @@ export default function ProfilePage() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors font-medium"
+        className="btn btn-danger btn-full py-4"
       >
         🚪 Sign Out
       </button>
