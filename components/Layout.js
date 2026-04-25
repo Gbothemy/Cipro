@@ -52,8 +52,7 @@ export default function Layout({ children }) {
       <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.headerInner}>
           <Link href="/game" className={styles.logo}>
-            <div className={styles.logoIcon}>💎</div>
-            <span className={styles.logoText}>Cipro</span>
+            <img src="/ciprohub.png" alt="CiproHub" className={styles.logoImage} />
           </Link>
 
           <nav className={styles.desktopNav}>

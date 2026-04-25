@@ -29,6 +29,11 @@
   gap: 0.625rem;
   text-decoration: none;
 }
+.navLogoImage {
+  height: 2rem;
+  width: auto;
+  filter: drop-shadow(0 4px 12px rgba(102,126,234,0.4));
+}
 .navLogoIcon {
   width: 2rem; 
   height: 2rem;
@@ -532,6 +537,11 @@
   font-weight: 700; 
   color: white; 
   margin-bottom: 0.75rem; 
+}
+.footerLogoImage {
+  height: 2rem;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(102,126,234,0.3));
 }
 .footerLogoIcon {
   width: 1.75rem; 

@@ -9,6 +9,7 @@
     "vercel-build": "next build"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "next": "^14.0.0",
     "pg": "^8.20.0",
     "react": "^18.2.0",

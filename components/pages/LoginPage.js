@@ -125,19 +125,8 @@ function LoginForm() {
       <div className="relative w-full" style={{ maxWidth: '28rem' }}>
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <div 
-              className="rounded-xl bg-grad-brand flex items-center justify-center shadow-brand"
-              style={{ 
-                width: '2.5rem', 
-                height: '2.5rem', 
-                fontSize: '1.125rem',
-                transition: 'box-shadow 0.3s'
-              }}
-            >
-              💎
-            </div>
-            <span className="font-bold text-xl text-white">Cipro</span>
+          <Link href="/" className="inline-flex items-center justify-center">
+            <img src="/ciprohub.png" alt="CiproHub" style={{ height: '3rem', width: 'auto' }} />
           </Link>
           <p className="text-muted text-sm mt-3">
             {isLogin ? 'Welcome back! Sign in to continue.' : 'Create your account and start earning.'}

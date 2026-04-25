@@ -33,8 +33,7 @@ export default function LandingPage() {
       <nav className={styles.nav}>
         <div className={styles.navInner}>
           <div className={styles.navLogo}>
-            <div className={styles.navLogoIcon}>💎</div>
-            <span className={styles.navLogoText}>Cipro</span>
+            <img src="/ciprohub.png" alt="CiproHub" className={styles.navLogoImage} />
           </div>
           <div className={styles.navBtns}>
             <Link href="/login" className={styles.navBtnGhost}>Login</Link>
@@ -163,8 +162,7 @@ export default function LandingPage() {
           <div className={styles.footerGrid}>
             <div>
               <div className={styles.footerLogo}>
-                <div className={styles.footerLogoIcon}>💎</div>
-                <span>Cipro</span>
+                <img src="/ciprohub.png" alt="CiproHub" className={styles.footerLogoImage} />
               </div>
               <p className={styles.footerTagline}>Play games and earn cryptocurrency rewards</p>
             </div>
