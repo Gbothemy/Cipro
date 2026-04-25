@@ -43,10 +43,10 @@ export default function LeaderboardPage() {
   };
 
   const getRankStyle = (i) => {
-    if (i === 0) return 'text-amber-400';
-    if (i === 1) return 'text-slate-300';
-    if (i === 2) return 'text-amber-600';
-    return 'text-slate-500';
+    if (i === 0) return '#fbbf24'; // gold
+    if (i === 1) return '#cbd5e1'; // silver
+    if (i === 2) return '#d97706'; // bronze
+    return '#64748b'; // default
   };
 
   const getRankIcon = (i) => {
@@ -112,9 +112,7 @@ export default function LeaderboardPage() {
                     className="font-bold text-sm text-center"
                     style={{ 
                       width: '2rem',
-                      color: getRankStyle(i) === 'text-amber-400' ? '#fbbf24' : 
-                             getRankStyle(i) === 'text-slate-300' ? '#cbd5e1' :
-                             getRankStyle(i) === 'text-amber-600' ? '#d97706' : '#64748b'
+                      color: getRankStyle(i)
                     }}
                   >
                     {getRankIcon(i)}
