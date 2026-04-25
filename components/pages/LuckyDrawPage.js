@@ -4,12 +4,15 @@ import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
 
 export default function LuckyDrawPage() {
-  const { user, addNotification } = useStore();
+  const { user, updateUser, addNotification } = useStore();
   const [tickets, setTickets] = useState(0);
   const [pool, setPool] = useState({ cipro: 50000, usdt: 20, totalTickets: 0 });
   const [winners, setWinners] = useState([]);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState(null);
+  const [purchasing, setPurchasing] = useState(false);
+
+  const TICKET_PRICE = 1; // $1 USDT per ticket
 
   useEffect(() => {
     if (user?.userId) loadData();
@@ -48,6 +51,50 @@ export default function LuckyDrawPage() {
       addNotification({ type: 'error', title: 'Error', message: e.message });
     } finally {
       setSpinning(false);
+    }
+  };
+
+  const handlePurchaseTickets = async (quantity) => {
+    if (!user?.userId || purchasing) return;
+    
+    const cost = quantity * TICKET_PRICE;
+    const userBalance = user?.balance?.usdt || 0;
+    
+    if (userBalance < cost) {
+      addNotification({
+        type: 'error',
+        title: 'Insufficient Balance',
+        message: `You need $${cost} USDT. Go to Wallet to add funds.`,
+      });
+      return;
+    }
+
+    setPurchasing(true);
+    try {
+      // Deduct USDT and add tickets (this would be a real API call)
+      await db.updateBalance(user.userId, 'usdt', userBalance - cost);
+      
+      updateUser({
+        ...user,
+        balance: { ...user.balance, usdt: userBalance - cost }
+      });
+      
+      setTickets(tickets + quantity);
+      
+      addNotification({
+        type: 'success',
+        title: '🎫 Tickets Purchased!',
+        message: `You bought ${quantity} ticket${quantity > 1 ? 's' : ''} for $${cost} USDT`,
+      });
+    } catch (error) {
+      console.error(error);
+      addNotification({
+        type: 'error',
+        title: 'Purchase Failed',
+        message: error.message || 'Failed to purchase tickets',
+      });
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -129,9 +176,72 @@ export default function LuckyDrawPage() {
         >
           {spinning ? '🌀 Drawing...' : tickets < 1 ? 'No Tickets' : '🎰 Draw Now'}
         </button>
-        {tickets < 1 && (
-          <p className="text-xs text-dim mt-3">Earn tickets by completing tasks and playing games</p>
-        )}
+      </div>
+
+      {/* Purchase Tickets */}
+      <div className="card p-6 mb-6">
+        <h3 className="font-semibold text-white mb-4">💳 Buy Tickets</h3>
+        <p className="text-sm text-muted mb-4">Purchase tickets with USDT for instant draws</p>
+        
+        <div className="grid gap-3">
+          <button
+            onClick={() => handlePurchaseTickets(1)}
+            disabled={purchasing}
+            className="btn btn-primary flex items-center justify-between p-4"
+            style={{ borderRadius: '0.75rem' }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎫</span>
+              <div className="text-left">
+                <p className="font-semibold">1 Ticket</p>
+                <p className="text-xs opacity-75">Single draw</p>
+              </div>
+            </div>
+            <span className="font-bold">${TICKET_PRICE}</span>
+          </button>
+
+          <button
+            onClick={() => handlePurchaseTickets(5)}
+            disabled={purchasing}
+            className="btn btn-primary flex items-center justify-between p-4"
+            style={{ borderRadius: '0.75rem' }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎫🎫</span>
+              <div className="text-left">
+                <p className="font-semibold">5 Tickets</p>
+                <p className="text-xs opacity-75">Better odds</p>
+              </div>
+            </div>
+            <span className="font-bold">${TICKET_PRICE * 5}</span>
+          </button>
+
+          <button
+            onClick={() => handlePurchaseTickets(10)}
+            disabled={purchasing}
+            className="btn btn-primary flex items-center justify-between p-4"
+            style={{ 
+              borderRadius: '0.75rem',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              border: '2px solid rgba(139,92,246,0.3)'
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎫🎫🎫</span>
+              <div className="text-left">
+                <p className="font-semibold">10 Tickets</p>
+                <p className="text-xs opacity-75">Best value!</p>
+              </div>
+            </div>
+            <span className="font-bold">${TICKET_PRICE * 10}</span>
+          </button>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+          <p className="text-xs text-success">
+            💰 Your Balance: ${(user?.balance?.usdt || 0).toFixed(2)} USDT
+          </p>
+        </div>
       </div>
 
       {/* How to get tickets */}
