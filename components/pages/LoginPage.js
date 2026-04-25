@@ -107,20 +107,39 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#0a0a0f' }}>
       {/* Background glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '500px',
+        height: '400px',
+        background: 'rgba(102,126,234,0.08)',
+        borderRadius: '50%',
+        filter: 'blur(80px)',
+        pointerEvents: 'none'
+      }} />
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full" style={{ maxWidth: '28rem' }}>
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-brand flex items-center justify-center text-lg shadow-brand group-hover:shadow-brand-lg transition-shadow">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <div 
+              className="rounded-xl bg-grad-brand flex items-center justify-center shadow-brand"
+              style={{ 
+                width: '2.5rem', 
+                height: '2.5rem', 
+                fontSize: '1.125rem',
+                transition: 'box-shadow 0.3s'
+              }}
+            >
               💎
             </div>
             <span className="font-bold text-xl text-white">Cipro</span>
           </Link>
-          <p className="text-slate-400 text-sm mt-3">
+          <p className="text-muted text-sm mt-3">
             {isLogin ? 'Welcome back! Sign in to continue.' : 'Create your account and start earning.'}
           </p>
         </div>
@@ -128,54 +147,50 @@ function LoginForm() {
         {/* Card */}
         <div className="card p-8">
           {/* Tabs */}
-          <div className="flex bg-dark-800/60 rounded-xl p-1 mb-6">
+          <div className="tabs mb-6">
             <button
               onClick={() => { setIsLogin(true); setError(''); }}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                isLogin ? 'bg-primary text-white shadow-brand' : 'text-slate-400 hover:text-white'
-              }`}
+              className={isLogin ? 'tab tab-active' : 'tab'}
             >
               Sign In
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(''); }}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                !isLogin ? 'bg-primary text-white shadow-brand' : 'text-slate-400 hover:text-white'
-              }`}
+              className={!isLogin ? 'tab tab-active' : 'tab'}
             >
               Sign Up
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex-col gap-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium text-light mb-2">Full Name</label>
                 <input
                   name="fullName"
                   value={form.fullName}
                   onChange={handleChange}
                   placeholder="Your full name"
-                  className="input-field"
+                  className="input"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+              <label className="block text-sm font-medium text-light mb-2">Username</label>
               <input
                 name="username"
                 value={form.username}
                 onChange={handleChange}
                 placeholder="Enter username"
                 autoComplete="username"
-                className="input-field"
+                className="input"
               />
             </div>
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-light mb-2">Email</label>
                 <input
                   name="email"
                   type="email"
@@ -183,13 +198,13 @@ function LoginForm() {
                   onChange={handleChange}
                   placeholder="your@email.com"
                   autoComplete="email"
-                  className="input-field"
+                  className="input"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-light mb-2">Password</label>
               <input
                 name="password"
                 type="password"
@@ -197,13 +212,13 @@ function LoginForm() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
-                className="input-field"
+                className="input"
               />
             </div>
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirm Password</label>
+                <label className="block text-sm font-medium text-light mb-2">Confirm Password</label>
                 <input
                   name="confirmPassword"
                   type="password"
@@ -211,34 +226,33 @@ function LoginForm() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="input-field"
+                  className="input"
                 />
               </div>
             )}
 
             {!isLogin && referralCode && (
-              <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-                <span className="text-emerald-400">🎁</span>
-                <span className="text-sm text-emerald-400">Referral code applied: <strong>{referralCode}</strong></span>
+              <div className="alert-success">
+                🎁 Referral code applied: <strong>{referralCode}</strong>
               </div>
             )}
 
             {error && (
-              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-                <span className="text-red-400 text-sm">⚠️ {error}</span>
+              <div className="alert-error">
+                ⚠️ {error}
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-                <span className="text-emerald-400 text-sm">✅ {success}</span>
+              <div className="alert-success">
+                ✅ {success}
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 mt-2">
+            <button type="submit" disabled={loading} className="btn btn-primary btn-full py-4 mt-2">
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="spinner spinner-sm" />
                   {isLogin ? 'Signing in...' : 'Creating account...'}
                 </span>
               ) : (
@@ -248,11 +262,11 @@ function LoginForm() {
           </form>
 
           {isLogin && (
-            <div className="mt-4 p-4 bg-dark-800/60 rounded-xl border border-white/5">
-              <p className="text-xs text-slate-500 text-center mb-2">Try the demo account</p>
+            <div className="mt-4 p-4 rounded-xl" style={{ background: 'rgba(17,17,24,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <p className="text-xs text-dim text-center mb-2">Try the demo account</p>
               <button
                 onClick={() => setForm((f) => ({ ...f, username: 'DemoPlayer', password: 'Demo1234' }))}
-                className="w-full text-xs text-primary hover:text-primary-light transition-colors"
+                className="btn-ghost w-full text-xs text-primary"
               >
                 Fill demo credentials →
               </button>
@@ -260,11 +274,11 @@ function LoginForm() {
           )}
         </div>
 
-        <p className="text-center text-xs text-slate-600 mt-6">
+        <p className="text-center text-xs text-dim mt-6">
           By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms</Link>
+          <Link href="/terms" className="text-muted" style={{ transition: 'color 0.2s' }}>Terms</Link>
           {' '}and{' '}
-          <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/privacy" className="text-muted" style={{ transition: 'color 0.2s' }}>Privacy Policy</Link>
         </p>
       </div>
     </div>
@@ -273,7 +287,11 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-dark-900 flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+        <div className="spinner spinner-lg" />
+      </div>
+    }>
       <LoginForm />
     </Suspense>
   );

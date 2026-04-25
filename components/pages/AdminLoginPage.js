@@ -32,24 +32,45 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0a0a0f' }}>
+      <div className="w-full" style={{ maxWidth: '24rem' }}>
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-brand mx-auto flex items-center justify-center text-2xl mb-4 shadow-brand">🔐</div>
+          <div 
+            className="rounded-xl bg-grad-brand flex items-center justify-center shadow-brand"
+            style={{ 
+              width: '3.5rem', 
+              height: '3.5rem', 
+              margin: '0 auto 1rem',
+              fontSize: '1.5rem'
+            }}
+          >🔐</div>
           <h1 className="text-2xl font-bold text-white">Admin Access</h1>
         </div>
         <div className="card p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
-              <input name="username" value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} className="input-field" required />
+              <label className="block text-sm font-medium text-light mb-2">Username</label>
+              <input 
+                name="username" 
+                value={form.username} 
+                onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} 
+                className="input" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-              <input name="password" type="password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} className="input-field" required />
+              <label className="block text-sm font-medium text-light mb-2">Password</label>
+              <input 
+                name="password" 
+                type="password" 
+                value={form.password} 
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} 
+                className="input" 
+                required 
+              />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3">
+            {error && <p className="text-error text-sm">{error}</p>}
+            <button type="submit" disabled={loading} className="btn btn-primary btn-full py-3">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
