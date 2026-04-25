@@ -9,6 +9,29 @@ const TABS = [
   { key: 'streak', label: 'Streak', icon: '🔥' },
 ];
 
+// Generate 50 default users for leaderboard
+const AVATARS = ['🎮', '🚀', '⚡', '🔥', '💎', '🌟', '🎯', '🏆', '👑', '💰', '🎨', '🎭', '🎪', '🎬', '🎸', '🎺', '🎻', '🎹', '🥁', '🎤'];
+const NAMES = [
+  'CryptoKing', 'DiamondHands', 'MoonWalker', 'RocketMan', 'GemHunter', 'PointMaster', 'GameChamp', 'ProPlayer',
+  'LuckyWinner', 'TopEarner', 'StreakLord', 'TaskMaster', 'CoinCollector', 'RewardSeeker', 'VIPPlayer', 'EliteGamer',
+  'ChainBreaker', 'TokenHunter', 'ProfitMaker', 'WealthBuilder', 'PointChaser', 'GameNinja', 'CryptoWhale', 'MegaMiner',
+  'StarPlayer', 'LegendaryUser', 'UltimateGamer', 'PowerPlayer', 'SuperStreak', 'MasterMiner', 'EpicWinner', 'ProMiner',
+  'GoldDigger', 'TreasureHunter', 'FortuneSeeker', 'BonusKing', 'RewardHunter', 'PointCollector', 'TaskNinja', 'GameMaster',
+  'CryptoLord', 'DiamondMiner', 'MoonShooter', 'StarChaser', 'WinStreak', 'TopGamer', 'ElitePlayer', 'ProChamp', 'MegaWinner', 'UltraPlayer'
+];
+
+const generateDefaultUsers = () => {
+  return NAMES.map((name, i) => ({
+    user_id: `DEFAULT-${i}`,
+    username: name,
+    avatar: AVATARS[i % AVATARS.length],
+    points: Math.floor(Math.random() * 50000) + 10000 - (i * 800),
+    total_earnings: (Math.random() * 500 + 50 - (i * 8)).toFixed(2),
+    day_streak: Math.floor(Math.random() * 30) + 5 - Math.floor(i / 2),
+    vip_level: i < 10 ? Math.floor(Math.random() * 3) + 2 : 1,
+  })).sort((a, b) => b.points - a.points);
+};
+
 export default function LeaderboardPage() {
   const { user } = useStore();
   const [activeTab, setActiveTab] = useState('points');
