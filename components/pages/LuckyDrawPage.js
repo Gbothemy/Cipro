@@ -197,6 +197,71 @@ export default function LuckyDrawPage() {
         </div>
       </div>
 
+      {/* VIP Upgrade Benefits */}
+      <div className="card p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl">👑</span>
+          <h3 className="font-semibold text-white">VIP Upgrade Benefits</h3>
+        </div>
+        <p className="text-sm text-muted mb-4">Win a VIP upgrade to instantly level up and unlock exclusive benefits!</p>
+        
+        <div className="grid gap-3">
+          <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(185,147,86,0.1), rgba(185,147,86,0.05))' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🥉</span>
+              <span className="font-semibold text-white text-sm">Bronze → Silver</span>
+            </div>
+            <ul className="flex-col gap-1 text-xs text-muted ml-7">
+              <li>• 5 → 7 game attempts per day</li>
+              <li>• 0% → 5% conversion bonus</li>
+              <li>• Priority support access</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(203,213,225,0.1), rgba(203,213,225,0.05))' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🥈</span>
+              <span className="font-semibold text-white text-sm">Silver → Gold</span>
+            </div>
+            <ul className="flex-col gap-1 text-xs text-muted ml-7">
+              <li>• 7 → 10 game attempts per day</li>
+              <li>• 5% → 10% conversion bonus</li>
+              <li>• Exclusive tasks unlocked</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05))' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🥇</span>
+              <span className="font-semibold text-white text-sm">Gold → Platinum</span>
+            </div>
+            <ul className="flex-col gap-1 text-xs text-muted ml-7">
+              <li>• 10 → 15 game attempts per day</li>
+              <li>• 10% → 15% conversion bonus</li>
+              <li>• Free lucky draw tickets</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(34,211,238,0.05))' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">💎</span>
+              <span className="font-semibold text-white text-sm">Platinum → Diamond</span>
+            </div>
+            <ul className="flex-col gap-1 text-xs text-muted ml-7">
+              <li>• 15 → 20 game attempts per day</li>
+              <li>• 15% → 20% conversion bonus</li>
+              <li>• VIP-only exclusive events</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)' }}>
+          <p className="text-xs" style={{ color: '#a78bfa' }}>
+            💡 VIP upgrades are instant and permanent! View all tiers in the VIP section.
+          </p>
+        </div>
+      </div>
+
       {/* Recent winners */}
       {winners.length > 0 && (
         <div className="card overflow-hidden">
