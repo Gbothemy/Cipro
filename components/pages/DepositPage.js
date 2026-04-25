@@ -209,12 +209,7 @@ export default function DepositPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder={`Min: ${CRYPTO_INFO[selectedCrypto].minDeposit}`}
-                className="w-full p-3 rounded-lg text-white"
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  outline: 'none',
-                }}
+                className="input"
                 step="0.0001"
                 min={CRYPTO_INFO[selectedCrypto].minDeposit}
               />
@@ -227,12 +222,7 @@ export default function DepositPage() {
                 value={txHash}
                 onChange={(e) => setTxHash(e.target.value)}
                 placeholder="Enter your transaction hash"
-                className="w-full p-3 rounded-lg text-white font-mono"
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  outline: 'none',
-                }}
+                className="input font-mono"
               />
               <p className="text-xs text-dim mt-1">
                 Find this in your wallet after sending the transaction
