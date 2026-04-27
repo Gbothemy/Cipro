@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,9 +20,14 @@ export default function AdminPage() {
 
   const loadData = async () => {
     try {
-      const [u, w] = await Promise.all([db.getAllUsers(), db.getWithdrawalRequests()]);
+      const [u, w, d] = await Promise.all([
+        db.getAllUsers().catch(() => []),
+        db.getWithdrawalRequests().catch(() => []),
+        db.getDepositRequests().catch(() => [])
+      ]);
       setUsers(u);
       setWithdrawals(w);
+      setDeposits(d);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -40,7 +46,23 @@ export default function AdminPage() {
     } catch (e) { console.error(e); }
   };
 
+  const approveDeposit = async (id) => {
+    try {
+      await db.updateDepositStatus(id, 'approved', user.userId);
+      setDeposits((prev) => prev.map((d) => d.id === id ? { ...d, status: 'approved' } : d));
+      loadData(); // Reload to update stats
+    } catch (e) { console.error(e); }
+  };
+
+  const rejectDeposit = async (id) => {
+    try {
+      await db.updateDepositStatus(id, 'rejected', user.userId);
+      setDeposits((prev) => prev.map((d) => d.id === id ? { ...d, status: 'rejected' } : d));
+    } catch (e) { console.error(e); }
+  };
+
   const pending = withdrawals.filter((w) => w.status === 'pending');
+  const pendingDeposits = deposits.filter((d) => d.status === 'pending');
 
   return (
     <div className="min-h-screen p-6" style={{ background: '#0a0a0f' }}>
@@ -57,8 +79,8 @@ export default function AdminPage() {
         <div className="grid-4 mb-8">
           {[
             { label: 'Total Users', value: users.length, icon: '👥' },
+            { label: 'Pending Deposits', value: pendingDeposits.length, icon: '💰' },
             { label: 'Pending Withdrawals', value: pending.length, icon: '⏳' },
-            { label: 'Total Withdrawals', value: withdrawals.length, icon: '💸' },
             { label: 'Active Today', value: users.filter((u) => u.lastClaim && new Date(u.lastClaim) > new Date(Date.now() - 86400000)).length, icon: '✅' },
           ].map((s, i) => (
             <div key={i} className="stat-card">
@@ -71,7 +93,11 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="tabs mb-6" style={{ width: 'fit-content' }}>
-          {[{ key: 'users', label: '👥 Users' }, { key: 'withdrawals', label: '💸 Withdrawals' }].map((t) => (
+          {[
+            { key: 'users', label: '👥 Users' }, 
+            { key: 'deposits', label: '💰 Deposits' },
+            { key: 'withdrawals', label: '💸 Withdrawals' }
+          ].map((t) => (
             <button 
               key={t.key} 
               onClick={() => setTab(t.key)}
@@ -117,6 +143,51 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        ) : tab === 'deposits' ? (
+          <div className="card overflow-hidden">
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    {['User', 'Amount', 'Currency', 'TX Hash', 'Wallet', 'Status', 'Actions'].map((h) => (
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {deposits.map((d) => (
+                    <tr key={d.id}>
+                      <td className="font-medium text-white">{d.user_id}</td>
+                      <td className="text-white">{d.amount}</td>
+                      <td className="text-light" style={{ textTransform: 'uppercase' }}>{d.currency}</td>
+                      <td className="text-muted text-xs" style={{ fontFamily: 'monospace', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {d.tx_hash}
+                      </td>
+                      <td className="text-muted text-xs" style={{ fontFamily: 'monospace', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {d.wallet_address}
+                      </td>
+                      <td>
+                        <span className={`badge text-xs ${
+                          d.status === 'approved' ? 'badge-success' :
+                          d.status === 'rejected' ? 'badge-error' :
+                          'badge-warning'
+                        }`}>{d.status}</span>
+                      </td>
+                      <td>
+                        {d.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button onClick={() => approveDeposit(d.id)} className="btn-ghost text-xs text-success">Approve</button>
+                            <button onClick={() => rejectDeposit(d.id)} className="btn-ghost text-xs text-error">Reject</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {deposits.length === 0 && <div className="p-12 text-center text-muted">No deposit requests</div>}
             </div>
           </div>
         ) : (
