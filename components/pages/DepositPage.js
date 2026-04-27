@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
 
@@ -44,6 +44,25 @@ export default function DepositPage() {
   const [amount, setAmount] = useState('');
   const [txHash, setTxHash] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deposits, setDeposits] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  useEffect(() => {
+    if (user?.userId) {
+      loadDepositHistory();
+    }
+  }, [user?.userId]);
+
+  const loadDepositHistory = async () => {
+    try {
+      const history = await db.getDepositRequests(user.userId);
+      setDeposits(history);
+    } catch (error) {
+      console.error('Error loading deposit history:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const handleCopyAddress = (address) => {
     navigator.clipboard.writeText(address);
@@ -129,6 +148,9 @@ export default function DepositPage() {
       setAmount('');
       setTxHash('');
       setSelectedCrypto(null);
+      
+      // Reload deposit history
+      loadDepositHistory();
     } catch (error) {
       console.error('Deposit submission error:', error);
       addNotification({
@@ -274,11 +296,60 @@ export default function DepositPage() {
       {/* Deposit History */}
       <div className="card p-6">
         <h3 className="font-semibold text-white mb-4">Recent Deposits</h3>
-        <div className="text-center py-8">
-          <div className="text-4xl mb-3">📊</div>
-          <p className="text-sm text-muted">Your deposit history will appear here</p>
-          <p className="text-xs text-dim mt-2">Pending deposits are verified within 5-15 minutes</p>
-        </div>
+        {loadingHistory ? (
+          <div className="text-center py-8">
+            <div className="spinner spinner-lg" style={{ margin: '0 auto' }} />
+          </div>
+        ) : deposits.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">📊</div>
+            <p className="text-sm text-muted">Your deposit history will appear here</p>
+            <p className="text-xs text-dim mt-2">Pending deposits are verified within 5-15 minutes</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th className="text-left text-xs text-dim font-medium pb-3">Date</th>
+                  <th className="text-left text-xs text-dim font-medium pb-3">Currency</th>
+                  <th className="text-left text-xs text-dim font-medium pb-3">Amount</th>
+                  <th className="text-left text-xs text-dim font-medium pb-3">TX Hash</th>
+                  <th className="text-left text-xs text-dim font-medium pb-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deposits.map((deposit) => (
+                  <tr key={deposit.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td className="py-3 text-sm text-muted">
+                      {new Date(deposit.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3">
+                      <span className="text-sm font-medium text-white" style={{ textTransform: 'uppercase' }}>
+                        {CRYPTO_INFO[deposit.currency]?.icon} {deposit.currency}
+                      </span>
+                    </td>
+                    <td className="py-3 text-sm font-medium text-white">
+                      {Number(deposit.amount).toFixed(deposit.currency === 'sol' ? 4 : 2)}
+                    </td>
+                    <td className="py-3 text-xs text-muted font-mono" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {deposit.tx_hash}
+                    </td>
+                    <td className="py-3">
+                      <span className={`badge text-xs ${
+                        deposit.status === 'approved' ? 'badge-success' :
+                        deposit.status === 'rejected' ? 'badge-error' :
+                        'badge-warning'
+                      }`}>
+                        {deposit.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* FAQ */}

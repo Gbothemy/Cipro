@@ -12,6 +12,30 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ username: user?.username || '', email: user?.email || '', avatar: user?.avatar || '👤' });
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshBalance = async () => {
+    setRefreshing(true);
+    try {
+      const userData = await db.getUser(user.userId);
+      if (userData) {
+        updateUser(userData);
+        addNotification({
+          type: 'success',
+          title: 'Balance Updated',
+          message: 'Your balance has been refreshed',
+        });
+      }
+    } catch (e) {
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to refresh balance',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -170,12 +194,21 @@ export default function ProfilePage() {
       <div className="card p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-white">💰 Deposited Balance</h3>
-          <button 
-            onClick={() => router.push('/deposit')}
-            className="btn btn-primary btn-sm py-2 px-4 text-xs"
-          >
-            + Deposit
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={refreshBalance}
+              disabled={refreshing}
+              className="btn btn-secondary btn-sm py-2 px-4 text-xs"
+            >
+              {refreshing ? '⏳' : '🔄'} Refresh
+            </button>
+            <button 
+              onClick={() => router.push('/deposit')}
+              className="btn btn-primary btn-sm py-2 px-4 text-xs"
+            >
+              + Deposit
+            </button>
+          </div>
         </div>
         <div className="grid-2 gap-3">
           {[
