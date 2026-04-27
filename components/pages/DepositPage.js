@@ -9,7 +9,7 @@ const CRYPTO_INFO = {
     icon: '◎', 
     color: '#14F195',
     network: 'Solana Mainnet',
-    walletAddress: 'YOUR_SOL_WALLET_ADDRESS_HERE', // Replace with actual wallet
+    walletAddress: '7zZ4cE3CqtA1p8ZVweBRTUesWr9PZ8GYidmnMFUar5Xi',
     minDeposit: 0.01,
   },
   eth: { 
@@ -17,23 +17,23 @@ const CRYPTO_INFO = {
     icon: 'Ξ', 
     color: '#627EEA',
     network: 'Ethereum Mainnet (ERC-20)',
-    walletAddress: 'YOUR_ETH_WALLET_ADDRESS_HERE', // Replace with actual wallet
+    walletAddress: '0x84e44cbb161dce433e3dad575cd6b055dbc71009',
     minDeposit: 0.001,
   },
   usdt: { 
     name: 'Tether', 
     icon: '₮', 
     color: '#26A17B',
-    network: 'Ethereum (ERC-20) or Tron (TRC-20)',
-    walletAddress: 'YOUR_USDT_WALLET_ADDRESS_HERE', // Replace with actual wallet
+    network: 'Ethereum (ERC-20)',
+    walletAddress: '0x84e44cbb161dce433e3dad575cd6b055dbc71009',
     minDeposit: 5,
   },
   usdc: { 
     name: 'USD Coin', 
     icon: '$', 
     color: '#2775CA',
-    network: 'Ethereum (ERC-20) or Solana',
-    walletAddress: 'YOUR_USDC_WALLET_ADDRESS_HERE', // Replace with actual wallet
+    network: 'Ethereum (ERC-20)',
+    walletAddress: '0x84e44cbb161dce433e3dad575cd6b055dbc71009',
     minDeposit: 5,
   },
 };
