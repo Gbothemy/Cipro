@@ -473,14 +473,38 @@ async function handleAction(action, p) {
         const deposit = r.rows[0];
         const currency = deposit.currency.toLowerCase();
         
-        // Update balance in balances table
-        await query(
-          `INSERT INTO balances (user_id, ${currency}) 
-           VALUES ($1, $2)
-           ON CONFLICT (user_id) 
-           DO UPDATE SET ${currency} = balances.${currency} + $2, updated_at = NOW()`,
-          [deposit.user_id, deposit.amount]
-        );
+        // Validate currency
+        const validCurrencies = ['sol', 'eth', 'usdt', 'usdc'];
+        if (!validCurrencies.includes(currency)) {
+          throw new Error(`Invalid currency: ${currency}`);
+        }
+        
+        // Update balance in balances table using CASE statement for safety
+        if (currency === 'sol') {
+          await query(
+            `INSERT INTO balances (user_id, sol) VALUES ($1, $2)
+             ON CONFLICT (user_id) DO UPDATE SET sol = balances.sol + $2, updated_at = NOW()`,
+            [deposit.user_id, deposit.amount]
+          );
+        } else if (currency === 'eth') {
+          await query(
+            `INSERT INTO balances (user_id, eth) VALUES ($1, $2)
+             ON CONFLICT (user_id) DO UPDATE SET eth = balances.eth + $2, updated_at = NOW()`,
+            [deposit.user_id, deposit.amount]
+          );
+        } else if (currency === 'usdt') {
+          await query(
+            `INSERT INTO balances (user_id, usdt) VALUES ($1, $2)
+             ON CONFLICT (user_id) DO UPDATE SET usdt = balances.usdt + $2, updated_at = NOW()`,
+            [deposit.user_id, deposit.amount]
+          );
+        } else if (currency === 'usdc') {
+          await query(
+            `INSERT INTO balances (user_id, usdc) VALUES ($1, $2)
+             ON CONFLICT (user_id) DO UPDATE SET usdc = balances.usdc + $2, updated_at = NOW()`,
+            [deposit.user_id, deposit.amount]
+          );
+        }
       }
       
       return r.rows[0];

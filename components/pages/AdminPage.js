@@ -48,17 +48,28 @@ export default function AdminPage() {
 
   const approveDeposit = async (id) => {
     try {
-      await db.updateDepositStatus(id, 'approved', user.userId);
+      console.log('Approving deposit:', id);
+      const result = await db.updateDepositStatus(id, 'approved', user.userId);
+      console.log('Deposit approved:', result);
       setDeposits((prev) => prev.map((d) => d.id === id ? { ...d, status: 'approved' } : d));
       loadData(); // Reload to update stats
-    } catch (e) { console.error(e); }
+      alert('Deposit approved successfully! User balance has been updated.');
+    } catch (e) {
+      console.error('Error approving deposit:', e);
+      alert('Error approving deposit: ' + e.message);
+    }
   };
 
   const rejectDeposit = async (id) => {
     try {
+      console.log('Rejecting deposit:', id);
       await db.updateDepositStatus(id, 'rejected', user.userId);
       setDeposits((prev) => prev.map((d) => d.id === id ? { ...d, status: 'rejected' } : d));
-    } catch (e) { console.error(e); }
+      alert('Deposit rejected.');
+    } catch (e) {
+      console.error('Error rejecting deposit:', e);
+      alert('Error rejecting deposit: ' + e.message);
+    }
   };
 
   const pending = withdrawals.filter((w) => w.status === 'pending');
