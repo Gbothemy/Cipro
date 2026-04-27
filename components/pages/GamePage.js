@@ -183,7 +183,19 @@ function TriviaInline({ onComplete, gameId }) {
   const [questions] = useState(() => {
     // Shuffle and pick 5 random questions from 500+ question pool
     const shuffled = [...TRIVIA_QUESTIONS].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 5);
+    const selected = shuffled.slice(0, 5);
+    
+    // Shuffle answer options for each question
+    return selected.map(q => {
+      const optionsWithIndex = q.options.map((opt, idx) => ({ opt, idx }));
+      const shuffledOptions = optionsWithIndex.sort(() => Math.random() - 0.5);
+      
+      return {
+        q: q.q,
+        options: shuffledOptions.map(o => o.opt),
+        answer: shuffledOptions.findIndex(o => o.idx === q.answer)
+      };
+    });
   });
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
