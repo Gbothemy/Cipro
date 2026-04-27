@@ -80,7 +80,7 @@ export default function LuckyDrawPage() {
     const cost = quantity * TICKET_PRICE;
     const priceInCurrency = cost / CRYPTO_RATES[currency];
     // Only use deposited balance, not earned balance
-    const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+    const depositedBalance = Number(user?.balance?.[currency] || 0);
     
     if (depositedBalance < priceInCurrency) {
       addNotification({
@@ -100,7 +100,7 @@ export default function LuckyDrawPage() {
       
       updateUser({
         ...user,
-        depositedBalance: { ...user.depositedBalance, [currency]: newDepositedBalance }
+        balance: { ...user.balance, [currency]: newDepositedBalance }
       });
       
       setTickets(tickets + quantity);
@@ -281,7 +281,7 @@ export default function LuckyDrawPage() {
 
         <div className="mt-4 p-3 rounded-lg text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
           <p className="text-xs text-success">
-            💰 Deposited Balance: ${Number(user?.depositedBalance?.usdt || 0).toFixed(2)} USDT
+            💰 Deposited Balance: ${Number(user?.balance?.usdt || 0).toFixed(2)} USDT
           </p>
         </div>
       </div>
@@ -308,7 +308,7 @@ export default function LuckyDrawPage() {
             <div className="grid gap-3">
               {Object.entries(CRYPTO_INFO).map(([currency, info]) => {
                 const priceInCurrency = (selectedQuantity * TICKET_PRICE) / CRYPTO_RATES[currency];
-                const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+                const depositedBalance = Number(user?.balance?.[currency] || 0);
                 const canAfford = depositedBalance >= priceInCurrency;
                 
                 return (

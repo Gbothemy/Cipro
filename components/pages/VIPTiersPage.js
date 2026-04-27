@@ -37,7 +37,7 @@ export default function VIPTiersPage() {
     
     const priceInCurrency = tier.monthlyPrice / CRYPTO_RATES[currency];
     // Only use deposited balance, not earned balance
-    const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+    const depositedBalance = Number(user?.balance?.[currency] || 0);
     
     if (depositedBalance < priceInCurrency) {
       addNotification({
@@ -67,7 +67,7 @@ export default function VIPTiersPage() {
       
       updateUser({
         ...updatedUser,
-        depositedBalance: { ...user.depositedBalance, [currency]: newDepositedBalance }
+        balance: { ...user.balance, [currency]: newDepositedBalance }
       });
       
       addNotification({
@@ -115,8 +115,8 @@ export default function VIPTiersPage() {
           <div className="text-right">
             <p className="text-xs text-dim">Deposited Balance</p>
             <div className="flex gap-2 text-xs">
-              <span style={{ color: CRYPTO_INFO.sol.color }}>{Number(user?.depositedBalance?.sol || 0).toFixed(2)} SOL</span>
-              <span style={{ color: CRYPTO_INFO.eth.color }}>{Number(user?.depositedBalance?.eth || 0).toFixed(4)} ETH</span>
+              <span style={{ color: CRYPTO_INFO.sol.color }}>{Number(user?.balance?.sol || 0).toFixed(2)} SOL</span>
+              <span style={{ color: CRYPTO_INFO.eth.color }}>{Number(user?.balance?.eth || 0).toFixed(4)} ETH</span>
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function VIPTiersPage() {
             <div className="grid gap-3">
               {Object.entries(CRYPTO_INFO).map(([currency, info]) => {
                 const priceInCurrency = selectedTier.monthlyPrice / CRYPTO_RATES[currency];
-                const depositedBalance = Number(user?.depositedBalance?.[currency] || 0);
+                const depositedBalance = Number(user?.balance?.[currency] || 0);
                 const canAfford = depositedBalance >= priceInCurrency;
                 
                 return (
