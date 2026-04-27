@@ -55,16 +55,45 @@ export default function DepositPage() {
   };
 
   const handleSubmitDeposit = async () => {
-    if (!selectedCrypto || !amount || !txHash) {
+    // Validation
+    if (!selectedCrypto) {
       addNotification({
         type: 'error',
-        title: 'Missing Information',
-        message: 'Please fill in all fields',
+        title: 'No Crypto Selected',
+        message: 'Please select a cryptocurrency first',
+      });
+      return;
+    }
+
+    if (!amount || amount.trim() === '') {
+      addNotification({
+        type: 'error',
+        title: 'Missing Amount',
+        message: 'Please enter the amount you sent',
+      });
+      return;
+    }
+
+    if (!txHash || txHash.trim() === '') {
+      addNotification({
+        type: 'error',
+        title: 'Missing Transaction Hash',
+        message: 'Please enter your transaction hash',
       });
       return;
     }
 
     const depositAmount = parseFloat(amount);
+    
+    if (isNaN(depositAmount) || depositAmount <= 0) {
+      addNotification({
+        type: 'error',
+        title: 'Invalid Amount',
+        message: 'Please enter a valid amount',
+      });
+      return;
+    }
+
     const minDeposit = CRYPTO_INFO[selectedCrypto].minDeposit;
 
     if (depositAmount < minDeposit) {
@@ -79,14 +108,16 @@ export default function DepositPage() {
     setSubmitting(true);
     try {
       // Submit deposit request to backend for verification
-      await db.createDepositRequest({
+      const result = await db.createDepositRequest({
         userId: user.userId,
         currency: selectedCrypto,
         amount: depositAmount,
-        txHash: txHash,
+        txHash: txHash.trim(),
         walletAddress: CRYPTO_INFO[selectedCrypto].walletAddress,
         status: 'pending',
       });
+
+      console.log('Deposit request created:', result);
 
       addNotification({
         type: 'success',
@@ -99,11 +130,11 @@ export default function DepositPage() {
       setTxHash('');
       setSelectedCrypto(null);
     } catch (error) {
-      console.error(error);
+      console.error('Deposit submission error:', error);
       addNotification({
         type: 'error',
         title: 'Submission Failed',
-        message: error.message || 'Failed to submit deposit request',
+        message: error.message || 'Failed to submit deposit request. Please try again.',
       });
     } finally {
       setSubmitting(false);
@@ -232,12 +263,7 @@ export default function DepositPage() {
             <button
               onClick={handleSubmitDeposit}
               disabled={submitting || !amount || !txHash}
-              className={submitting || !amount || !txHash ? 'btn w-full opacity-50 cursor-not-allowed' : 'btn btn-primary w-full'}
-              style={{ 
-                padding: '1rem',
-                fontSize: '1rem',
-                borderRadius: '0.75rem',
-              }}
+              className="btn btn-primary btn-full py-4"
             >
               {submitting ? '⏳ Submitting...' : '✅ Submit Deposit'}
             </button>
