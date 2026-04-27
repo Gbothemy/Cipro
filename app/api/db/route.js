@@ -468,16 +468,18 @@ async function handleAction(action, p) {
         [p.status, p.processed_by, p.id]
       );
       
-      // If approved, add to deposited balance
+      // If approved, add to user's balance
       if (p.status === 'approved' && r.rows[0]) {
         const deposit = r.rows[0];
-        // This would update the deposited_balance in the users table
+        const currency = deposit.currency.toLowerCase();
+        
+        // Update balance in balances table
         await query(
-          `UPDATE users SET deposited_balance = 
-           COALESCE(deposited_balance, '{}'::jsonb) || 
-           jsonb_build_object($1, COALESCE((deposited_balance->>$1)::numeric, 0) + $2)
-           WHERE user_id = $3`,
-          [deposit.currency, deposit.amount, deposit.user_id]
+          `INSERT INTO balances (user_id, ${currency}) 
+           VALUES ($1, $2)
+           ON CONFLICT (user_id) 
+           DO UPDATE SET ${currency} = balances.${currency} + $2, updated_at = NOW()`,
+          [deposit.user_id, deposit.amount]
         );
       }
       
