@@ -135,6 +135,20 @@ CREATE TABLE IF NOT EXISTS withdrawal_requests (
   transaction_hash TEXT
 );
 
+-- Deposit requests
+CREATE TABLE IF NOT EXISTS deposit_requests (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  currency TEXT NOT NULL,
+  amount DECIMAL(18,8) NOT NULL,
+  tx_hash TEXT NOT NULL,
+  wallet_address TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT NOW(),
+  processed_at TIMESTAMP,
+  processed_by TEXT
+);
+
 -- Conversion history
 CREATE TABLE IF NOT EXISTS conversion_history (
   id BIGSERIAL PRIMARY KEY,
@@ -236,6 +250,7 @@ CREATE INDEX IF NOT EXISTS idx_game_attempts_user ON game_attempts(user_id, crea
 CREATE INDEX IF NOT EXISTS idx_user_tasks_user ON user_tasks(user_id, reset_date);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_withdrawal_requests_status ON withdrawal_requests(status);
+CREATE INDEX IF NOT EXISTS idx_deposit_requests_status ON deposit_requests(status, user_id);
 CREATE INDEX IF NOT EXISTS idx_lucky_draw_tickets_user ON lucky_draw_tickets(user_id, is_used);
 
 -- ==================== INITIAL DATA ====================
