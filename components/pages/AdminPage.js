@@ -189,8 +189,34 @@ export default function AdminPage() {
                       <td>
                         {d.status === 'pending' && (
                           <div className="flex gap-2">
-                            <button onClick={() => approveDeposit(d.id)} className="btn-ghost text-xs text-success">Approve</button>
-                            <button onClick={() => rejectDeposit(d.id)} className="btn-ghost text-xs text-error">Reject</button>
+                            <button 
+                              onClick={() => approveDeposit(d.id)} 
+                              className="btn btn-sm"
+                              style={{ 
+                                background: 'rgba(16,185,129,0.1)', 
+                                color: '#10b981',
+                                border: '1px solid rgba(16,185,129,0.3)',
+                                cursor: 'pointer',
+                                padding: '0.25rem 0.75rem',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              ✓ Approve
+                            </button>
+                            <button 
+                              onClick={() => rejectDeposit(d.id)} 
+                              className="btn btn-sm"
+                              style={{ 
+                                background: 'rgba(239,68,68,0.1)', 
+                                color: '#ef4444',
+                                border: '1px solid rgba(239,68,68,0.3)',
+                                cursor: 'pointer',
+                                padding: '0.25rem 0.75rem',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              ✕ Reject
+                            </button>
                           </div>
                         )}
                       </td>
@@ -229,8 +255,34 @@ export default function AdminPage() {
                       <td>
                         {w.status === 'pending' && (
                           <div className="flex gap-2">
-                            <button onClick={() => approveWithdrawal(w.id)} className="btn-ghost text-xs text-success">Approve</button>
-                            <button onClick={() => rejectWithdrawal(w.id)} className="btn-ghost text-xs text-error">Reject</button>
+                            <button 
+                              onClick={() => approveWithdrawal(w.id)} 
+                              className="btn btn-sm"
+                              style={{ 
+                                background: 'rgba(16,185,129,0.1)', 
+                                color: '#10b981',
+                                border: '1px solid rgba(16,185,129,0.3)',
+                                cursor: 'pointer',
+                                padding: '0.25rem 0.75rem',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              ✓ Approve
+                            </button>
+                            <button 
+                              onClick={() => rejectWithdrawal(w.id)} 
+                              className="btn btn-sm"
+                              style={{ 
+                                background: 'rgba(239,68,68,0.1)', 
+                                color: '#ef4444',
+                                border: '1px solid rgba(239,68,68,0.3)',
+                                cursor: 'pointer',
+                                padding: '0.25rem 0.75rem',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              ✕ Reject
+                            </button>
                           </div>
                         )}
                       </td>
