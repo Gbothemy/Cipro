@@ -287,6 +287,15 @@ async function handleAction(action, p) {
       if (!r.rows[0]?.last_mine_time) return 0;
       return new Date(r.rows[0].last_mine_time).toISOString().split('T')[0] === today ? 1 : 0;
     }
+    case 'recordMiningSession': {
+      const now = new Date().toISOString();
+      await query(`UPDATE users SET last_mine_time=$1 WHERE user_id=$2`, [now, p.user_id]);
+      await query(
+        `INSERT INTO user_activity_log (user_id, activity_type, points_change, description) VALUES ($1, $2, $3, $4)`,
+        [p.user_id, 'mining', p.points_earned, `Completed mining session and earned ${p.points_earned} points`]
+      );
+      return { success: true, timestamp: now };
+    }
     case 'getPointsEarnedThisMonth': {
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
       const r = await query(`SELECT COALESCE(SUM(points_change),0) as total FROM user_activity_log WHERE user_id=$1 AND created_at>=$2 AND points_change>0`, [p.user_id, startOfMonth]);

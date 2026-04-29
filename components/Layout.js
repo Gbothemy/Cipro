@@ -8,6 +8,7 @@ import styles from './Layout.module.css';
 const NAV_ITEMS = [
   { path: '/dashboard',    icon: '📊', label: 'Dashboard' },
   { path: '/game',         icon: '🎮', label: 'Games' },
+  { path: '/mining',       icon: '⛏️', label: 'Mining' },
   { path: '/tasks',        icon: '📋', label: 'Tasks' },
   { path: '/conversion',   icon: '💳', label: 'Wallet' },
   { path: '/deposit',      icon: '💰', label: 'Deposit' },
@@ -24,8 +25,8 @@ const NAV_ITEMS = [
 const BOTTOM_NAV = [
   { path: '/dashboard',   icon: '📊', label: 'Home' },
   { path: '/game',        icon: '🎮', label: 'Games' },
+  { path: '/mining',      icon: '⛏️', label: 'Mining' },
   { path: '/tasks',       icon: '📋', label: 'Tasks' },
-  { path: '/lucky-draw',  icon: '🎰', label: 'Draw' },
   { path: '/profile',     icon: '👤', label: 'Profile' },
 ];
 
