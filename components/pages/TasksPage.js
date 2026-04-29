@@ -258,8 +258,20 @@ export default function TasksPage() {
                       {complete && !isClaimed && (
                         <button
                           onClick={() => claimTask(task)}
-                          className="text-xs font-semibold text-success"
-                          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                          className="btn btn-sm"
+                          style={{ 
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.375rem 0.875rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            borderRadius: '0.5rem',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                         >
                           Claim →
                         </button>
