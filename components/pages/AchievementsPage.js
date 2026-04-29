@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
+import { checkAndUnlockAchievements, getUserStatsForAchievements } from '../../lib/achievementChecker';
 
 const DEFAULT_ACHIEVEMENTS = [
   { id: 'first_game', title: 'First Game', description: 'Play your first game', icon: '🎮', points: 50, category: 'games' },
@@ -16,10 +17,11 @@ const DEFAULT_ACHIEVEMENTS = [
 ];
 
 export default function AchievementsPage() {
-  const { user } = useStore();
+  const { user, addPoints, addNotification } = useStore();
   const [achievements, setAchievements] = useState([]);
   const [unlocked, setUnlocked] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function AchievementsPage() {
             icon: a.icon || '🏆',
             reward_points: a.reward_points,
             category: a.category,
+            requirement_text: a.requirement_text,
           }))
         : DEFAULT_ACHIEVEMENTS;
       
@@ -55,6 +58,52 @@ export default function AchievementsPage() {
     }
   };
 
+  const checkAchievements = async () => {
+    if (checking) return;
+    setChecking(true);
+    
+    try {
+      // Get user stats
+      const stats = await getUserStatsForAchievements(user.userId);
+      
+      // Check and unlock achievements
+      const newlyUnlocked = await checkAndUnlockAchievements(user.userId, stats);
+      
+      if (newlyUnlocked.length > 0) {
+        // Add points for all newly unlocked achievements
+        const totalPoints = newlyUnlocked.reduce((sum, a) => sum + a.reward_points, 0);
+        addPoints(totalPoints);
+        
+        // Show notifications
+        newlyUnlocked.forEach(achievement => {
+          addNotification({
+            type: 'success',
+            title: '🏆 Achievement Unlocked!',
+            message: `${achievement.achievement_name} (+${achievement.reward_points} pts)`,
+          });
+        });
+        
+        // Reload achievements
+        await loadAchievements();
+      } else {
+        addNotification({
+          type: 'info',
+          title: 'All Caught Up!',
+          message: 'No new achievements to unlock',
+        });
+      }
+    } catch (e) {
+      console.error('Error checking achievements:', e);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to check achievements',
+      });
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const categories = ['all', 'points', 'games', 'streak', 'tasks', 'social', 'vip', 'financial', 'lucky', 'special'];
   const filtered = filter === 'all' ? achievements : achievements.filter((a) => a.category === filter);
   const unlockedCount = unlocked.length;
@@ -62,8 +111,19 @@ export default function AchievementsPage() {
   return (
     <div className="page-container">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-white">Achievements</h1>
-        <p className="text-muted mt-2">{unlockedCount}/{achievements.length} unlocked</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-black text-white">Achievements</h1>
+            <p className="text-muted mt-2">{unlockedCount}/{achievements.length} unlocked</p>
+          </div>
+          <button
+            onClick={checkAchievements}
+            disabled={checking}
+            className="btn btn-primary px-4 py-2"
+          >
+            {checking ? '⏳ Checking...' : '🔍 Check Progress'}
+          </button>
+        </div>
       </div>
 
       {/* Progress */}
