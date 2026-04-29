@@ -136,8 +136,8 @@ export default function TasksPage() {
       // Update task progress first
       await db.updateTaskProgress(user.userId, task.id, task.progress);
       
-      // Claim the task
-      await db.claimTask(user.userId, task.id);
+      // Claim the task with progress
+      await db.claimTask(user.userId, task.id, task.progress);
       
       // Add points to user
       await db.addPoints(user.userId, task.reward_points);
@@ -159,7 +159,7 @@ export default function TasksPage() {
       addNotification({ 
         type: 'error', 
         title: 'Error', 
-        message: 'Failed to claim task. Please try again.' 
+        message: e.message || 'Failed to claim task. Please try again.' 
       });
     }
   };

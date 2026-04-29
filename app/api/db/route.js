@@ -273,8 +273,17 @@ async function handleAction(action, p) {
     }
     case 'claimTask': {
       const today = new Date().toISOString().split('T')[0];
-      const r = await query(`UPDATE user_tasks SET is_claimed=true,claimed_at=NOW() WHERE user_id=$1 AND task_id=$2 AND reset_date=$3 RETURNING *`, [p.user_id, p.task_id, today]);
-      return r.rows[0];
+      // First ensure the task exists in user_tasks
+      const ex = await query(`SELECT * FROM user_tasks WHERE user_id=$1 AND task_id=$2 AND reset_date=$3`, [p.user_id, p.task_id, today]);
+      if (ex.rows[0]) {
+        // Update existing task
+        const r = await query(`UPDATE user_tasks SET is_claimed=true,claimed_at=NOW() WHERE id=$1 RETURNING *`, [ex.rows[0].id]);
+        return r.rows[0];
+      } else {
+        // Create and claim in one go
+        const r = await query(`INSERT INTO user_tasks (user_id,task_id,progress,is_claimed,claimed_at,reset_date) VALUES ($1,$2,$3,true,NOW(),$4) RETURNING *`, [p.user_id, p.task_id, p.progress || 0, today]);
+        return r.rows[0];
+      }
     }
     case 'getGamesPlayedToday': {
       const today = new Date().toISOString().split('T')[0];
