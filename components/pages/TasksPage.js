@@ -7,14 +7,14 @@ const FALLBACK_TASKS = [
   { id: 'daily_login', task_name: 'Daily Login', description: 'Log in today', icon: '🔑', required_count: 1, reward_points: 50, task_type: 'daily' },
   { id: 'play_games', task_name: 'Play 3 Games', description: 'Play any 3 games', icon: '🎮', required_count: 3, reward_points: 100, task_type: 'daily' },
   { id: 'mining_session', task_name: 'Mining Session', description: 'Complete a mining session', icon: '⛏️', required_count: 1, reward_points: 75, task_type: 'daily' },
-  { id: 'earn_points', task_name: 'Earn 200 Points', description: 'Earn 200 points today', icon: '💎', required_count: 200, reward_points: 150, task_type: 'daily' },
+  { id: 'earn_points', task_name: 'Earn 500 Points', description: 'Earn 500 points today', icon: '💎', required_count: 500, reward_points: 150, task_type: 'daily' },
   { id: 'weekly_games', task_name: 'Play 20 Games', description: 'Play 20 games this week', icon: '🏆', required_count: 20, reward_points: 500, task_type: 'weekly' },
-  { id: 'monthly_points', task_name: 'Earn 5000 Points', description: 'Earn 5000 points this month', icon: '🌟', required_count: 5000, reward_points: 2000, task_type: 'monthly' },
+  { id: 'monthly_points', task_name: 'Earn 25000 Points', description: 'Earn 25000 points this month', icon: '🌟', required_count: 25000, reward_points: 5000, task_type: 'monthly' },
 ];
 
 export default function TasksPage() {
   const { user, addPoints, addNotification } = useStore();
-  const [tasks, setTasks] = useState({ daily: [], weekly: [], monthly: [] });
+  const [tasks, setTasks] = useState({ daily: [], weekly: [], monthly: [], social: [], vip: [], financial: [], achievement: [] });
   const [claimed, setClaimed] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('daily');
@@ -25,16 +25,19 @@ export default function TasksPage() {
 
   const initTasks = async () => {
     try {
-      const [dbTasks, userTasks, gamesPlayed, miningSessions, pointsEarned] = await Promise.all([
+      const [dbTasks, userTasks, gamesPlayed, miningSessions, pointsEarned, achievements, deposits, vipLevel] = await Promise.all([
         db.getTasks().catch(() => []),
         db.getUserTasks(user.userId).catch(() => []),
         db.getGamesPlayedToday(user.userId).catch(() => 0),
-        db.getMiningSessionsToday(user.userId).catch(() => 0),
+        db.getActiveMiningCount(user.userId).catch(() => 0),
         db.getPointsEarnedThisMonth(user.userId).catch(() => 0),
+        db.getUserAchievements(user.userId).catch(() => []),
+        db.getDepositRequests(user.userId, 'approved').catch(() => []),
+        Promise.resolve(user?.vipLevel || 1),
       ]);
 
       const allTasks = dbTasks.length > 0 ? dbTasks : FALLBACK_TASKS;
-      const grouped = { daily: [], weekly: [], monthly: [] };
+      const grouped = { daily: [], weekly: [], monthly: [], social: [], vip: [], financial: [], achievement: [] };
 
       // Create a map of user task progress
       const userTaskMap = {};
@@ -46,13 +49,49 @@ export default function TasksPage() {
         const type = t.task_type || 'daily';
         let progress = 0;
         
-        // Calculate progress based on task type
-        if (t.id === 'daily_login') progress = 1;
-        if (t.id === 'play_games') progress = Math.min(gamesPlayed, t.required_count);
-        if (t.id === 'mining_session') progress = Math.min(miningSessions, t.required_count);
-        if (t.id === 'earn_points') progress = Math.min(user.points || 0, t.required_count);
-        if (t.id === 'weekly_games') progress = Math.min(gamesPlayed, t.required_count); // Should track weekly
-        if (t.id === 'monthly_points') progress = Math.min(pointsEarned, t.required_count);
+        // Calculate progress based on task name/type
+        const taskName = t.task_name.toLowerCase();
+        
+        // Daily tasks
+        if (taskName.includes('daily login') || taskName.includes('log in')) progress = 1;
+        if (taskName.includes('play') && taskName.includes('game')) {
+          const count = parseInt(taskName.match(/\d+/)?.[0] || '0');
+          progress = Math.min(gamesPlayed, count);
+        }
+        if (taskName.includes('mining')) progress = miningSessions;
+        if (taskName.includes('earn') && taskName.includes('point')) {
+          const count = parseInt(taskName.match(/\d+/)?.[0] || '0');
+          progress = Math.min(user?.points || 0, count);
+        }
+        if (taskName.includes('win') && taskName.includes('game')) {
+          // Would need win tracking - for now use games played / 2
+          const count = parseInt(taskName.match(/\d+/)?.[0] || '0');
+          progress = Math.min(Math.floor(gamesPlayed / 2), count);
+        }
+        
+        // VIP tasks
+        if (taskName.includes('vip') || taskName.includes('upgrade')) {
+          if (taskName.includes('silver') || taskName.includes('level 2')) progress = vipLevel >= 2 ? 1 : 0;
+          if (taskName.includes('gold') || taskName.includes('level 3')) progress = vipLevel >= 3 ? 1 : 0;
+          if (taskName.includes('platinum') || taskName.includes('level 4')) progress = vipLevel >= 4 ? 1 : 0;
+          if (taskName.includes('diamond') || taskName.includes('level 5')) progress = vipLevel >= 5 ? 1 : 0;
+        }
+        
+        // Financial tasks
+        if (taskName.includes('deposit')) {
+          const totalDeposited = deposits.reduce((sum, d) => sum + parseFloat(d.amount || 0), 0);
+          if (taskName.includes('first')) progress = deposits.length > 0 ? 1 : 0;
+          else {
+            const amount = parseInt(taskName.match(/\$(\d+)/)?.[1] || '0');
+            progress = Math.min(totalDeposited, amount);
+          }
+        }
+        
+        // Achievement tasks
+        if (taskName.includes('achievement') || taskName.includes('unlock')) {
+          const count = parseInt(taskName.match(/\d+/)?.[0] || '0');
+          progress = Math.min(achievements.length, count);
+        }
         
         // Check if task is claimed from database
         const userTask = userTaskMap[t.id];
@@ -81,7 +120,7 @@ export default function TasksPage() {
       
     } catch (e) {
       console.error('Error loading tasks:', e);
-      const grouped = { daily: [], weekly: [], monthly: [] };
+      const grouped = { daily: [], weekly: [], monthly: [], social: [], vip: [], financial: [], achievement: [] };
       FALLBACK_TASKS.forEach((t) => {
         grouped[t.task_type]?.push({ ...t, progress: t.id === 'daily_login' ? 1 : 0 });
       });
@@ -129,6 +168,10 @@ export default function TasksPage() {
     { key: 'daily', label: 'Daily', icon: '📅' },
     { key: 'weekly', label: 'Weekly', icon: '📆' },
     { key: 'monthly', label: 'Monthly', icon: '🗓️' },
+    { key: 'social', label: 'Social', icon: '👥' },
+    { key: 'vip', label: 'VIP', icon: '👑' },
+    { key: 'financial', label: 'Financial', icon: '💰' },
+    { key: 'achievement', label: 'Achievements', icon: '🏆' },
   ];
 
   const currentTasks = tasks[activeTab] || [];
@@ -141,12 +184,12 @@ export default function TasksPage() {
       </div>
 
       {/* Tabs */}
-      <div className="tabs mb-6" style={{ width: 'fit-content' }}>
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: 'thin' }}>
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={activeTab === t.key ? 'tab tab-active' : 'tab'}
+            className={activeTab === t.key ? 'btn btn-primary flex-shrink-0 px-4 py-2 text-sm' : 'btn btn-secondary flex-shrink-0 px-4 py-2 text-sm'}
           >
             <span>{t.icon}</span>
             <span>{t.label}</span>

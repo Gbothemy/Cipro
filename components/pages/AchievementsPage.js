@@ -32,16 +32,30 @@ export default function AchievementsPage() {
         db.getAchievements().catch(() => []),
         db.getUserAchievements(user.userId).catch(() => []),
       ]);
-      setAchievements(all.length > 0 ? all : DEFAULT_ACHIEVEMENTS);
+      
+      // Map database achievements to match component format
+      const mappedAchievements = all.length > 0 
+        ? all.map(a => ({
+            id: a.id,
+            title: a.achievement_name,
+            description: a.description,
+            icon: a.icon || '🏆',
+            reward_points: a.reward_points,
+            category: a.category,
+          }))
+        : DEFAULT_ACHIEVEMENTS;
+      
+      setAchievements(mappedAchievements);
       setUnlocked(userAch.map((a) => a.achievement_id || a.id));
     } catch (e) {
+      console.error('Error loading achievements:', e);
       setAchievements(DEFAULT_ACHIEVEMENTS);
     } finally {
       setLoading(false);
     }
   };
 
-  const categories = ['all', 'games', 'points', 'streak', 'crypto', 'social'];
+  const categories = ['all', 'points', 'games', 'streak', 'tasks', 'social', 'vip', 'financial', 'lucky', 'special'];
   const filtered = filter === 'all' ? achievements : achievements.filter((a) => a.category === filter);
   const unlockedCount = unlocked.length;
 

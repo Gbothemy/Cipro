@@ -287,12 +287,20 @@ async function handleAction(action, p) {
       if (!r.rows[0]?.last_mine_time) return 0;
       return new Date(r.rows[0].last_mine_time).toISOString().split('T')[0] === today ? 1 : 0;
     }
+    case 'getActiveMiningCount': {
+      // Check if user has an active mining session (within last 8 hours)
+      const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
+      const r = await query(`SELECT last_mine_time FROM users WHERE user_id=$1`, [p.user_id]);
+      if (!r.rows[0]?.last_mine_time) return 0;
+      const lastMineTime = new Date(r.rows[0].last_mine_time);
+      return lastMineTime > new Date(eightHoursAgo) ? 1 : 0;
+    }
     case 'recordMiningSession': {
       const now = new Date().toISOString();
       await query(`UPDATE users SET last_mine_time=$1 WHERE user_id=$2`, [now, p.user_id]);
       await query(
         `INSERT INTO user_activity_log (user_id, activity_type, points_change, description) VALUES ($1, $2, $3, $4)`,
-        [p.user_id, 'mining', p.points_earned, `Completed mining session and earned ${p.points_earned} points`]
+        [p.user_id, 'mining', p.points_earned, `Completed 8-hour mining session and earned ${p.points_earned} points`]
       );
       return { success: true, timestamp: now };
     }
