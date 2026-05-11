@@ -371,6 +371,34 @@ async function handleAction(action, p) {
       const r = await query(`SELECT * FROM vip_tiers WHERE min_level<=$1 AND max_level>=$1`, [p.vipLevel]);
       return r.rows[0] || null;
     }
+    case 'validateStreak': {
+      // Called on every login - checks if streak is still valid or should be reset
+      const r = await query(`SELECT day_streak, last_claim FROM users WHERE user_id=$1`, [p.user_id]);
+      if (!r.rows[0]) return { dayStreak: 0, reset: false };
+
+      const { day_streak, last_claim } = r.rows[0];
+
+      if (!last_claim) {
+        // Never claimed - streak stays at 0
+        return { dayStreak: 0, reset: false };
+      }
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const lastClaimDate = new Date(last_claim).toISOString().split('T')[0];
+      const yesterday = new Date(now - 86400000).toISOString().split('T')[0];
+
+      // Streak is valid if last claim was today or yesterday
+      const isValid = lastClaimDate === today || lastClaimDate === yesterday;
+
+      if (!isValid && day_streak > 0) {
+        // Streak broken - reset to 0
+        await query(`UPDATE users SET day_streak=0 WHERE user_id=$1`, [p.user_id]);
+        return { dayStreak: 0, reset: true };
+      }
+
+      return { dayStreak: day_streak || 0, reset: false };
+    }
     case 'recordDailyReward': {
       const today = new Date().toISOString().split('T')[0];
       const r = await query(

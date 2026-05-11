@@ -3,9 +3,10 @@ import Layout from '../../components/Layout';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useStore from '../store/useStore';
+import { db } from '../../lib/apiClient';
 
 export default function AppLayout({ children }) {
-  const { isAuthenticated } = useStore();
+  const { isAuthenticated, user, updateUser } = useStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -13,6 +14,28 @@ export default function AppLayout({ children }) {
       router.replace('/login');
     }
   }, [isAuthenticated, router]);
+
+  // Validate streak on every app load
+  useEffect(() => {
+    if (!isAuthenticated || !user?.userId) return;
+
+    const validate = async () => {
+      try {
+        const result = await db.validateStreak(user.userId);
+        if (result.reset) {
+          // Streak was broken - update local state
+          updateUser({ dayStreak: 0 });
+        } else if (result.dayStreak !== user.dayStreak) {
+          // Sync streak from DB in case it's out of sync
+          updateUser({ dayStreak: result.dayStreak });
+        }
+      } catch (e) {
+        // Silent fail - streak validation is non-critical
+      }
+    };
+
+    validate();
+  }, [isAuthenticated, user?.userId]);
 
   if (!isAuthenticated) {
     return (

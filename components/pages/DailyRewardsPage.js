@@ -46,7 +46,22 @@ export default function DailyRewardsPage() {
       const lastClaim = user?.lastClaim;
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
       const lastClaimDate = lastClaim ? new Date(lastClaim).toISOString().split('T')[0] : null;
-      const newStreak = lastClaimDate === yesterday ? streak + 1 : 1;
+
+      // Strict check: only continue streak if last claim was EXACTLY yesterday
+      // If last claim was today already, don't allow (shouldn't reach here but safety check)
+      // If last claim was 2+ days ago, reset to 1
+      let newStreak;
+      if (lastClaimDate === yesterday) {
+        newStreak = (user?.dayStreak || 0) + 1;
+      } else if (lastClaimDate === today) {
+        // Already claimed today - shouldn't happen but guard it
+        setClaimed(true);
+        setLoading(false);
+        return;
+      } else {
+        // Missed a day or first claim - start fresh
+        newStreak = 1;
+      }
 
       await db.recordDailyReward(user.userId, { points: todayReward.points, streakDay: newStreak });
       await db.addPoints(user.userId, todayReward.points);
