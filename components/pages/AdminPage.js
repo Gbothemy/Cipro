@@ -129,29 +129,51 @@ export default function AdminPage() {
               <table>
                 <thead>
                   <tr>
-                    {['User', 'Points', 'VIP', 'Streak', 'Joined'].map((h) => (
+                    {['User', 'Points', 'VIP', 'Streak', 'Last Claim', 'Streak Valid', 'Joined'].map((h) => (
                       <th key={h}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
-                    <tr key={u.userId}>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <span>{u.avatar || '👤'}</span>
-                          <div>
-                            <p className="font-medium text-white">{u.username}</p>
-                            <p className="text-xs text-dim">{u.email}</p>
+                  {users.map((u) => {
+                    // Calculate if streak is still valid
+                    const now = new Date();
+                    const today = now.toISOString().split('T')[0];
+                    const yesterday = new Date(now - 86400000).toISOString().split('T')[0];
+                    const lastClaimDate = u.lastClaim ? new Date(u.lastClaim).toISOString().split('T')[0] : null;
+                    const streakValid = lastClaimDate === today || lastClaimDate === yesterday;
+                    const realStreak = streakValid ? (u.dayStreak || 0) : 0;
+
+                    return (
+                      <tr key={u.userId}>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            <span>{u.avatar || '👤'}</span>
+                            <div>
+                              <p className="font-medium text-white">{u.username}</p>
+                              <p className="text-xs text-dim">{u.email}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="font-medium text-primary">{(u.points || 0).toLocaleString()}</td>
-                      <td className="text-light">{u.vipLevel || 1}</td>
-                      <td className="text-light">{u.dayStreak || 0}</td>
-                      <td className="text-dim text-xs">{u.userId?.split('-')[1] ? new Date(parseInt(u.userId.split('-')[1])).toLocaleDateString() : '—'}</td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="font-medium text-primary">{(u.points || 0).toLocaleString()}</td>
+                        <td className="text-light">{u.vipLevel || 1}</td>
+                        <td className="font-medium" style={{ color: realStreak > 0 ? '#f59e0b' : '#64748b' }}>
+                          {realStreak > 0 ? `🔥 ${realStreak}` : '—'}
+                        </td>
+                        <td className="text-dim text-xs">
+                          {lastClaimDate === today ? '✅ Today' :
+                           lastClaimDate === yesterday ? '🟡 Yesterday' :
+                           lastClaimDate ? `❌ ${lastClaimDate}` : '—'}
+                        </td>
+                        <td>
+                          <span className="text-xs" style={{ color: streakValid ? '#10b981' : '#ef4444' }}>
+                            {streakValid ? '✓ Active' : '✗ Broken'}
+                          </span>
+                        </td>
+                        <td className="text-dim text-xs">{u.userId?.split('-')[1] ? new Date(parseInt(u.userId.split('-')[1])).toLocaleDateString() : '—'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
