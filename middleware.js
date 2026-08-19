@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { verifySessionToken } from './lib/session';
 
 const PUBLIC_ROUTES = ['/', '/login', '/admin/login', '/privacy', '/terms', '/support', '/about', '/faq'];
 const ADMIN_ROUTES = ['/admin'];
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes and static files
@@ -24,7 +25,8 @@ export function middleware(request) {
   }
 
   try {
-    const auth = JSON.parse(authCookie.value);
+    const auth = await verifySessionToken(authCookie.value);
+    if (!auth) throw new Error('Invalid session');
 
     // Admin route protection
     if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {

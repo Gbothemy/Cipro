@@ -133,19 +133,12 @@ export default function TasksPage() {
   const claimTask = async (task) => {
     if (claimed[task.id]) return;
     try {
-      // Update task progress first
-      await db.updateTaskProgress(user.userId, task.id, task.progress);
-      
-      // Claim the task with progress
-      await db.claimTask(user.userId, task.id, task.progress);
-      
-      // Add points to user
-      await db.addPoints(user.userId, task.reward_points);
-      addPoints(task.reward_points);
+      const result = await db.claimTask(user.userId, task.id);
+      addPoints(Number(result.user.points) - Number(user.points || 0));
       addNotification({ 
         type: 'success', 
         title: 'Task Complete!', 
-        message: `+${task.reward_points} points earned` 
+        message: `+${task.reward_points} points earned`
       });
       
       // Update local state

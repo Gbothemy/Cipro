@@ -63,13 +63,10 @@ export default function DailyRewardsPage() {
         newStreak = 1;
       }
 
-      await db.recordDailyReward(user.userId, { points: todayReward.points, streakDay: newStreak });
-      await db.addPoints(user.userId, todayReward.points);
-      await db.updateUser(user.userId, { dayStreak: newStreak, lastClaim: now });
-
-      addPoints(todayReward.points);
-      updateUser({ dayStreak: newStreak, lastClaim: now });
-      addNotification({ type: 'success', title: 'Daily Reward Claimed!', message: `+${todayReward.points} points · Day ${newStreak} streak` });
+      const result = await db.claimDailyReward(user.userId);
+      addPoints(result.points);
+      updateUser({ dayStreak: result.streak, lastClaim: now });
+      addNotification({ type: 'success', title: 'Daily Reward Claimed!', message: `+${result.points} points · Day ${result.streak} streak` });
       setClaimed(true);
     } catch (e) {
       addNotification({ type: 'error', title: 'Error', message: e.message });

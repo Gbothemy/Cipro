@@ -9,47 +9,23 @@ const TABS = [
   { key: 'streak', label: 'Streak', icon: '🔥' },
 ];
 
-// Generate 50 default users for leaderboard
-const AVATARS = ['🎮', '🚀', '⚡', '🔥', '💎', '🌟', '🎯', '🏆', '👑', '💰', '🎨', '🎭', '🎪', '🎬', '🎸', '🎺', '🎻', '🎹', '🥁', '🎤'];
-const NAMES = [
-  'CryptoKing', 'DiamondHands', 'MoonWalker', 'RocketMan', 'GemHunter', 'PointMaster', 'GameChamp', 'ProPlayer',
-  'LuckyWinner', 'TopEarner', 'StreakLord', 'TaskMaster', 'CoinCollector', 'RewardSeeker', 'VIPPlayer', 'EliteGamer',
-  'ChainBreaker', 'TokenHunter', 'ProfitMaker', 'WealthBuilder', 'PointChaser', 'GameNinja', 'CryptoWhale', 'MegaMiner',
-  'StarPlayer', 'LegendaryUser', 'UltimateGamer', 'PowerPlayer', 'SuperStreak', 'MasterMiner', 'EpicWinner', 'ProMiner',
-  'GoldDigger', 'TreasureHunter', 'FortuneSeeker', 'BonusKing', 'RewardHunter', 'PointCollector', 'TaskNinja', 'GameMaster',
-  'CryptoLord', 'DiamondMiner', 'MoonShooter', 'StarChaser', 'WinStreak', 'TopGamer', 'ElitePlayer', 'ProChamp', 'MegaWinner', 'UltraPlayer'
-];
-
-const generateDefaultUsers = () => {
-  return NAMES.map((name, i) => {
-    // Ensure all values are positive
-    const basePoints = 60000 - (i * 1000); // Decreasing from 60k to 11k
-    const baseEarnings = 600 - (i * 10); // Decreasing from 600 to 110
-    const baseStreak = 35 - Math.floor(i / 2); // Decreasing from 35 to 10
-    
-    return {
-      user_id: `DEFAULT-${i}`,
-      username: name,
-      avatar: AVATARS[i % AVATARS.length],
-      points: Math.max(1000, basePoints + Math.floor(Math.random() * 5000)),
-      total_earnings: Math.max(10, Number((baseEarnings + Math.random() * 50).toFixed(2))),
-      day_streak: Math.max(1, baseStreak + Math.floor(Math.random() * 5)),
-      vip_level: i < 10 ? Math.floor(Math.random() * 3) + 2 : 1,
-    };
-  }).sort((a, b) => b.points - a.points);
-};
-
 export default function LeaderboardPage() {
   const { user } = useStore();
   const [activeTab, setActiveTab] = useState('points');
   const [data, setData] = useState({ points: [], earnings: [], streak: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
     fetchData();
+    const refreshTimer = window.setInterval(() => fetchData(true), 30000);
+    return () => window.clearInterval(refreshTimer);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
+    setError('');
     try {
       const [points, earnings, streak] = await Promise.all([
         db.getLeaderboard('points', 50),
@@ -57,17 +33,14 @@ export default function LeaderboardPage() {
         db.getLeaderboard('streak', 50),
       ]);
       
-      // Generate default users
-      const defaultUsers = generateDefaultUsers();
-      
-      // Merge real users with default users (real users first, then fill with defaults)
-      const mergeUsers = (realUsers, defaultUsers, sortKey) => {
-        const merged = [...realUsers];
-        const needed = 50 - realUsers.length;
-        if (needed > 0) {
-          merged.push(...defaultUsers.slice(0, needed));
-        }
-        return merged.sort((a, b) => {
+      const normalizeAndSort = (realUsers = [], sortKey) => {
+        return realUsers.map((entry) => ({
+          ...entry,
+          points: Number(entry.points) || 0,
+          total_earnings: Number(entry.total_earnings) || 0,
+          day_streak: Number(entry.day_streak) || 0,
+          vip_level: Number(entry.vip_level) || 1,
+        })).sort((a, b) => {
           const aVal = Number(a[sortKey] || 0);
           const bVal = Number(b[sortKey] || 0);
           return bVal - aVal;
@@ -75,21 +48,18 @@ export default function LeaderboardPage() {
       };
       
       setData({ 
-        points: mergeUsers(points, defaultUsers, 'points'),
-        earnings: mergeUsers(earnings, defaultUsers, 'total_earnings'),
-        streak: mergeUsers(streak, defaultUsers, 'day_streak'),
+        points: normalizeAndSort(points, 'points'),
+        earnings: normalizeAndSort(earnings, 'total_earnings'),
+        streak: normalizeAndSort(streak, 'day_streak'),
       });
+      setLastUpdated(new Date());
     } catch (e) {
       console.error(e);
-      // On error, show default users
-      const defaultUsers = generateDefaultUsers();
-      setData({ 
-        points: defaultUsers.sort((a, b) => b.points - a.points),
-        earnings: defaultUsers.sort((a, b) => Number(b.total_earnings) - Number(a.total_earnings)),
-        streak: defaultUsers.sort((a, b) => b.day_streak - a.day_streak),
-      });
+      setError('Live rankings are temporarily unavailable.');
+      setData({ points: [], earnings: [], streak: [] });
+      setLastUpdated(new Date());
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -119,13 +89,23 @@ export default function LeaderboardPage() {
     <div className="page-container-md">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-white">Leaderboard</h1>
-        <p className="text-muted mt-2">Top players ranked by performance</p>
+        <p className="text-muted mt-2">
+          {activeTab === 'earnings'
+            ? 'Ranked by the estimated USD value of approved lifetime withdrawals'
+            : 'Top players ranked by performance'}
+        </p>
+        <p className="text-xs text-dim mt-2" aria-live="polite">
+          <span style={{ color: '#22c55e' }}>●</span>{' '}
+          Live updates every 30 seconds
+          {lastUpdated ? ` · Updated ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : ''}
+        </p>
       </div>
 
       {/* Tabs */}
       <div className="tabs mb-6">
         {TABS.map((t) => (
           <button
+            type="button"
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={activeTab === t.key ? 'tab tab-active' : 'tab'}
@@ -135,6 +115,8 @@ export default function LeaderboardPage() {
           </button>
         ))}
       </div>
+
+      {error && <div className="alert-warning mb-4">{error}</div>}
 
       {/* List */}
       <div className="card overflow-hidden">
@@ -194,7 +176,7 @@ export default function LeaderboardPage() {
                       <span className="text-xs text-warning">VIP {entry.vip_level}</span>
                     )}
                   </div>
-                  <span className="font-bold text-sm text-white">{getValue(entry)}</span>
+                  <span className="font-bold text-sm text-white" style={{ whiteSpace: 'nowrap' }}>{getValue(entry)}</span>
                 </div>
               );
             })}

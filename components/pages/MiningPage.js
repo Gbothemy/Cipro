@@ -87,9 +87,14 @@ export default function MiningPage() {
     }, 1000); // Update every second
   };
 
-  const startMining = () => {
+  const startMining = async () => {
     if (mining || activeSessions >= 1) return;
-    
+    try {
+      await db.startMiningSession(user.userId);
+    } catch (error) {
+      addNotification({ type: 'error', title: 'Unable to Start', message: error.message });
+      return;
+    }
     const now = Date.now();
     const endTime = now + MINING_DURATION;
     
@@ -123,14 +128,9 @@ export default function MiningPage() {
     setHashRate(0);
     setProgress(100);
     
-    // Calculate rewards based on VIP level
-    const vipLevel = user?.vipLevel || 1;
-    const pointsPerHour = MINING_RATES[vipLevel] || 100;
-    const reward = pointsPerHour * 8; // 8 hours
-    
     try {
-      await db.addPoints(user.userId, reward);
-      await db.recordMiningSession(user.userId, reward);
+      const result = await db.completeMiningSession(user.userId);
+      const reward = result.reward;
       addPoints(reward);
       setTotalMined((prev) => prev + reward);
       setActiveSessions(0);
@@ -156,7 +156,7 @@ export default function MiningPage() {
     }
   };
 
-  const stopMining = () => {
+  const stopMining = async () => {
     if (!confirm('Are you sure you want to stop mining? You will lose all progress!')) {
       return;
     }
@@ -172,6 +172,7 @@ export default function MiningPage() {
     
     // Remove from localStorage
     localStorage.removeItem(`mining_${user?.userId}`);
+    await db.cancelMiningSession(user.userId).catch(() => {});
     
     addNotification({
       type: 'warning',

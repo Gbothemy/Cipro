@@ -37,9 +37,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await db.logout().catch(() => {});
     logout();
-    document.cookie = 'cipro-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/');
   };
 

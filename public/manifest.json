@@ -13,9 +13,10 @@
   "categories": ["games", "finance", "entertainment"],
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "16x16 32x32",
-      "type": "image/x-icon"
+      "src": "/ciprohub.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/ciprohub.png",

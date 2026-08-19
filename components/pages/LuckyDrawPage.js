@@ -57,16 +57,17 @@ export default function LuckyDrawPage() {
     if (tickets < 1 || spinning || !isWeekend) return;
     setSpinning(true);
     setResult(null);
-    await new Promise((r) => setTimeout(r, 2000));
     try {
-      const res = await db.participateInLuckyDraw ? { won: false } : { won: false };
+      const res = await db.useLuckyDrawTicket(user.userId);
+      await new Promise((r) => setTimeout(r, 2000));
       setResult(res);
+      updateUser(res.user);
       if (res.won) {
         addNotification({ type: 'success', title: '🎉 You Won!', message: `Prize: ${JSON.stringify(res.winnings)}` });
       } else {
         addNotification({ type: 'info', title: 'Better luck next time!', message: 'Try again with more tickets' });
       }
-      setTickets((t) => Math.max(0, t - 1));
+      setTickets(res.tickets);
     } catch (e) {
       addNotification({ type: 'error', title: 'Error', message: e.message });
     } finally {
@@ -95,15 +96,9 @@ export default function LuckyDrawPage() {
     setShowPaymentModal(false);
     
     try {
-      // Deduct from deposited balance and add tickets
-      const newDepositedBalance = depositedBalance - priceInCurrency;
-      
-      updateUser({
-        ...user,
-        balance: { ...user.balance, [currency]: newDepositedBalance }
-      });
-      
-      setTickets(tickets + quantity);
+      const result = await db.purchaseLuckyDrawTickets(user.userId, quantity, currency);
+      updateUser(result.user);
+      setTickets(result.tickets);
       
       addNotification({
         type: 'success',

@@ -21,17 +21,26 @@ export default function ConversionPage() {
   const [address, setAddress] = useState('');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [activeReferralCount, setActiveReferralCount] = useState(0);
 
   useEffect(() => {
-    if (user?.userId) db.getConversionHistory(user.userId).then(setHistory).catch(() => {});
+    if (user?.userId) {
+      db.getConversionHistory(user.userId).then(setHistory).catch(() => {});
+      db.getReferralStats(user.userId).then((stats) => setActiveReferralCount(stats.activeReferrals || 0)).catch(() => {});
+    }
   }, [user?.userId]);
+
+  const hasActiveVip = Number(user?.vipLevel || 1) >= 2
+    && user?.vipSubscriptionEnd
+    && new Date(user.vipSubscriptionEnd) > new Date();
+  const withdrawalUnlocked = Boolean(hasActiveVip) && activeReferralCount >= 5;
 
   const points = user?.points || 0;
   const balance = {
-    sol: Number(user?.balance?.sol || 0),
-    eth: Number(user?.balance?.eth || 0),
-    usdt: Number(user?.balance?.usdt || 0),
-    usdc: Number(user?.balance?.usdc || 0),
+    sol: Number(user?.earnedBalance?.sol || 0),
+    eth: Number(user?.earnedBalance?.eth || 0),
+    usdt: Number(user?.earnedBalance?.usdt || 0),
+    usdc: Number(user?.earnedBalance?.usdc || 0),
   };
   const rate = RATES[currency];
   const convertedAmount = convertAmt ? (parseInt(convertAmt) / rate).toFixed(6) : '0';
@@ -49,13 +58,9 @@ export default function ConversionPage() {
     }
     setLoading(true);
     try {
-      const amount = pts / rate;
-      await db.recordConversion(user.userId, { points: pts, currency, amount, rate });
-      const newBalance = { ...balance, [currency]: (balance[currency] || 0) + amount };
-      const newPoints = points - pts;
-      await db.updateUser(user.userId, { points: newPoints });
-      await db.updateBalance(user.userId, currency, newBalance[currency]);
-      updateUser({ points: newPoints, balance: newBalance });
+      const result = await db.convertPoints(user.userId, pts, currency);
+      const amount = result.amount;
+      updateUser(result.user);
       addNotification({ type: 'success', title: 'Converted!', message: `${pts.toLocaleString()} pts → ${amount.toFixed(6)} ${currency.toUpperCase()}` });
       setConvertAmt('');
       db.getConversionHistory(user.userId).then(setHistory).catch(() => {});
@@ -82,12 +87,12 @@ export default function ConversionPage() {
     }
     setLoading(true);
     try {
-      const id = `WD-${Date.now()}`;
       await db.createWithdrawalRequest({
-        id, user_id: user.userId, username: user.username,
+        user_id: user.userId,
         currency, amount: amt, wallet_address: address,
-        network: CURRENCY_INFO[currency].network, status: 'pending',
+        network: CURRENCY_INFO[currency].network,
       });
+      updateUser(await db.getUser(user.userId));
       addNotification({ type: 'success', title: 'Withdrawal Submitted', message: 'Your request is being processed (1-3 business days)' });
       setWithdrawAmt('');
       setAddress('');
@@ -196,6 +201,11 @@ export default function ConversionPage() {
       {/* Withdraw tab */}
       {tab === 'withdraw' && (
         <div className="card p-6 flex-col gap-5">
+          {!withdrawalUnlocked && (
+            <div className="alert-warning">
+              🔒 Withdrawals require an active VIP subscription and 5 active invited users ({activeReferralCount}/5 active).
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-light mb-2">Currency</label>
             <div className="grid-4">
@@ -239,7 +249,7 @@ export default function ConversionPage() {
           <div className="alert-warning">
             ⚠️ Withdrawals are processed within 1-3 business days. Double-check your address.
           </div>
-          <button onClick={handleWithdraw} disabled={loading} className="btn btn-primary btn-full py-4">
+          <button onClick={handleWithdraw} disabled={loading || !withdrawalUnlocked} className="btn btn-primary btn-full py-4">
             {loading ? 'Submitting...' : 'Submit Withdrawal'}
           </button>
         </div>

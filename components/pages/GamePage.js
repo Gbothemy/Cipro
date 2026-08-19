@@ -36,10 +36,9 @@ export default function GamePage() {
 
   const handleGameComplete = async (gameId, result) => {
     try {
-      await db.recordGameAttempt(user.userId, gameId, result);
+      const updated = await db.completeGame(user.userId, gameId, result);
       if (result.points > 0) {
-        await db.addPoints(user.userId, result.points);
-        addPoints(result.points);
+        addPoints(Number(updated.points) - Number(user.points || 0));
         addNotification({ type: 'success', title: 'Points Earned!', message: `+${result.points} points from ${gameId}` });
       }
       setAttempts((prev) => ({ ...prev, [gameId]: (prev[gameId] || 0) + 1 }));

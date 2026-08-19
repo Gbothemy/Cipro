@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import useStore from '../../app/store/useStore';
 import { db } from '../../lib/apiClient';
-import { checkAndUnlockAchievements, getUserStatsForAchievements } from '../../lib/achievementChecker';
 
 const DEFAULT_ACHIEVEMENTS = [
   { id: 'first_game', title: 'First Game', description: 'Play your first game', icon: '🎮', points: 50, category: 'games' },
@@ -63,16 +62,12 @@ export default function AchievementsPage() {
     setChecking(true);
     
     try {
-      // Get user stats
-      const stats = await getUserStatsForAchievements(user.userId);
-      
-      // Check and unlock achievements
-      const newlyUnlocked = await checkAndUnlockAchievements(user.userId, stats);
+      const result = await db.checkAchievements(user.userId);
+      const newlyUnlocked = result.unlocked;
       
       if (newlyUnlocked.length > 0) {
         // Add points for all newly unlocked achievements
-        const totalPoints = newlyUnlocked.reduce((sum, a) => sum + a.reward_points, 0);
-        addPoints(totalPoints);
+        addPoints(Number(result.user.points) - Number(user.points || 0));
         
         // Show notifications
         newlyUnlocked.forEach(achievement => {

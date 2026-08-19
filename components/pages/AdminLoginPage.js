@@ -16,48 +16,13 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError('');
     try {
-      // Hardcoded admin credentials for now (change in production!)
-      const ADMIN_USERNAME = 'admin';
-      const ADMIN_PASSWORD = 'admin123';
-      
-      if (form.username.toLowerCase() === ADMIN_USERNAME && form.password === ADMIN_PASSWORD) {
-        const adminUser = {
-          userId: 'ADMIN-001',
-          username: 'Admin',
-          email: 'admin@ciprohub.site',
-          avatar: '👑',
-          isAdmin: true,
-          points: 0,
-          vipLevel: 5,
-          exp: 0,
-          maxExp: 1000,
-          dayStreak: 0,
-          balance: { sol: 0, eth: 0, usdt: 0, usdc: 0 },
-        };
-        
-        login(adminUser);
-        document.cookie = `cipro-auth=${encodeURIComponent(JSON.stringify({ userId: adminUser.userId, isAdmin: true }))}; path=/; max-age=${7 * 24 * 60 * 60}`;
-        router.push('/admin');
-        return;
+      const admin = await db.authenticateUser(form.username, form.password);
+      if (!admin.isAdmin) {
+        await db.logout().catch(() => {});
+        throw new Error('Administrator access required.');
       }
-      
-      // Try database lookup
-      try {
-        const users = await db.getAllUsers();
-        const admin = users.find(
-          (u) => u.username.toLowerCase() === form.username.toLowerCase() && u.isAdmin
-        );
-        if (admin) {
-          login(admin);
-          document.cookie = `cipro-auth=${encodeURIComponent(JSON.stringify({ userId: admin.userId, isAdmin: true }))}; path=/; max-age=${7 * 24 * 60 * 60}`;
-          router.push('/admin');
-          return;
-        }
-      } catch (dbError) {
-        console.error('Database error:', dbError);
-      }
-      
-      setError('Invalid admin credentials.');
+      login(admin);
+      router.push('/admin');
     } catch (e) {
       setError(e.message);
     } finally {

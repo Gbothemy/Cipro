@@ -52,23 +52,8 @@ export default function VIPTiersPage() {
     setShowPaymentModal(false);
     
     try {
-      // Calculate subscription end date (30 days from now)
-      const subscriptionEnd = new Date();
-      subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
-      
-      // Deduct from deposited balance and upgrade VIP level
-      const updatedUser = await db.updateUser(user.userId, {
-        vipLevel: tier.level,
-        vipSubscriptionEnd: subscriptionEnd.toISOString(),
-      });
-      
-      // Update deposited balance separately
-      const newDepositedBalance = depositedBalance - priceInCurrency;
-      
-      updateUser({
-        ...updatedUser,
-        balance: { ...user.balance, [currency]: newDepositedBalance }
-      });
+      const result = await db.purchaseVip(user.userId, tier.level, currency);
+      updateUser(result.user);
       
       addNotification({
         type: 'success',

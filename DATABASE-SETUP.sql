@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   user_id TEXT PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   email TEXT,
+  password_hash TEXT,
   avatar TEXT DEFAULT '👤',
   is_admin BOOLEAN DEFAULT FALSE,
   referred_by TEXT,
@@ -20,9 +21,11 @@ CREATE TABLE IF NOT EXISTS users (
   day_streak INTEGER DEFAULT 0,
   last_claim TIMESTAMP,
   last_mine_time TIMESTAMP,
+  mining_started_at TIMESTAMP,
   total_mined INTEGER DEFAULT 0,
   mining_sessions INTEGER DEFAULT 0,
   last_game_reset TIMESTAMP,
+  vip_subscription_end TIMESTAMP,
   last_login TIMESTAMP DEFAULT NOW(),
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -35,6 +38,10 @@ CREATE TABLE IF NOT EXISTS balances (
   eth DECIMAL(18,8) DEFAULT 0,
   usdt DECIMAL(18,8) DEFAULT 0,
   usdc DECIMAL(18,8) DEFAULT 0,
+  earned_sol DECIMAL(18,8) DEFAULT 0,
+  earned_eth DECIMAL(18,8) DEFAULT 0,
+  earned_usdt DECIMAL(18,8) DEFAULT 0,
+  earned_usdc DECIMAL(18,8) DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -148,6 +155,7 @@ CREATE TABLE IF NOT EXISTS deposit_requests (
   processed_at TIMESTAMP,
   processed_by TEXT
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_deposit_tx_hash_unique ON deposit_requests(tx_hash);
 
 -- Conversion history
 CREATE TABLE IF NOT EXISTS conversion_history (

@@ -1,4 +1,5 @@
 import './globals.css';
+import AdScripts from '../components/AdScripts';
 
 export const metadata = {
   title: 'Cipro - Play Games, Earn Real Cryptocurrency',
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="antialiased">
         {children}
+        <AdScripts />
       </body>
     </html>
   );

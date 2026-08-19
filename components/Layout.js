@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import useStore from '../app/store/useStore';
+import { db } from '../lib/apiClient';
 import styles from './Layout.module.css';
 
 const NAV_ITEMS = [
@@ -45,9 +46,9 @@ export default function Layout({ children }) {
 
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await db.logout().catch(() => {});
     logout();
-    document.cookie = 'cipro-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/');
   };
 
@@ -59,19 +60,6 @@ export default function Layout({ children }) {
           <Link href="/game" className={styles.logo}>
             <img src="/ciprohub.png" alt="CiproHub" className={styles.logoImage} />
           </Link>
-
-          <nav className={styles.desktopNav}>
-            {NAV_ITEMS.slice(0, 5).map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`${styles.navLink} ${pathname === item.path ? styles.navLinkActive : ''}`}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
 
           <div className={styles.headerRight}>
             <div className={styles.pointsBadge}>
@@ -93,6 +81,25 @@ export default function Layout({ children }) {
           </div>
         </div>
       </header>
+
+      {/* ── Desktop Sidebar ── */}
+      <aside className={styles.desktopSidebar} aria-label="Main navigation">
+        <nav className={styles.desktopSidebarNav}>
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`${styles.desktopSidebarLink} ${pathname === item.path ? styles.desktopSidebarLinkActive : ''}`}
+            >
+              <span className={styles.desktopSidebarIcon}>{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+        <button type="button" onClick={handleLogout} className={styles.desktopLogoutBtn}>
+          <span>🚪</span> Sign Out
+        </button>
+      </aside>
 
       {/* ── Mobile Sidebar ── */}
       {menuOpen && (

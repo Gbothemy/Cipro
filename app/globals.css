@@ -237,6 +237,7 @@ img { max-width: 100%; display: block; }
   mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.3s;
+  pointer-events: none;
 }
 .card:hover::before { opacity: 1; }
 
@@ -383,6 +384,14 @@ img { max-width: 100%; display: block; }
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(139,92,246,0.15), var(--glow-primary);
   background: rgba(26,11,46,0.8);
+}
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-white);
+  caret-color: var(--text-white);
+  box-shadow: 0 0 0 1000px #1a0b2e inset;
+  transition: background-color 9999s ease-out 0s;
 }
 textarea.input { resize: vertical; min-height: 100px; }
 
