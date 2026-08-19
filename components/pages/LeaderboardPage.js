@@ -92,7 +92,9 @@ export default function LeaderboardPage() {
         <p className="text-muted mt-2">
           {activeTab === 'earnings'
             ? 'Ranked by the estimated USD value of approved lifetime withdrawals'
-            : 'Top players ranked by performance'}
+            : activeTab === 'points'
+              ? 'Ranked by lifetime points accumulated, including converted points'
+              : 'Top players ranked by performance'}
         </p>
         <p className="text-xs text-dim mt-2" aria-live="polite">
           <span style={{ color: '#22c55e' }}>●</span>{' '}

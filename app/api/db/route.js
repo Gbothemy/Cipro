@@ -400,7 +400,7 @@ async function handleAction(action, p) {
       const type = ['points', 'earnings', 'streak'].includes(p.type) ? p.type : 'points';
       const requestedLimit = Number.parseInt(p.limit, 10);
       const limit = Number.isFinite(requestedLimit) ? Math.min(100, Math.max(1, requestedLimit)) : 10;
-      const cacheKey = `leaderboard-v3-${type}-${limit}`;
+      const cacheKey = `leaderboard-v4-${type}-${limit}`;
       
       // Check cache first
       const cached = cache.get(cacheKey);
@@ -433,7 +433,19 @@ async function handleAction(action, p) {
         const r = await query(`SELECT user_id,username,avatar,day_streak,points,vip_level FROM users WHERE is_admin=false ORDER BY day_streak DESC, points DESC, user_id ASC LIMIT $1`, [limit]);
         result = r.rows;
       } else {
-        const r = await query(`SELECT user_id,username,avatar,points,vip_level FROM users WHERE is_admin=false ORDER BY points DESC, user_id ASC LIMIT $1`, [limit]);
+        const r = await query(
+          `SELECT u.user_id,u.username,u.avatar,u.vip_level,
+                  (u.points + COALESCE((
+                    SELECT SUM(c.points_converted)
+                    FROM conversion_history c
+                    WHERE c.user_id=u.user_id
+                  ),0))::bigint AS points
+           FROM users u
+           WHERE u.is_admin=false
+           ORDER BY points DESC,u.user_id ASC
+           LIMIT $1`,
+          [limit]
+        );
         result = r.rows;
       }
       
