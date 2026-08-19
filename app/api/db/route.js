@@ -214,14 +214,14 @@ async function handleAction(action, p) {
       return formatUser(r.rows[0]);
     }
     case 'authenticateDemo': {
-      if (process.env.NODE_ENV === 'production') throw new Error('Demo login is disabled in production');
-      let demo = await query(`SELECT user_id FROM users WHERE LOWER(username)='demoplayer' LIMIT 1`);
-      let userId = demo.rows[0]?.user_id;
-      if (!userId) {
-        userId = 'USR-DEMO123';
-        await query(`INSERT INTO users (user_id,username,email,avatar,is_admin,points,vip_level) VALUES ($1,'DemoPlayer','demo@cipro.local','🎮',false,5000,1)`,[userId]);
-        await query(`INSERT INTO balances (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,[userId]);
-      }
+      const demo = await query(
+        `INSERT INTO users (user_id,username,email,avatar,is_admin,points,vip_level,last_login)
+         VALUES ('USR-DEMO123','DemoPlayer','demo@cipro.local','🎮',false,5000,1,NOW())
+         ON CONFLICT (username) DO UPDATE SET last_login=NOW(),is_admin=false
+         RETURNING user_id`
+      );
+      const userId = demo.rows[0].user_id;
+      await query(`INSERT INTO balances (user_id) VALUES ($1) ON CONFLICT DO NOTHING`,[userId]);
       const r = await query(`SELECT u.*,b.sol,b.eth,b.usdt,b.usdc,b.earned_sol,b.earned_eth,b.earned_usdt,b.earned_usdc FROM users u LEFT JOIN balances b ON b.user_id=u.user_id WHERE u.user_id=$1`,[userId]);
       return formatUser(r.rows[0]);
     }
