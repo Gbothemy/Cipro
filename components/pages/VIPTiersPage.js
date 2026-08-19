@@ -184,15 +184,17 @@ export default function VIPTiersPage() {
       {/* Payment Modal */}
       {showPaymentModal && selectedTier && (
         <div 
-          className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ background: 'rgba(0,0,0,0.8)' }}
+          className="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="vip-payment-title"
           onClick={() => setShowPaymentModal(false)}
         >
           <div 
-            className="card p-6 max-w-md w-full mx-4"
+            className="modal p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold text-white mb-4">Choose Payment Method</h3>
+            <h3 id="vip-payment-title" className="text-xl font-bold text-white mb-4">Choose Payment Method</h3>
             <p className="text-sm text-muted mb-2">
               Subscribe to {selectedTier.name} tier for ${selectedTier.monthlyPrice}/month
             </p>
